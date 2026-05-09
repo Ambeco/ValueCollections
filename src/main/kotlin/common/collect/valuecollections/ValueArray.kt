@@ -3,7 +3,6 @@
 
 package mpd.com.common.collect.valuecollections
 
-import mpd.com.common.collect.valuecollections.MutableVIntList
 import java.util.BitSet
 import kotlin.random.Random
 
@@ -11,23 +10,24 @@ import kotlin.random.Random
 
 
 // VIntArray<T> -> VIntArray
-class VIntArray<T>(val collection:IntArray): MutableVIntCollection<T> {
+class VIntArray<T>(val collection:IntArray): VIntCollection<T> {
     context(a: ValueIntAdapter<T>) inline operator fun get(index: Int): T = a.fromInt(collection.get(index))
-    context(a: ValueIntAdapter<T>) inline fun getBits(index: Int): Int = collection[index]
+    context(a: ValueIntAdapter<T>) override inline fun bitsAtIndex(index: Int): Int = collection[index]
     context(a: ValueIntAdapter<T>) inline operator fun set(index: Int, value: T) = collection.set(index, a.toInt(value))
     context(a: ValueIntAdapter<T>) inline fun setBits(index: Int, value: Int) = collection.set(index, value)
     override val size inline get() = collection.size
-    context(a: ValueIntAdapter<T>) inline operator fun iterator() = VIntIterator(collection.iterator(),a)
+    context(a: ValueIntAdapter<T>) override inline fun asIterable(): VIntIterator<T> = VIntIterator<T>(collection.iterator(),a)
     override inline operator fun equals(other: Any?): Boolean = collection.equals(other)
     override inline fun hashCode(): Int = collection.hashCode()
-    
+
     context(a: ValueIntAdapter<T>) inline operator fun component1(): T = a.fromInt(collection.component1())
     context(a: ValueIntAdapter<T>) inline operator fun component2(): T = a.fromInt(collection.component2())
     context(a: ValueIntAdapter<T>) inline operator fun component3(): T = a.fromInt(collection.component3())
     context(a: ValueIntAdapter<T>) inline operator fun component4(): T = a.fromInt(collection.component4())
     context(a: ValueIntAdapter<T>) inline operator fun component5(): T = a.fromInt(collection.component5())
-    context(a: ValueIntAdapter<T>) inline operator fun contains(element: T): Boolean = collection.contains(a.toInt(element))
-    context(a: ValueIntAdapter<T>) inline fun elementAt(index: Int): T = a.fromInt(collection.elementAt(index))
+    context(a: ValueIntAdapter<T>) override inline operator fun contains(element: T): Boolean = collection.contains(a.toInt(element))
+    context(a: ValueIntAdapter<T>) override inline fun containsAll(elements: VIntCollection<T>): Boolean = elements.all {contains(it)}
+    context(a: ValueIntAdapter<T>) override inline fun elementAtIndex(index: Int): T = a.fromInt(collection.elementAt(index))
     context(a: ValueIntAdapter<T>) inline fun elementAtOrElse(index: Int, defaultValue: (Int) -> T): T = a.fromInt(collection.elementAtOrElse(index, {a.toInt(defaultValue(it))}))
     context(a: ValueIntAdapter<T>) inline fun elementAtOrNull(index: Int): T? = a.fromInt(collection.elementAtOrNull(index))
     context(a: ValueIntAdapter<T>) inline fun find(predicate: (T) -> Boolean): T? = a.fromInt(collection.find{predicate(a.fromInt(it))})
@@ -104,7 +104,7 @@ class VIntArray<T>(val collection:IntArray): MutableVIntCollection<T> {
     context(a: ValueIntAdapter<T>) inline fun copyOf(newSize: Int, init: (Int) -> T): VIntArray<T> = VIntArray(collection.copyOf(newSize, {a.toInt(init(it))}))
     context(a: ValueIntAdapter<T>) inline fun copyOfRange(fromIndex: Int, toIndex: Int): VIntArray<T> = VIntArray(collection.copyOfRange(fromIndex, toIndex))
     context(a: ValueIntAdapter<T>) inline fun fill(element: T, fromIndex: Int = 0, toIndex: Int = size): Unit = collection.fill(a.toInt(element), fromIndex, toIndex)
-    context(a: ValueIntAdapter<T>) inline fun isEmpty(): Boolean = collection.isEmpty()
+    override inline fun isEmpty(): Boolean = collection.isEmpty()
     context(a: ValueIntAdapter<T>) inline fun isNotEmpty(): Boolean = collection.isNotEmpty()
     context(a: ValueIntAdapter<T>) inline operator fun plus(element: T): VIntArray<T> = VIntArray(collection.plus(a.toInt(element)))
     context(a: ValueIntAdapter<T>) inline operator fun plus(elements: Collection<T>): VIntArray<T> = VIntArray(collection.plus(elements.map { a.toInt(it) }))
@@ -142,7 +142,7 @@ class VIntArray<T>(val collection:IntArray): MutableVIntCollection<T> {
     context(a: ValueIntAdapter<T>) inline fun <R> mapIndexed(transform: (index: Int, T) -> R): List<R> = collection.mapIndexed {i,e->transform(i,a.fromInt(e)) }
     context(a: ValueIntAdapter<T>) inline fun <R, C : MutableCollection<in R>> mapIndexedTo(destination:C, transform: (index: Int, T) -> R): C = collection.mapIndexedTo(destination) {i,e->transform(i,a.fromInt(e)) }
     context(a: ValueIntAdapter<T>) inline fun <R, C : MutableCollection<in R>> mapTo(destination:C, transform: (T)->R): C = collection.mapTo(destination) { transform(a.fromInt(it)) }
-    context(a: ValueIntAdapter<T>) inline fun withIndex(): Iterable<IndexedValue<T>> = VIterableIndexedValueInt(collection.withIndex(), a)
+    context(a: ValueIntAdapter<T>) inline fun withIndex(): Iterable<IndexedValue<T>> = VIteratorIndexedValueInt(collection.withIndex().iterator(), a)
     // TODO: context(a: ValueIntAdapter<T>) inline fun distinct(): MutableVIntList<T> = MutableVIntList(collection.distinct())
     // TODO: context(a: ValueIntAdapter<T>) inline fun <K> distinctBy(selector: (T) -> K): List<T> = collection.distinctBy { selector(a.fromInt(it)) }
     // TODO: context(a: ValueIntAdapter<T>) inline infix fun intersect(other: Iterable<T>): Set<T> = collection.intersect(other)
@@ -239,7 +239,6 @@ class VIntArray<T>(val collection:IntArray): MutableVIntCollection<T> {
         = collection.joinTo(buffer, separator, prefix, postfix, limit, truncated, { transform(a.fromInt(it)) })
     context(a: ValueIntAdapter<T>) inline fun joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", crossinline transform: ((T) -> CharSequence)={ it.toString()}): String
         = collection.joinToString(separator, prefix, postfix, limit, truncated, { transform(a.fromInt(it)) })
-    context(a: ValueIntAdapter<T>) inline fun asIterable(): Iterable<T> = VIterableInt(collection.asIterable(), a)
     context(a: ValueIntAdapter<T>) inline fun asSequence(): Sequence<T> = collection.asSequence().map { a.fromInt(it) }
     context(a: ValueIntAdapter<T>) inline fun average(): Double = collection.average()
     context(a: ValueIntAdapter<T>) inline fun sum(): T = a.fromInt(collection.sum())
@@ -379,7 +378,7 @@ class VLongArray<T>(val collection:LongArray) {
     context(a: ValueLongAdapter<T>) inline fun <R> mapIndexed(transform: (index: Int, T) -> R): List<R> = collection.mapIndexed {i,e->transform(i,a.fromLong(e)) }
     context(a: ValueLongAdapter<T>) inline fun <R, C : MutableCollection<in R>> mapIndexedTo(destination:C, transform: (index: Int, T) -> R): C = collection.mapIndexedTo(destination) {i,e->transform(i,a.fromLong(e)) }
     context(a: ValueLongAdapter<T>) inline fun <R, C : MutableCollection<in R>> mapTo(destination:C, transform: (T)->R): C = collection.mapTo(destination) { transform(a.fromLong(it)) }
-    context(a: ValueLongAdapter<T>) inline fun withIndex(): Iterable<IndexedValue<T>> = VIterableIndexedValueLong(collection.withIndex(), a)
+    context(a: ValueLongAdapter<T>) inline fun withIndex(): Iterable<IndexedValue<T>> = VIteratorIndexedValueLong(collection.withIndex().iterator(), a)
     // TODO: context(a: ValueLongAdapter<T>) inline fun distinct(): MutableVLongList<T> = MutableVLongList(collection.distinct())
     // TODO: context(a: ValueLongAdapter<T>) inline fun <K> distinctBy(selector: (T) -> K): List<T> = collection.distinctBy { selector(a.fromLong(it)) }
     // TODO: context(a: ValueLongAdapter<T>) inline infix fun intersect(other: Iterable<T>): Set<T> = collection.intersect(other)
@@ -476,7 +475,7 @@ class VLongArray<T>(val collection:LongArray) {
             = collection.joinTo(buffer, separator, prefix, postfix, limit, truncated, { transform(a.fromLong(it)) })
     context(a: ValueLongAdapter<T>) inline fun joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", crossinline transform: ((T) -> CharSequence)={ it.toString()}): String
             = collection.joinToString(separator, prefix, postfix, limit, truncated, { transform(a.fromLong(it)) })
-    context(a: ValueLongAdapter<T>) inline fun asIterable(): Iterable<T> = VIterableLong(collection.asIterable(), a)
+    context(a: ValueLongAdapter<T>) inline fun asIterable(): Iterable<T> = VLongIterator(collection.asIterable().iterator(), a)
     context(a: ValueLongAdapter<T>) inline fun asSequence(): Sequence<T> = collection.asSequence().map { a.fromLong(it) }
     context(a: ValueLongAdapter<T>) inline fun average(): Double = collection.average()
     context(a: ValueLongAdapter<T>) inline fun sum(): T = a.fromLong(collection.sum())

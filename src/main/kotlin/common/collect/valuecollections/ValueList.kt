@@ -10,7 +10,7 @@ import androidx.collection.MutableLongList
 // inline wrappers around androidx.collection.IntList and LongList
 
 // IntList -> VIntList
-interface VIntList<T> { val collection:IntList }
+interface VIntList<T>: VIntCollection<T> { val collection:IntList }
 val <T> VIntList<T>.size inline get() = collection.size
 val <T> VIntList<T>.lastIndex inline get() = collection.lastIndex
 val <T> VIntList<T>.indices inline get() = collection.indices
@@ -34,8 +34,8 @@ context(a: ValueIntAdapter<T>) inline fun <T> VIntList<T>.forEachIndexed(block: 
 context(a: ValueIntAdapter<T>) inline fun <T> VIntList<T>.forEachReversed(block: (element: T) -> Unit) = collection.forEachReversed { block(a.fromInt(it)) }
 context(a: ValueIntAdapter<T>) inline fun <T> VIntList<T>.forEachReversedIndexed(block: (index: Int, element: T) -> Unit) = collection.forEachReversedIndexed { i, e -> block(i, a.fromInt(e)) }
 context(a: ValueIntAdapter<T>) inline operator fun <T> VIntList<T>.get(@androidx.annotation.IntRange(from = 0) index: Int): T = a.fromInt(collection.get(index))
-inline fun <T> VIntList<T>.getBits(@androidx.annotation.IntRange(from = 0) index: Int): Int = collection.get(index)
-context(a: ValueIntAdapter<T>) inline fun <T> VIntList<T>.elementAt(@androidx.annotation.IntRange(from = 0) index: Int): T = a.fromInt(collection.elementAt(index))
+inline fun <T> VIntList<T>.bitsAtIndex(@androidx.annotation.IntRange(from = 0) index: Int): Int = collection.get(index)
+context(a: ValueIntAdapter<T>) inline fun <T> VIntList<T>.elementAtIndex(@androidx.annotation.IntRange(from = 0) index: Int): T = a.fromInt(collection.elementAt(index))
 context(a: ValueIntAdapter<T>) inline fun <T> VIntList<T>.elementAtOrElse(@androidx.annotation.IntRange(from = 0) index: Int, defaultValue: (index: Int) -> T): T = a.fromInt(collection.elementAtOrElse(index, {a.toInt(defaultValue(it))}))
 context(a: ValueIntAdapter<T>) inline fun <T> VIntList<T>.indexOf(element: T): Int = collection.indexOf(a.toInt(element))
 context(a: ValueIntAdapter<T>) inline fun <T> VIntList<T>.indexOfFirst(predicate: (element: T) -> Boolean): Int = collection.indexOfFirst { predicate(a.fromInt(it)) }
@@ -53,6 +53,8 @@ context(a: ValueIntAdapter<T>) inline fun <T> VIntList<T>.toString() = joinToStr
 
 class MutableVIntList<T>(override val collection: MutableIntList = MutableIntList()): VIntList<T> {
     constructor(capacity: Int) : this(MutableIntList(capacity))
+    constructor(other: VIntCollection<T>) : this(MutableIntList(other.size)) {other.copyInto(this,0,0,size)}
+    constructor(other: VIntList<T>) : this(MutableIntList(other.collection))
     val capacity inline get() = collection.capacity
     context(a: ValueIntAdapter<T>) inline fun add(element: T): Boolean = collection.add(a.toInt(element))
     inline fun addBits(element: Int): Boolean = collection.add(element)
@@ -150,8 +152,8 @@ context(a: ValueLongAdapter<T>) inline fun <T> VLongList<T>.forEachIndexed(block
 context(a: ValueLongAdapter<T>) inline fun <T> VLongList<T>.forEachReversed(block: (element: T) -> Unit) = collection.forEachReversed { block(a.fromLong(it)) }
 context(a: ValueLongAdapter<T>) inline fun <T> VLongList<T>.forEachReversedIndexed(block: (index: Int, element: T) -> Unit) = collection.forEachReversedIndexed { i, e -> block(i, a.fromLong(e)) }
 context(a: ValueLongAdapter<T>) inline operator fun <T> VLongList<T>.get(@androidx.annotation.IntRange(from = 0) index: Int): T = a.fromLong(collection.get(index))
-inline fun <T> VLongList<T>.getBits(@androidx.annotation.IntRange(from = 0) index: Int): Long = collection.get(index)
-context(a: ValueLongAdapter<T>) inline fun <T> VLongList<T>.elementAt(@androidx.annotation.IntRange(from = 0) index: Int): T = a.fromLong(collection.elementAt(index))
+inline fun <T> VLongList<T>.bitsAtIndex(@androidx.annotation.IntRange(from = 0) index: Int): Long = collection.get(index)
+context(a: ValueLongAdapter<T>) inline fun <T> VLongList<T>.elementAtIndex(@androidx.annotation.IntRange(from = 0) index: Int): T = a.fromLong(collection.elementAt(index))
 context(a: ValueLongAdapter<T>) inline fun <T> VLongList<T>.elementAtOrElse(@androidx.annotation.IntRange(from = 0) index: Int, defaultValue: (index: Int) -> T): T = a.fromLong(collection.elementAtOrElse(index, {a.toLong(defaultValue(it))}))
 context(a: ValueLongAdapter<T>) inline fun <T> VLongList<T>.indexOf(element: T): Int = collection.indexOf(a.toLong(element))
 context(a: ValueLongAdapter<T>) inline fun <T> VLongList<T>.indexOfFirst(predicate: (element: T) -> Boolean): Int = collection.indexOfFirst { predicate(a.fromLong(it)) }
