@@ -4,6 +4,8 @@ package mpd.com.common.collect.valuecollections
 
 import androidx.collection.IntList
 import java.util.BitSet
+import java.util.PrimitiveIterator
+import java.util.function.Consumer
 import kotlin.also
 import kotlin.collections.set
 import kotlin.random.Random
@@ -21,7 +23,8 @@ interface VIntCollection<T> {
     fun indexOfLastIndexedBits(predicate: (index:Int, bits:Int) -> Boolean): Int = indexOfLastIndexedBitsDefault(predicate)
 
     fun <C: MutableVIntCollection<T>> copyInto(destination: C, destinationOffset: Int = 0, startIndex: Int = 0, endIndex: Int = size): C = copyIntoDefault(destination, destinationOffset, startIndex, endIndex)
-    
+
+    context(a: ValueIntAdapter<T>) fun <T> asIterable(): Iterable<T>
     context(a: ValueIntAdapter<T>) fun toString(): String = toVString()
     
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
@@ -140,7 +143,6 @@ inline fun <T> VIntCollection<T>.toArrayGenericBits(): Array<Int> = (this as? VI
 context(a: ValueIntAdapter<T>) inline fun <T> VIntCollection<T>.asSequence(): Sequence<T> = throw NotImplementedError()
 context(a: ValueIntAdapter<T>) inline fun <T> VIntCollection<T>.asList(): VIntList<T> = toList()
 context(a: ValueIntAdapter<T>) inline fun <T> VIntCollection<T>.asListGeneric(): List<T> = toListGeneric()
-context(a: ValueIntAdapter<T>) inline fun <T> VIntCollection<T>.asIterable(): VIntIterator<T> = throw NotImplementedError()
 context(a: ValueIntAdapter<T>) inline fun <T> VIntCollection<T>.contentEquals(other: VIntCollection<T>?): Boolean = other != null && size == other.size && this.indexOfFirstIndexedBits {i,e-> other.bitsAtIndex(i) != e } == -1
 /*
 context(a: ValueIntAdapter<T>) inline fun <T, R> VIntCollection<T>.flatMap(transform: (T) ->VIntCollection<R>): List<R>
@@ -375,7 +377,8 @@ interface VLongCollection<T> {
     fun indexOfLastIndexedBits(predicate: (index:Int, bits:Long) -> Boolean): Int
 
     fun <C: MutableVLongCollection<T>> copyInto(destination: C, destinationOffset: Int = 0, startIndex: Int = 0, endIndex: Int = size): C
-    
+
+    context(a: ValueLongAdapter<T>) fun <T> asIterable(): Iterable<T>
     context(a: ValueLongAdapter<T>) fun toString(): String = toVString()
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")

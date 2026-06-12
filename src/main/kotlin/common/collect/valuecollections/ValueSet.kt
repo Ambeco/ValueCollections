@@ -38,7 +38,8 @@ class FlatVIntSet<T>(override val collection: MutableIntSet, ): MutableVIntSet<T
     override inline fun removeAllIndexedBits(predicate: (index: Int, bits: Int) -> Boolean): Boolean = throw NotImplementedError()
     override inline fun clear()  = collection.clear()
     override inline fun setBits(index: Int, bits: Int) = throw UnsupportedOperationException()
-    
+    context(a: ValueIntAdapter<T>) override fun <T> asIterable(): Iterable<T> = throw UnsupportedOperationException()
+
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toVString() to print K.toString", ReplaceWith("toVString()"))
     override inline fun toString(): String = collection.toString()
@@ -75,6 +76,7 @@ class FlatVLongSet<T>(override val collection: MutableLongSet): MutableVLongSet<
     override inline fun removeAllIndexedBits(predicate: (index: Int, bits: Long) -> Boolean): Boolean = throw NotImplementedError()
     override inline fun clear()  = collection.clear()
     override inline fun setBits(index: Int, bits: Long) = throw UnsupportedOperationException()
+    context(a: ValueLongAdapter<T>) override fun <T> asIterable(): Iterable<T> = throw UnsupportedOperationException()
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toVString() to print K.toString", ReplaceWith("toVString()"))

@@ -4,6 +4,8 @@
 package mpd.com.common.collect.valuecollections
 
 import mpd.com.common.collect.valuecollections.VIntArray
+import java.util.PrimitiveIterator
+import java.util.function.Consumer
 
 // inline wrappers around kotlin.IntArray and kotlin.LongArray
 
@@ -23,6 +25,7 @@ class VIntArray<T>(val collection:IntArray): ModifiableVIntCollection<T> {
     override inline fun indexOfLastIndexedBits(predicate: (index: Int, bits: Int) -> Boolean): Int = indexOfLastIndexedBitsDefault(predicate)
     override inline fun <C : MutableVIntCollection<T>> copyInto(destination: C, destinationOffset: Int, startIndex: Int, endIndex: Int): C = copyIntoDefault(destination, destinationOffset, startIndex, endIndex)
 
+    context(a: ValueIntAdapter<T>) override fun <T> asIterable() = VIteratableFrom(collection.iterator())
     override inline operator fun equals(other: Any?): Boolean = collection == other
     override inline fun hashCode(): Int = collection.hashCode()
     
@@ -46,6 +49,7 @@ class VLongArray<T>(val collection:LongArray): ModifiableVLongCollection<T> {
     override inline fun indexOfFirstIndexedBits(predicate: (index: Int, bits: Long) -> Boolean): Int { for(i in 0 ..< size) if (predicate(i, bitsAtIndex(i))) return i; return -1 }
     override inline fun indexOfLastIndexedBits(predicate: (index: Int, bits: Long) -> Boolean): Int { for(i in size-1..0) if (predicate(i, bitsAtIndex(i))) return i; return -1 }
     override inline fun <C : MutableVLongCollection<T>> copyInto(destination: C, destinationOffset: Int, startIndex: Int, endIndex: Int): C = destination.also{for(i in startIndex..endIndex) destination.setBits(i+destinationOffset, bitsAtIndex(i))}
+    context(a: ValueLongAdapter<T>) override fun <T> asIterable() = VIteratableFrom(collection.iterator())
     override inline operator fun equals(other: Any?): Boolean = collection == other
     override inline fun hashCode(): Int = collection.hashCode()
 

@@ -52,7 +52,8 @@ class FlatVIntList<T>(override val collection: MutableIntList = MutableIntList()
 
     override fun removeAllIndexedBits(predicate: (index: Int, bits: Int) -> Boolean): Boolean = throw NotImplementedError()
     override inline fun clear() = collection.clear()
-    
+
+    context(a: ValueIntAdapter<T>) override fun <T> asIterable() = throw NotImplementedError()
     override inline fun hashCode() = collection.hashCode()
     override inline fun equals(other: Any?) = collection == other
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
@@ -124,6 +125,7 @@ class FlatVLongList<T>(override val collection: MutableLongList = MutableLongLis
     override fun removeAllIndexedBits(predicate: (index: Int, bits: Long) -> Boolean): Boolean = throw NotImplementedError()
     override inline fun clear() = collection.clear()
 
+    context(a: ValueLongAdapter<T>) override fun <T> asIterable() = throw NotImplementedError()
     override inline fun hashCode() = collection.hashCode()
     override inline fun equals(other: Any?) = collection == other
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
