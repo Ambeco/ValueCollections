@@ -13,8 +13,6 @@ overhead should be one additional allocation per collection.
 `distinct`, `intersect`, `subtract`, and `union` methods.
 
 ## Thin Java wrappers
-- `VIntConsumer<T>`
-- `VLongConsumer<T>`
 - `VIntIterator<T>`
 - `VLongIterator<T>`
 - `VIntIterable<T>`
