@@ -17,8 +17,6 @@ overhead should be one additional allocation per collection.
 - `VLongIterator<T>`
 - `VIntIterable<T>`
 - `VLongIterable<T>`
-- `Value32Stream<T>`
-- `Value64Stream<T>`
 
 ## Thin AndroidX wrappers
 https://github.com/androidx/androidx/tree/0a6843ad7cd148b7128d4db9e3c9299c5e58fa6d/collection/collection/src/commonMain/kotlin/androidx/collection
