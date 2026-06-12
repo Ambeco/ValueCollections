@@ -3,9 +3,8 @@
 package mpd.com.common.collect.valuecollections
 
 import androidx.collection.IntList
+import androidx.collection.LongList
 import java.util.BitSet
-import java.util.PrimitiveIterator
-import java.util.function.Consumer
 import kotlin.also
 import kotlin.collections.set
 import kotlin.random.Random
@@ -368,6 +367,9 @@ inline fun <T> MutableVIntCollection<T>.retainAll(elements: IntList): Boolean= t
 
 
 
+
+
+
 interface VLongCollection<T> {
     val size: Int
     fun bitsAtIndex(index: Int): Long
@@ -385,7 +387,267 @@ interface VLongCollection<T> {
     @Deprecated("toString() prints Longs. Use toString(ValueLongAdapter) to print K.toString", ReplaceWith("toVString()"))
     override fun toString(): String // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
 }
-context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.toVString(): String = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline operator fun <T> VLongCollection<T>.component1(): T = elementAtIndex(0)
+context(a: ValueLongAdapter<T>) inline operator fun <T> VLongCollection<T>.component2(): T = elementAtIndex(1)
+context(a: ValueLongAdapter<T>) inline operator fun <T> VLongCollection<T>.component3(): T = elementAtIndex(2)
+context(a: ValueLongAdapter<T>) inline operator fun <T> VLongCollection<T>.component4(): T = elementAtIndex(3)
+context(a: ValueLongAdapter<T>) inline operator fun <T> VLongCollection<T>.component5(): T = elementAtIndex(4)
+inline fun <T> VLongCollection<T>.isEmpty() = size == 0
+inline fun <T> VLongCollection<T>.isNotEmpty() = size > 0
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.contains(element: T) = indexOf(element) != -1
+inline fun <T> VLongCollection<T>.containsAll(elements: VLongCollection<T>) = elements.allBits { indexOfBits(it) != -1 }
+inline fun <T> VLongCollection<T>.containsAll(elements: LongList) = elements.forEach { indexOfBits(it) != -1 }
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.elementAtIndex(index: Int): T = a.fromLong(bitsAtIndex(index))
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.elementAtOrNull(index: Int): T? = if(index in 0..<size) elementAtIndex(index) else null
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.elementAtOrElse(index: Int, defaultValue: (Int) -> T): T = if(index in 0..<size)elementAtIndex(index) else defaultValue(index)
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.getOrElse(index: Int, defaultValue: (Int) -> T): T = if (index<size) elementAtIndex(index) else defaultValue(index)
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.getOrNull(index: Int): T? = if (index<size) elementAtIndex(index) else null
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.find(predicate: (T) -> Boolean): T? = elementAtOrNull(indexOfFirst(predicate))
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.findLast(predicate: (T) -> Boolean): T? = elementAtOrNull(indexOfLast(predicate))
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.first(): T = elementAtIndex(0)
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.first(predicate: (T) -> Boolean): T = find(predicate) ?: throw NoSuchElementException()
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.firstNotNullOf(transform: (T) -> R?): R = firstNotNullOfOrNull(transform) ?: throw NoSuchElementException()
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.firstNotNullOfOrNull(transform: (T) -> R?): R? { for(i in 0 ..< size) return transform(elementAtIndex(i)) ?: continue; return null }
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.firstOrNull(): T? = elementAtOrNull(0)
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.firstOrNull(predicate: (T) -> Boolean): T? = elementAtOrNull(indexOfFirst(predicate))
+context(a: ValueLongAdapter<T>)fun <T> VLongCollection<T>.indexOf(element: T): Int = indexOfFirst {it==element}
+inline fun <T> VLongCollection<T>.indexOfFirstBits(predicate: (Long) -> Boolean): Int { for(i in 0 ..< size) if (predicate(bitsAtIndex(i))) return i; return -1 }
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.indexOfFirst(predicate: (T) -> Boolean): Int { for(i in 0 ..< size) if (predicate(elementAtIndex(i))) return i; return -1 }
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.indexOfFirstIndexed(predicate: (Int,T) -> Boolean): Int { for(i in 0 ..< size) if (predicate(i, elementAtIndex(i))) return i; return -1 }
+inline fun <T> VLongCollection<T>.indexOfFirstIndexedBitsDefault(predicate: (index:Int, bits:Long) -> Boolean): Int { for(i in 0 ..< size) if (predicate(i, bitsAtIndex(i))) return i; return -1 }
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.indexOfLast(predicate: (T) -> Boolean): Int { for(i in size-1..0) if (predicate(elementAtIndex(i))) return i; return -1 }
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.indexOfLastIndexed(predicate: (Int,T) -> Boolean): Int { for(i in size-1..0) if (predicate(i, elementAtIndex(i))) return i; return -1 }
+inline fun <T> VLongCollection<T>.indexOfLastIndexedBitsDefault(predicate: (index:Int, bits:Long) -> Boolean): Int { for(i in size-1..0) if (predicate(i, bitsAtIndex(i))) return i; return -1 }
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.last(): T = elementAtIndex(size-1)
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.last(predicate: (T) -> Boolean): T = findLast(predicate) ?: throw NoSuchElementException()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.lastIndexOf(element: T): Int = indexOfLast {it==element}
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.lastOrNull(): T? = elementAtOrNull(size - 1)
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.lastOrNull(predicate: (T) -> Boolean): T? = elementAtOrNull(indexOfLast(predicate))
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.single(): T = elementAtIndex(0)
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.single(predicate: (T) -> Boolean): T = elementAtIndex(indexOfFirst(predicate))
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.singleOrNull(): T? = elementAtOrNull(0)
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.singleOrNull(predicate: (T) -> Boolean): T? = if (size==1 && predicate(elementAtIndex(0))) elementAtIndex(0) else null
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.drop(n: Int): FlatVLongList<T> = slice(IntRange(n,size-1))
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.dropLast(n: Int): FlatVLongList<T> = slice(IntRange(0,size-n))
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.dropWhile(predicate: (T) -> Boolean): FlatVLongList<T> {val i=indexOfFirst{!predicate(it)}; return if(i==-1) FlatVLongList(this) else slice(IntRange(i, size))}
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.dropLastWhile(predicate: (T) -> Boolean): FlatVLongList<T> {val i=indexOfLast{!predicate(it)}; return if(i==-1) toMutableList() else slice(IntRange(0, i))}
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.filter(predicate: (T) -> Boolean): FlatVLongList<T> = filterFromMask(filterMask(predicate))
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.filterMask(predicate: (T) -> Boolean): BitSet = filterIndexedMask {_,e->predicate(e)}
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.filterFromMask(mask: BitSet): FlatVLongList<T> = FlatVLongList<T>(mask.cardinality()).also {c-> forEachBitsIndexed {i,e-> if(mask[i]) c.addBits(e)} }
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.filterIndexed(predicate: (index: Int, T) -> Boolean): FlatVLongList<T> = filterFromMask(filterIndexedMask(predicate))
+context(a: ValueLongAdapter<T>) inline fun <T, C : MutableVLongCollection<T>> VLongCollection<T>.filterIndexedTo(destination: C, predicate: (index: Int, T) -> Boolean): C = destination.also { forEachIndexed { i, e -> if (predicate(i, e)) destination.add(e) } }
+context(a: ValueLongAdapter<T>) inline fun <T, C : MutableCollection<T>> VLongCollection<T>.filterIndexedTo(destination: C, predicate: (index: Int, T) -> Boolean): C = destination.also { forEachIndexed { i, e -> if (predicate(i, e)) destination.add(e) } }
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.filterIndexedMask(predicate: (index: Int, T) -> Boolean): BitSet {val destination=BitSet(size); forEachIndexed { i, e -> destination.set(i,predicate(i, e))}; return destination }
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.filterNot(predicate: (T) -> Boolean): VLongList<T> = filter {!predicate(it)}
+context(a: ValueLongAdapter<T>) inline fun <T, C : MutableVLongCollection<T>> VLongCollection<T>.filterNotTo(destination: C, predicate: (T) -> Boolean): C = filterTo(destination) {!predicate(it)}
+context(a: ValueLongAdapter<T>) inline fun <T, C : MutableCollection<T>> VLongCollection<T>.filterNotTo(destination: C, predicate: (T) -> Boolean): C = filterTo(destination) {!predicate(it)}
+context(a: ValueLongAdapter<T>) inline fun <T, C : MutableVLongCollection<T>> VLongCollection<T>.filterTo(destination: C, predicate: (T) -> Boolean): C = destination.also { forEach { if (predicate(it)) destination.add(it) } }
+context(a: ValueLongAdapter<T>) inline fun <T, C : MutableCollection<T>> VLongCollection<T>.filterTo(destination: C, predicate: (T) -> Boolean): C = destination.also { forEach { if (predicate(it)) destination.add(it) } }
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.slice(indices: IntRange): FlatVLongList<T> = copyInto<FlatVLongList<T>>(FlatVLongList<T>(indices.last-indices.first), 0, indices.first, indices.last)
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.slice(indices: Iterable<Int>): FlatVLongList<T> = FlatVLongList<T>(if (indices is Collection<Int>) indices.size else size/8).also { for(i in indices) it.addBits(bitsAtIndex(i)) }
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.sliceArray(indices: Collection<Int>): VLongArray<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.sliceArray(indices: IntRange): VLongArray<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.take(n: Int): FlatVLongList<T> = slice(IntRange(0,n))
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.takeLast(n: Int): FlatVLongList<T> = slice(IntRange(size-n,size))
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.takeLastWhile(predicate: (T) -> Boolean): FlatVLongList<T> {val i=indexOfLast{!predicate(it)}; return if(i==-1) FlatVLongList<T>(this) else slice(IntRange(0, i))}
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.takeWhile(predicate: (T) -> Boolean): FlatVLongList<T> {val i=indexOfFirst{!predicate(it)}; return if(i==-1) FlatVLongList<T>(this) else slice(IntRange(i,size))}
+inline fun <T> VLongCollection<T>.reversed(): FlatVLongList<T> = FlatVLongList<T>(size).also {forEachBitsIndexed{i,e-> it.setBits(size-i-1, e) }}
+//TODO: context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.sorted(): FlatVLongList<T> = FlatVLongList<T>(this).also{it.sort()}
+//TODO: context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> VLongCollection<T>.sortedBy(crossinline selector: (T) -> R?): FlatVLongList<T> = FlatVLongList<T>(this).also{it.sortedBy(selector)}
+//TODO: context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> VLongCollection<T>.sortedByDescending(crossinline selector: (T) -> R?): VLongList<T> = FlatVLongList<T>(this).also{it.sortedBy(selector)}
+//TODO: context(a: ValueLongAdapter<T>) inline fun <T : Comparable<T>> VLongCollection<T>.sortedDescending(): VLongList<T>
+//TODO: context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.sortedWith(comparator: Comparator<in T>): VLongList<T>
+inline fun <T, C: MutableVLongCollection<T>> VLongCollection<T>.copyIntoDefault(destination: C, destinationOffset: Int = 0, startIndex: Int = 0, endIndex: Int = size): C = destination.also{for(i in startIndex..endIndex) destination.setBits(i+destinationOffset, bitsAtIndex(i))}
+context(a: ValueLongAdapter<T>) inline fun <T, C: MutableList<T>> VLongCollection<T>.copyInto(destination: C, destinationOffset: Int = 0, startIndex: Int = 0, endIndex: Int = size): C = destination.also{for(i in startIndex..endIndex) destination.set(i+destinationOffset, elementAtIndex(i))}
+context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) inline fun <T, K, V> VLongCollection<T>.associateVIntInt(transform: (T) -> VIntIntPair<K, V>): VIntIntMap<K, V> = associateTo(MutableVIntIntMap(size), transform)
+context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>) inline fun <T, K, V> VLongCollection<T>.associateVIntLong(transform: (T) -> VIntLongPair<K, V>): VIntLongMap<K, V> = associateTo(MutableVIntLongMap(size), transform)
+context(a: ValueLongAdapter<T>, ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <T, K, V> VLongCollection<T>.associateVLongInt(transform: (T) -> VLongIntPair<K, V>): VLongIntMap<K, V> = associateTo(MutableVLongIntMap(size), transform)
+context(a: ValueLongAdapter<T>, ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>) inline fun <T, K, V> VLongCollection<T>.associateVLongLong(transform: (T) -> VLongLongPair<K, V>): VLongLongMap<K, V> = associateTo(MutableVLongLongMap(size), transform)
+context(a: ValueLongAdapter<T>) inline fun <T, K, V> VLongCollection<T>.associateGeneric(transform: (T) -> Pair<K, V>): Map<K, V> = associateTo(HashMap<K,V>(size), transform)
+context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>) inline fun <T, K> VLongCollection<T>.associateByVInt(keySelector: (T) -> K): MutableVIntLongMap<K, T> = associateByTo(MutableVIntLongMap<K,T>(size),keySelector,{it})
+context(a: ValueLongAdapter<T>, ka: ValueLongAdapter<K>) inline fun <T, K> VLongCollection<T>.associateByVLong(keySelector: (T) -> K): MutableVLongLongMap<K, T> = associateByTo(MutableVLongLongMap<K,T>(size),keySelector,{it})
+context(a: ValueLongAdapter<T>) inline fun <T, K> VLongCollection<T>.associateByGeneric(keySelector: (T) -> K): Map<K, T> = HashMap<K,T>(size).also{c->forEach {c.put(keySelector(it),it)}}
+context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) inline fun <T, K, V> VLongCollection<T>.associateByVIntInt(keySelector: (T) -> K, valueTransform: (T) -> V): VIntIntMap<K, V> = associateByTo(MutableVIntIntMap(size),keySelector,valueTransform)
+context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>) inline fun <T, K, V> VLongCollection<T>.associateByVIntLong(keySelector: (T) -> K, valueTransform: (T) -> V): VIntLongMap<K, V> = associateByTo(MutableVIntLongMap(size),keySelector,valueTransform)
+context(a: ValueLongAdapter<T>, ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <T, K, V> VLongCollection<T>.associateByVLongInt(keySelector: (T) -> K, valueTransform: (T) -> V): VLongIntMap<K, V> = associateByTo(MutableVLongIntMap(size),keySelector,valueTransform)
+context(a: ValueLongAdapter<T>, ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>) inline fun <T, K, V> VLongCollection<T>.associateByVLongLong(keySelector: (T) -> K, valueTransform: (T) -> V): VLongLongMap<K, V> = associateByTo(MutableVLongLongMap(size),keySelector,valueTransform)
+context(a: ValueLongAdapter<T>) inline fun <T, K, V> VLongCollection<T>.associateByGeneric(keySelector: (T) -> K, valueTransform: (T) -> V): Map<K, V> = HashMap<K,V>(size).also{c->forEach {c.put(keySelector(it),valueTransform(it))}}
+context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) inline fun <T, K, V, C:MutableVIntIntMap<K,V>> VLongCollection<T>.associateByTo(destination: C, keySelector: (T) -> K, valueTransform: (T) -> V): C = destination.also{c->c.putAll(this,keySelector,valueTransform)}
+context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>) inline fun <T, K, V, C:MutableVIntLongMap<K,V>> VLongCollection<T>.associateByTo(destination: C, keySelector: (T) -> K, valueTransform: (T) -> V): C = destination.also{c->c.putAll(this,keySelector,valueTransform)}
+context(a: ValueLongAdapter<T>, ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <T, K, V, C:MutableVLongIntMap<K,V>> VLongCollection<T>.associateByTo(destination: C, keySelector: (T) -> K, valueTransform: (T) -> V): C = destination.also{c->c.putAll(this,keySelector,valueTransform)}
+context(a: ValueLongAdapter<T>, ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>) inline fun <T, K, V, C:MutableVLongLongMap<K,V>> VLongCollection<T>.associateByTo(destination: C, keySelector: (T) -> K, valueTransform: (T) -> V): C = destination.also{c->c.putAll(this,keySelector,valueTransform)}
+context(a: ValueLongAdapter<T>) inline fun <T, K, V, M : MutableMap<in K, in V>> VLongCollection<T>.associateByTo(destination: M, keySelector: (T) -> K, valueTransform: (T) -> V): M = destination.also{c->forEach {c.put(keySelector(it),valueTransform(it))}}
+context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) inline fun <T, K, V, C:MutableVIntIntMap<K,V>> VLongCollection<T>.associateTo(destination: C, transform: (T) -> VIntIntPair<K, V>): C = destination.also{c->c.putAll(this,transform)}
+context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>) inline fun <T, K, V, C:MutableVIntLongMap<K,V>> VLongCollection<T>.associateTo(destination: C, transform: (T) -> VIntLongPair<K, V>): C = destination.also{c->c.putAll(this,transform)}
+context(a: ValueLongAdapter<T>, ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <T, K, V, C:MutableVLongIntMap<K,V>> VLongCollection<T>.associateTo(destination: C, transform: (T) -> VLongIntPair<K, V>): C = destination.also{c->c.putAll(this,transform)}
+context(a: ValueLongAdapter<T>, ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>) inline fun <T, K, V, C:MutableVLongLongMap<K,V>> VLongCollection<T>.associateTo(destination: C, transform: (T) -> VLongLongPair<K, V>): C = destination.also{c->c.putAll(this,transform)}
+context(a: ValueLongAdapter<T>) inline fun <T, K, V, M : MutableMap<in K, in V>> VLongCollection<T>.associateTo(destination: M, transform: (T) -> Pair<K, V>): M = destination.also{c->forEach {val p=transform(it); c[p.first] = p.second}}
+context(a: ValueLongAdapter<T>) inline fun <T, C : MutableVLongCollection<T>> VLongCollection<T>.toCollection(destination: C): C = destination.also { it.addAll(this) }
+context(a: ValueLongAdapter<T>) inline fun <T, C : MutableCollection<T>> VLongCollection<T>.toCollection(destination: C): C = destination.also{c->forEach {c.add(it)}}
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.toHashSet(): HashSet<T> = toCollection(HashSet(size))
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.toList(): VLongList<T> = this as? VLongList<T> ?: toMutableList()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.toListGeneric(): List<T> = toMutableListGeneric()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.toMutableList(): FlatVLongList<T> = this as? FlatVLongList<T> ?: toCollection(FlatVLongList<T>(size))
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.toMutableListGeneric(): MutableList<T> = toCollection(ArrayList(size))
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.toSet(): VLongSet<T> = this as? VLongSet<T> ?: toMutableSet()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.toMutableSet(): MutableVLongSet<T> = this as? MutableVLongSet<T> ?: toCollection(FlatVLongSet(size))
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.toSetGeneric(): Set<T> = toHashSet()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.toLongArray(): LongArray =  (this as? VLongArray<T>)?.collection ?: throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.toVLongArray(): VLongArray<T> = this as? VLongArray<T> ?: throw NotImplementedError()
+inline fun <T> VLongCollection<T>.toArrayGenericBits(): Array<Long> = (this as? VLongArray<T>)?.collection?.toTypedArray() ?: throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.asSequence(): Sequence<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.asList(): VLongList<T> = toList()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.asListGeneric(): List<T> = toListGeneric()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.contentEquals(other: VLongCollection<T>?): Boolean = other != null && size == other.size && this.indexOfFirstIndexedBits {i,e-> other.bitsAtIndex(i) != e } == -1
+/*
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.flatMap(transform: (T) ->VLongCollection<R>): List<R>
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.flatMap(transform: (T) -> Sequence<R>): List<R>
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.flatMapIndexed(transform: (index: Int, T) ->VLongCollection<R>): List<R>
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.flatMapIndexed(transform: (index: Int, T) -> Sequence<R>): List<R>
+context(a: ValueLongAdapter<T>) inline fun <T, R, C : MutableCollection<R>> VLongCollection<T>.flatMapIndexedTo(destination: C, transform: (index: Int, T) ->VLongCollection<R>): C
+context(a: ValueLongAdapter<T>) inline fun <T, R, C : MutableCollection<R>> VLongCollection<T>.flatMapIndexedTo(destination: C, transform: (index: Int, T) -> Sequence<R>): C
+context(a: ValueLongAdapter<T>) inline fun <T, R, C : MutableCollection<R>> VLongCollection<T>.flatMapTo(destination: C, transform: (T) ->VLongCollection<R>): C
+context(a: ValueLongAdapter<T>) inline fun <T, R, C : MutableCollection<R>> VLongCollection<T>.flatMapTo(destination: C, transform: (T) -> Sequence<R>): C
+context(a: ValueLongAdapter<T>) inline fun <T, K> VLongCollection<T>.groupByVLong(keySelector: (T) -> K): MutableVLongObjectMap<K, List<T>> = groupByTo(MutableVLongObjectMap<K,List<T>>(), keySelector)
+context(a: ValueLongAdapter<T>) inline fun <T, K> VLongCollection<T>.groupByVLong(keySelector: (T) -> K): MutableVLongObjectMap<K, List<T>> = groupByTo(MutableVLongObjectMap<K,List<T>>(), keySelector)
+context(a: ValueLongAdapter<T>) inline fun <T, K> VLongCollection<T>.groupByGeneric(keySelector: (T) -> K): MutableMap<K, List<T>> = groupByTo(HashMap<K,List<T>>(), keySelector)
+context(a: ValueLongAdapter<T>) inline fun <T, K, V> VLongCollection<T>.groupByVLong(keySelector: (T) -> K, valueTransform: (T) -> V): MutableVLongObjectMap<K, List<V>>
+context(a: ValueLongAdapter<T>) inline fun <T, K, V> VLongCollection<T>.groupByVLong(keySelector: (T) -> K, valueTransform: (T) -> V): MutableVLongObjectMap<K, List<V>>
+context(a: ValueLongAdapter<T>) inline fun <T, K, V> VLongCollection<T>.groupByGeneric(keySelector: (T) -> K, valueTransform: (T) -> V): MutableMap<K, List<V>>
+context(a: ValueLongAdapter<T>) inline fun <T, K, M : MutableMap<in K, MutableList<T>>> VLongCollection<T>.groupByTo(destination: M, keySelector: (T) -> K): M
+context(a: ValueLongAdapter<T>) inline fun <T, K, V, M : MutableMap<in K, MutableList<V>>> VLongCollection<T>.groupByTo(destination: M, keySelector: (T) -> K, valueTransform: (T) -> V): M
+context(a: ValueLongAdapter<T>) inline fun <T, K> VLongCollection<T>.groupingBy(crossinline keySelector: (T) -> K): Grouping<T, K>
+ */
+
+context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R> VLongCollection<T>.mapVInt(transform: (T) -> R): FlatVIntList<R> = mapTo(FlatVIntList<R>(size), transform)
+context(a: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R> VLongCollection<T>.mapVLong(transform: (T) -> R): FlatVLongList<R> = mapTo(FlatVLongList<R>(size), transform)
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.mapGeneric(transform: (T) -> R): MutableList<R> = mapTo(ArrayList<R>(size), transform)
+context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R> VLongCollection<T>.mapIndexedVInt(transform: (index: Int, T) -> R): FlatVIntList<R> = mapIndexedTo(FlatVIntList<R>(size), transform)
+context(a: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R> VLongCollection<T>.mapIndexedVLong(transform: (index: Int, T) -> R): FlatVLongList<R> = mapIndexedTo(FlatVLongList<R>(size), transform)
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.mapIndexedGeneric(transform: (index: Int, T) -> R): List<R> = mapIndexedTo(ArrayList<R>(size), transform)
+context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R> VLongCollection<T>.mapIndexedVIntNotNull(transform: (index: Int, T) -> R?): FlatVIntList<R> = mapIndexedNotNullTo(FlatVIntList<R>(size), transform)
+context(a: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R> VLongCollection<T>.mapIndexedVLongNotNull(transform: (index: Int, T) -> R?): FlatVLongList<R> = mapIndexedNotNullTo(FlatVLongList<R>(size), transform)
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.mapIndexedGenericNotNull(transform: (index: Int, T) -> R?): List<R> = mapIndexedNotNullTo(ArrayList<R>(size), transform)
+context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R, C : MutableVIntCollection<R>> VLongCollection<T>.mapIndexedNotNullTo(destination: C, transform: (index: Int, T) -> R?): C = destination.also{c->forEachIndexed{i,e->transform(i,e)?.also{c.add(it)} } }
+context(a: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R, C : MutableVLongCollection<R>> VLongCollection<T>.mapIndexedNotNullTo(destination: C, transform: (index: Int, T) -> R?): C = destination.also{c->forEachIndexed{i,e->transform(i,e)?.also{c.add(it)} } }
+context(a: ValueLongAdapter<T>) inline fun <T, R, C : MutableCollection<R>> VLongCollection<T>.mapIndexedNotNullTo(destination: C, transform: (index: Int, T) -> R?): C = destination.also{c->forEachIndexed{i,e->transform(i,e)?.also{c.add(it)} } }
+context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R, C : MutableVIntCollection<R>> VLongCollection<T>.mapIndexedTo(destination: C, transform: (index: Int, T) -> R): C = throw NotImplementedError()
+context(a: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R, C : MutableVLongCollection<R>> VLongCollection<T>.mapIndexedTo(destination: C, transform: (index: Int, T) -> R): C = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R, C : MutableCollection<R>> VLongCollection<T>.mapIndexedTo(destination: C, transform: (index: Int, T) -> R): C = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.mapNotNull(transform: (T) -> R?): List<R> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R, C : MutableCollection<R>> VLongCollection<T>.mapNotNullTo(destination: C, transform: (T) -> R?): C = throw NotImplementedError()
+context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R, C : MutableVIntCollection<R>> VLongCollection<T>.mapTo(destination: C, transform: (T) -> R): C = destination.also {forEach{destination.add(transform(it)) } }
+context(a: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R, C : MutableVLongCollection<R>> VLongCollection<T>.mapTo(destination: C, transform: (T) -> R): C = destination.also {forEach{destination.add(transform(it)) } }
+context(a: ValueLongAdapter<T>) inline fun <T, R, C : MutableCollection<R>> VLongCollection<T>.mapTo(destination: C, transform: (T) -> R): C = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.withIndex():VLongCollection<IndexedValue<T>> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.distinct(): VLongList<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, K> VLongCollection<T>.distinctBy(selector: (T) -> K): VLongList<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline infix fun <T> VLongCollection<T>.intersect(other:VLongCollection<T>): Set<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline infix fun <T> VLongCollection<T>.subtract(other:VLongCollection<T>): Set<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline infix fun <T> VLongCollection<T>.union(other:VLongCollection<T>): Set<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.all(predicate: (T) -> Boolean): Boolean = indexOfFirst(predicate) != -1
+inline fun <T> VLongCollection<T>.allBits(noinline predicate: (Long) -> Boolean): Boolean = indexOfFirstBits(predicate) != -1
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.any(): Boolean = size > 0
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.any(predicate: (T) -> Boolean): Boolean = indexOfFirst(predicate) > -1
+inline fun <T> VLongCollection<T>.anyBits(noinline predicate: (Long) -> Boolean): Boolean = indexOfFirstBits(predicate) > -1
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.count(): Long = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.count(predicate: (T) -> Boolean): Long = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.fold(initial: R, operation: (acc: R, T) -> R): R = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.foldIndexed(initial: R, operation: (index: Int, acc: R, T) -> R): R = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, C: VLongCollection<T>> C.onEach(action: (T) -> Unit): C = apply{forEach(action)}
+context(a: ValueLongAdapter<T>) inline fun <T, C: VLongCollection<T>> C.onEachIndexed(action: (Int,T) -> Unit): C = apply{forEachIndexed(action)}
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.forEach(action: (T) -> Unit) {for(i in 0..size) action(elementAtIndex(i))}
+inline fun <T> VLongCollection<T>.forEachBits(action: (Long) -> Unit) {for(i in 0..size) action(bitsAtIndex(i))}
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.forEachIndexed(action: (index:Int, T) -> Unit) {for(i in 0..size) action(i, elementAtIndex(i))}
+inline fun <T> VLongCollection<T>.forEachBitsIndexed(action: (index:Int, Long) -> Unit) {for(i in 0..size) action(i, bitsAtIndex(i))}
+context(a: ValueLongAdapter<T>) inline fun <T : Comparable<T>> VLongCollection<T>.max(): T = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> VLongCollection<T>.maxBy(selector: (T) -> R): T = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> VLongCollection<T>.maxByOrNull(selector: (T) -> R): T? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.maxOf(selector: (T) -> Double): Double = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.maxOf(selector: (T) -> Float): Float = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> VLongCollection<T>.maxOf(selector: (T) -> R): R = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.maxOfOrNull(selector: (T) -> Double): Double? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.maxOfOrNull(selector: (T) -> Float): Float? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> VLongCollection<T>.maxOfOrNull(selector: (T) -> R): R? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.maxOfWith(comparator: Comparator<R>, selector: (T) -> R): R = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.maxOfWithOrNull(comparator: Comparator<R>, selector: (T) -> R): R? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T : Comparable<T>> VLongCollection<T>.maxOrNull(): T? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.maxWith(comparator: Comparator<in T>): T = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.maxWithOrNull(comparator: Comparator<in T>): T? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T : Comparable<T>> VLongCollection<T>.min(): T = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> VLongCollection<T>.minBy(selector: (T) -> R): T = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> VLongCollection<T>.minByOrNull(selector: (T) -> R): T? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.minOf(selector: (T) -> Double): Double = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.minOf(selector: (T) -> Float): Float = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> VLongCollection<T>.minOf(selector: (T) -> R): R = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.minOfOrNull(selector: (T) -> Double): Double? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.minOfOrNull(selector: (T) -> Float): Float? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> VLongCollection<T>.minOfOrNull(selector: (T) -> R): R? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.minOfWith(comparator: Comparator<R>, selector: (T) -> R): R = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.minOfWithOrNull(comparator: Comparator<R>, selector: (T) -> R): R? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T : Comparable<T>> VLongCollection<T>.minOrNull(): T? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.minWith(comparator: Comparator<in T>): T = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.minWithOrNull(comparator: Comparator<in T>): T? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.none(): Boolean = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.none(predicate: (T) -> Boolean): Boolean = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <S, T : S> VLongCollection<T>.reduce(operation: (acc: S, T) -> S): S = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <S, T : S> VLongCollection<T>.reduceIndexed(operation: (index: Int, acc: S, T) -> S): S = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <S, T : S> VLongCollection<T>.reduceIndexedOrNull(operation: (index: Int, acc: S, T) -> S): S? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <S, T : S> VLongCollection<T>.reduceOrNull(operation: (acc: S, T) -> S): S? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <S, T : S> VLongCollection<T>.reduceRight(operation: (T, acc: T) -> T): T = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <S, T : S> VLongCollection<T>.reduceRightIndexed(operation: (index: Int, T, acc: T) -> T): T = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <S, T : S> VLongCollection<T>.reduceRightIndexedOrNull(operation: (index: Int, T, acc: T) -> T): T? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <S, T : S> VLongCollection<T>.reduceRightOrNull(operation: (T, acc: T) -> T): T? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.runningFold(initial: R, operation: (acc: R, T) -> R): List<R> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.runningFoldIndexed(initial: R, operation: (index: Int, acc: R, T) -> R): List<R> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <S, T : S> VLongCollection<T>.runningReduce(operation: (acc: S, T) -> S): List<S> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <S, T : S> VLongCollection<T>.runningReduceIndexed(operation: (index: Int, acc: S, T) -> S): List<S> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.scan(initial: R, operation: (acc: R, T) -> R): List<R> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.scanIndexed(initial: R, operation: (index: Int, acc: R, T) -> R): List<R> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.shuffle(): Unit = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.shuffle(random: Random): Unit = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.sorted(): FlatVLongList<T> = toMutableList().also{it.sort()}
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.sortedArray(): VLongArray<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.sortedArrayDescending(): VLongArray<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> VLongCollection<T>.sortedBy(crossinline selector: (T) -> R?): FlatVLongList<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> VLongCollection<T>.sortedByDescending(crossinline selector: (T) -> R?): FlatVLongList<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.sortedDescending(): FlatVLongList<T> = toMutableList().also{it.sortDescending()}
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.sortedWith(comparator: Comparator<in Long>): FlatVLongList<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.sumBy(selector: (T) -> Long): Long = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.sumByDouble(selector: (T) -> Double): Double = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.sumOf(selector: (T) -> Double): Double = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.sumOf(selector: (T) -> Int): Int = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.sumOf(selector: (T) -> Long): Long = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.sumOfUInt(selector: (T) -> UInt): UInt = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.sumOfULong(selector: (T) -> ULong): ULong = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.chunked(size: Long): List<List<T>> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.chunked(size: Long, transform: (List<T>) -> R): List<R> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline operator fun <T> VLongCollection<T>.minus(element: T): VLongList<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline operator fun <T> VLongCollection<T>.minus(elements: Array<out T>): VLongList<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline operator fun <T> VLongCollection<T>.minus(elements:VLongCollection<T>): VLongList<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline operator fun <T> VLongCollection<T>.minus(elements: Sequence<T>): VLongList<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.minusElement(element: T): VLongList<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.partition(predicate: (T) -> Boolean): Pair<List<T>, List<T>> = throw NotImplementedError()
+inline fun <T> ModifiableVLongCollection<T>.random(): T = throw NotImplementedError()
+fun <T> ModifiableVLongCollection<T>.random(random: Random): T = throw NotImplementedError()
+inline fun <T> ModifiableVLongCollection<T>.randomOrNull(): T? = throw NotImplementedError()
+fun <T> ModifiableVLongCollection<T>.randomOrNull(random: Random): T? = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline operator fun <T> VLongCollection<T>.plus(element: T): VLongList<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline operator fun <T> VLongCollection<T>.plus(elements: Array<out T>): VLongList<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline operator fun <T> VLongCollection<T>.plus(elements:VLongCollection<T>): VLongList<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline operator fun <T> VLongCollection<T>.plus(elements: Sequence<T>): VLongList<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.plusElement(element: T): VLongList<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.windowed(size: Long, step: Long = 1, partialWindows: Boolean = false): List<List<T>> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.windowed(size: Long, step: Long = 1, partialWindows: Boolean = false, transform: (List<T>) -> R): List<R> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline infix fun <T, R> VLongCollection<T>.zip(other: Array<out R>): List<Pair<T, R>> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R, V> VLongCollection<T>.zip(other: Array<out R>, transform: (a: T, b: R) -> V): List<V> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline infix fun <T, R> VLongCollection<T>.zip(other:VLongCollection<R>): List<Pair<T, R>> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R, V> VLongCollection<T>.zip(other:VLongCollection<R>, transform: (a: T, b: R) -> V): List<V> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.zipWithNext(): List<Pair<T, T>> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R> VLongCollection<T>.zipWithNext(transform: (a: T, b: T) -> R): List<R> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, A : Appendable> VLongCollection<T>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Long = -1, truncated: CharSequence = "...", transform: ((T) -> CharSequence) = { it.toString() }): A = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Long = -1, truncated: CharSequence = "...", transform: ((T) -> CharSequence) = { it.toString() }): String = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.toVString() = joinToString(", ","{","}")
 
 
 
@@ -394,6 +656,11 @@ context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.toVString(): S
 interface ModifiableVLongCollection<T>: VLongCollection<T> {
     fun setBits(index: Int, bits: Long)
 }
+context(a: ValueLongAdapter<T>) inline fun <T> ModifiableVLongCollection<T>.set(index: Int, value: T) = setBits(index, a.toLong(value))
+inline fun <T> ModifiableVLongCollection<T>.sort(): Unit = throw NotImplementedError()
+inline fun <T> ModifiableVLongCollection<T>.sort(fromIndex: Int, toIndex: Int): Unit = throw NotImplementedError()
+inline fun <T> ModifiableVLongCollection<T>.sortDescending(): Unit = throw NotImplementedError()
+inline fun <T> ModifiableVLongCollection<T>.sortDescending(fromIndex: Int, toIndex: Int): Unit = throw NotImplementedError()
 
 
 
@@ -417,3 +684,44 @@ interface MutableVLongCollection<T>: ModifiableVLongCollection<T> {
     fun clear()
 }
 context(a: ValueLongAdapter<T>) fun <T> MutableVLongCollection<T>.add(element: T): Boolean = throw NotImplementedError()
+operator fun <T> MutableVLongCollection<T>.plus(element: T): VLongList<T> = throw NotImplementedError()
+operator fun <T> MutableVLongCollection<T>.plus(elements: Iterable<T>): VLongList<T> = throw NotImplementedError()
+operator fun <T> MutableVLongCollection<T>.plus(elements: Sequence<T>): VLongList<T> = throw NotImplementedError()
+inline fun <T> MutableVLongCollection<T>.plusElement(element: T): VLongList<T>  = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.addAll(elements: LongArray): Boolean = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.addAll(elements: Array<out T>): Boolean = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.addAll(elements: Iterable<T>): Boolean = throw NotImplementedError()
+inline operator fun <T> MutableVLongCollection<T>.plusAssign(elements: LongList): Unit = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline operator fun <T> MutableVLongCollection<T>.plusAssign(elements: LongArray): Unit = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.plusAssign(elements: Array<out T>): Boolean = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.plusAssign(elements: Collection<T>): Boolean = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.plusAssign(elements: Iterable<T>): Boolean = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline operator fun <T> MutableVLongCollection<T>.plusAssign(element: T): Unit = throw NotImplementedError()
+
+inline fun <T> MutableVLongCollection<T>.add(index: Int, element: T): Boolean = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.addAll(index: Int, elements: LongArray): Boolean = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.addAll(index: Int, elements: VLongCollection<T>) : Boolean= throw NotImplementedError()
+inline fun <T> MutableVLongCollection<T>.addAll(index: Int, elements: LongList): Boolean = throw NotImplementedError()
+
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.remove(element: T): Boolean = throw NotImplementedError()
+inline fun <T> MutableVLongCollection<T>.removeBits(element: Long): Boolean = throw NotImplementedError()
+inline fun <T> MutableVLongCollection<T>.removeAll(elements: VLongCollection<T>): Boolean = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.removeAll(elements: Collection<T>): Boolean = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline operator fun <T> MutableVLongCollection<T>.minusAssign(element: T): Unit = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.removeAll(elements: VLongList<out T>): Boolean= throw NotImplementedError()
+inline fun <T> MutableVLongCollection<T>.removeAll(elements: LongList): Boolean= throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.removeAll(elements: LongArray): Boolean= throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.removeAll(elements: Array<out T>): Boolean= throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.removeAll(elements: Iterable<T>): Boolean= throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.minusAssign(elements: VLongList<out T>): Boolean= throw NotImplementedError()
+inline fun <T> MutableVLongCollection<T>.minusAssign(elements: LongList): Boolean= throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.minusAssign(elements: LongArray): Boolean= throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.minusAssign(elements: Array<out T>): Boolean= throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.minusAssign(elements: Collection<T>): Boolean= throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.minusAssign(elements: Iterable<T>): Boolean= throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.removeAt(index: Int): Boolean= throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.removeRange(start: Long, end: Long): Boolean= throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.retainAll(elements: LongArray): Boolean= throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> MutableVLongCollection<T>.retainAll(elements: VLongList<out T>): Boolean= throw NotImplementedError()
+inline fun <T> MutableVLongCollection<T>.retainAll(elements: LongList): Boolean= throw NotImplementedError()
+
