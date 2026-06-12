@@ -5,14 +5,13 @@ package mpd.com.common.collect.valuecollections
 import java.util.PrimitiveIterator
 import java.util.function.Consumer
 
-
-open class VIntIterator<T>(val delegate:Iterator<Int>, val a: ValueIntAdapter<T>): PrimitiveIterator<T, Consumer<T>>, Iterable<T> {
+open class VIntIterator<T>(val delegate:Iterator<Int>, val a: ValueIntAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, Iterable<T> {
     override fun iterator(): VIntIterator<T> = this
     final override inline fun hasNext(): Boolean = delegate.hasNext()
     override fun remove(): Unit = throw UnsupportedOperationException("remove")
     final override inline fun next(): T = nextInt()
     inline fun nextInt(): T = if (delegate is IntIterator) a.fromInt(delegate.nextInt()) else a.fromInt(delegate.next())
-    final override inline fun forEachRemaining(op: Consumer<T>?) { while (delegate.hasNext()) op?.accept(nextInt()) }
+    final override inline fun forEachRemaining(op: Consumer<in T>) { while (delegate.hasNext()) op.accept(nextInt()) }
 }
 class MutableVIntIterator<T>(delegate:MutableIterator<Int>, a: ValueIntAdapter<T>): VIntIterator<T>(delegate,a), MutableIterator<T>, MutableIterable<T> {
     override inline fun iterator(): MutableVIntIterator<T> = this
@@ -28,13 +27,13 @@ class VIteratorIndexedValueInt<T>(val delegate:Iterator<IndexedValue<Int>>, val 
 
 
 
-open class VLongIterator<T>(val delegate:Iterator<Long>, val a: ValueLongAdapter<T>): PrimitiveIterator<T, Consumer<T>>, Iterable<T> {
+open class VLongIterator<T>(val delegate:Iterator<Long>, val a: ValueLongAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, Iterable<T> {
     override fun iterator(): VLongIterator<T> = this
     final override inline fun hasNext(): Boolean = delegate.hasNext()
     override fun remove(): Unit = throw UnsupportedOperationException("remove")
     final override inline fun next(): T = nextLong()
     inline fun nextLong(): T = if (delegate is LongIterator) a.fromLong(delegate.nextLong()) else a.fromLong(delegate.next())
-    final override inline fun forEachRemaining(op: Consumer<T>?) { while (delegate.hasNext()) op?.accept(nextLong()) }
+    final override inline fun forEachRemaining(op: Consumer<in T>) { while (delegate.hasNext()) op.accept(nextLong()) }
 }
 class MutableVLongIterator<T>(delegate:MutableIterator<Long>, a: ValueLongAdapter<T>): VLongIterator<T>(delegate,a), MutableIterator<T>, MutableIterable<T> {
     override inline fun iterator(): MutableVLongIterator<T> = this

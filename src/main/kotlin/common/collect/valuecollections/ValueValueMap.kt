@@ -123,7 +123,7 @@ class MutableVIntVIntMap<K,V>(override val collection: MutableIntIntMap = Mutabl
     override inline fun hashCode() = collection.hashCode()
     override inline fun equals(other: Any?) = collection == other
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
-    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toString(K.ValueIntAdapter)"))
+    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toVString()"))
     override inline fun toString() = collection.toString() // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
     context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>)
     inline fun toString() = joinToString(", ","{","}")
@@ -239,7 +239,7 @@ class MutableVLongVIntMap<K,V>(override val collection: MutableLongIntMap = Muta
     override inline fun hashCode() = collection.hashCode()
     override inline fun equals(other: Any?) = collection == other
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
-    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toString(K.ValueIntAdapter)"))
+    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toVString()"))
     override inline fun toString() = collection.toString() // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
     context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>)
     inline fun toString() = joinToString(", ","{","}")
@@ -356,7 +356,7 @@ class MutableVIntVLongMap<K,V>(override val collection: MutableIntIntMap = Mutab
     override inline fun hashCode() = collection.hashCode()
     override inline fun equals(other: Any?) = collection == other
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
-    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toString(K.ValueIntAdapter)"))
+    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toVString()"))
     override inline fun toString() = collection.toString() // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
     context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>)
     inline fun toString() = joinToString(", ","{","}")
@@ -472,7 +472,7 @@ class MutableVLongVLongMap<K,V>(override val collection: MutableLongIntMap = Mut
     override inline fun hashCode() = collection.hashCode()
     override inline fun equals(other: Any?) = collection == other
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
-    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toString(K.ValueIntAdapter)"))
+    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toVString()"))
     override inline fun toString() = collection.toString() // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
     context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>)
     inline fun toString() = joinToString(", ","{","}")

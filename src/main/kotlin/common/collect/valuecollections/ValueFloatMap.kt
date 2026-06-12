@@ -93,7 +93,7 @@ class MutVIntFloatMap<K>(override val collection: MutableIntFloatMap = MutableIn
     override inline fun hashCode() = collection.hashCode()
     override inline fun equals(other: Any?) = collection == other
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
-    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toString(K.ValueIntAdapter)"))
+    @Deprecated("toString() prints Integers. Use toVString() to print K.toString", ReplaceWith("toVString()"))
     override inline fun toString() = collection.toString() // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
     context(a: ValueIntAdapter<K>) inline fun toString() = joinToString(", ","{","}")
 }
@@ -175,7 +175,7 @@ class MutVLongFloatMap<K>(override val collection: MutableLongFloatMap = Mutable
     override inline fun hashCode() = collection.hashCode()
     override inline fun equals(other: Any?) = collection == other
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
-    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toString(K.ValueIntAdapter)"))
+    @Deprecated("toString() prints Integers. Use toVString() to print K.toString", ReplaceWith("toVString()"))
     override inline fun toString() = collection.toString() // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
     context(a: ValueLongAdapter<K>) inline fun toString() = joinToString(", ","{","}")
 }
