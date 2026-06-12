@@ -12,65 +12,63 @@ overhead should be one additional allocation per collection.
 `VIntList` or `VLongList`, to reduce allocations. These are the `filter`, `take`, `drop`, `slice`, `sorted`,
 `distinct`, `intersect`, `subtract`, and `union` methods.
 
-## Thin Java wrappers
-- `VIntIterator<T>`
-- `VLongIterator<T>`
-- `VIntIterable<T>`
-- `VLongIterable<T>`
+## Java Collections
+- Pairs
+    - `VIntIntPair<F,S>`
+    - `VIntLongPair<F,S>`
+    - `VLongIntPair<F,S>`
+    - `VLongLongPair<F,S>`
+- Collections
+    - `interface VIntCollection<T>`
+    - `interface VLongCollection<T>` (TODO)
+    - `interface ModifiableVIntCollection<T>`
+    - `interface ModifiableVLongCollection<T>` (TODO)
+    - `interface MutableVIntCollection<T>`
+    - `interface MutableVLongCollection<T>` (TODO)
+- Queues 
+  - `IntArrayDeque` (actual `int` implementation, not a wrapper)
+  - `LongArrayDeque` (actual `int` implementation, not a wrapper) (TODO)
+  - `VIntArrayDeque<T>` (TODO)
+  - `VIntArrayDeque<T>` (TODO)
+  - `IntPriorityBlockingArrayDeque<T>` (TODO)
+  - `LongPriorityBlockingArrayDeque<T>` (TODO)
+  - `VIntPriorityBlockingArrayDeque<T>` (TODO)
+  - `VIntPriorityBlockingArrayDeque<T>` (TODO)
 
 ## Thin AndroidX wrappers
 https://github.com/androidx/androidx/tree/0a6843ad7cd148b7128d4db9e3c9299c5e58fa6d/collection/collection/src/commonMain/kotlin/androidx/collection
-- `Value32FloatMap<K>` 
-- `Value32Value32Map<K,V>` 
-- `Value32Value32Pair<F,S>` 
-- `Value32ArrayList<T>` 
-- `Value32Value64Map<K,V>`
-- `Value32ObjectMap<K,V>`
-- `Value32ArraySet<T>`
-- `Value32SparseArray<T>`
-- `Value64FloatMap<K>`
-- `Value64Value32Map<K,V>`
-- `Value64ArrayList<T>`
-- `Value64Value64Map<K,V>`
-- `Value64Value64Pair<F,S>`
-- `Value64ObjectMap<K,V>`
-- `Value64ArraySet<T>`
-- `Value64SparseArray<T>`
-- `ObjectValue32Map<V>`
-- `ObjectValue64Map<V>`
 
-## Extended Operations
-
-### Collections
-- `Value32PrimitiveIterator`
-- `Value64PrimitiveIterator`
-- `IntArrayDeque`
-- `LongArrayDeque`
-- `Value32ArrayDeque`
-- `Value32ArrayDeque`
-- `IntPriorityBlockingArrayDeque`
-- `LongPriorityBlockingArrayDeque`
-- `Value32PriorityBlockingArrayDeque`
-- `Value32PriorityBlockingArrayDeque`
-
-### Functions
-- `Value32Supplier`
-- `Value64Supplier`
-- `Value32Consumer`
-- `Value64Consumer`
-- `Value32FloatFunction`
-- `Value64FloatFunction`
-- `Value32DoubleFunction`
-- `Value64DoubleFunction`
-- `Value32Value32Function`
-- `Value64Value32Function`
-- `Value32Value64Function`
-- `Value64Value64Function`
-- `Value32Value32Value32Function`
-- `Value64Value32Value32Function`
-- `Value32Value64Value32Function`
-- `Value64Value64Value32Function`
-- `Value32Value32Value64Function`
-- `Value64Value32Value64Function`
-- `Value32Value64Value64Function`
-- `Value64Value64Value64Function`
+- Arrays
+    - `class VIntArray<T>`
+    - `class VLongArray<T>` (TODO)
+    - `class VIntSparseArray<T>` (TODO)
+    - `class VLongSparseArray<T>` (TODO)
+- Lists
+  - `interface VIntList<T>`
+  - `interface VLongList<T>` (TODO)
+  - `interface ModifiableVIntList<T>`
+  - `interface ModifiableVLongList<T>` (TODO)
+  - `interface MutableVIntList<T>`
+  - `interface MutableVLongList<T>` (TODO)
+  - `class FlatVIntList<T>`
+  - `class FlatVLongList<T>` (TODO)
+- Sets
+    - `interface VIntSet<T>` (TODO)
+    - `interface VLongSet<T>` (TODO)
+    - `interface ModifiableVIntSet<T>` (TODO)
+    - `interface ModifiableVLongSet<T>` (TODO)
+    - `interface MutableVIntSet<T>` (TODO)
+    - `interface MutableVLongSet<T>` (TODO)
+    - `class FlatVIntSet<T>` (TODO)
+    - `class FlatVLongSet<T>` (TODO)
+- Maps 
+  - `VIntDoubleMap<K>` (TODO)
+  - `VIntIntMap<K,V>` (TODO)
+  - `VIntLongMap<K,V>` (TODO)
+  - `VIntObjectMap<K,V>` (TODO)
+  - `VLongDoubleMap<K>` (TODO)
+  - `VLongIntMap<K,V>` (TODO)
+  - `VLongLongMap<K,V>` (TODO)
+  - `VLongObjectMap<K,V>` (TODO)
+  - `ObjectVIntMap<K,V>` (TODO)
+  - `ObjectVLongMap<K,V>` (TODO)
