@@ -26,14 +26,14 @@ overhead should be one additional allocation per collection.
     - `interface MutableVIntCollection<T>`
     - `interface MutableVLongCollection<T>` (TODO)
 - Queues 
-  - `IntArrayDeque` (actual `int` implementation, not a wrapper)
+  - `IntArrayDeque` (actual `int` implementation, not a wrapper) (TODO)
   - `LongArrayDeque` (actual `int` implementation, not a wrapper) (TODO)
   - `VIntArrayDeque<T>` (TODO)
   - `VIntArrayDeque<T>` (TODO)
-  - `IntPriorityBlockingArrayDeque<T>` (TODO)
-  - `LongPriorityBlockingArrayDeque<T>` (TODO)
-  - `VIntPriorityBlockingArrayDeque<T>` (TODO)
-  - `VIntPriorityBlockingArrayDeque<T>` (TODO)
+  - `IntPriorityBlockingArrayQueue` (actual `int` implementation, not a wrapper)
+  - `LongPriorityBlockingArrayQueue` (actual `int` implementation, not a wrapper)
+  - `VIntPriorityBlockingArrayQueue<T>` (TODO)
+  - `VIntPriorityBlockingArrayQueue<T>` (TODO)
 
 ## Thin AndroidX wrappers
 https://github.com/androidx/androidx/tree/0a6843ad7cd148b7128d4db9e3c9299c5e58fa6d/collection/collection/src/commonMain/kotlin/androidx/collection
