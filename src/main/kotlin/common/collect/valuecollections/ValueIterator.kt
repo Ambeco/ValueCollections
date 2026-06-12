@@ -10,7 +10,7 @@ open class VIntIterator<T>(val delegate:Iterator<Int>, val a: ValueIntAdapter<T>
     final override inline fun hasNext(): Boolean = delegate.hasNext()
     override fun remove(): Unit = throw UnsupportedOperationException("remove")
     final override inline fun next(): T = nextInt()
-    inline fun nextInt(): T = if (delegate is IntIterator) a.fromInt(delegate.nextInt()) else a.fromInt(delegate.next())
+    inline fun nextInt(): T = a.fromInt(if (delegate is IntIterator) delegate.nextInt() else if (delegate is PrimitiveIterator.OfInt) delegate.nextInt() else delegate.next())
     final override inline fun forEachRemaining(op: Consumer<in T>) { while (delegate.hasNext()) op.accept(nextInt()) }
 }
 class MutableVIntIterator<T>(delegate:MutableIterator<Int>, a: ValueIntAdapter<T>): VIntIterator<T>(delegate,a), MutableIterator<T>, MutableIterable<T> {
@@ -32,7 +32,7 @@ open class VLongIterator<T>(val delegate:Iterator<Long>, val a: ValueLongAdapter
     final override inline fun hasNext(): Boolean = delegate.hasNext()
     override fun remove(): Unit = throw UnsupportedOperationException("remove")
     final override inline fun next(): T = nextLong()
-    inline fun nextLong(): T = if (delegate is LongIterator) a.fromLong(delegate.nextLong()) else a.fromLong(delegate.next())
+    inline fun nextLong(): T = a.fromLong(if (delegate is LongIterator) delegate.nextLong() else if (delegate is PrimitiveIterator.OfLong) delegate.nextLong() else delegate.next())
     final override inline fun forEachRemaining(op: Consumer<in T>) { while (delegate.hasNext()) op.accept(nextLong()) }
 }
 class MutableVLongIterator<T>(delegate:MutableIterator<Long>, a: ValueLongAdapter<T>): VLongIterator<T>(delegate,a), MutableIterator<T>, MutableIterable<T> {
