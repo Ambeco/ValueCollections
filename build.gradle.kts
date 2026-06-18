@@ -15,6 +15,7 @@ repositories {
 dependencies {
     implementation("androidx.collection:collection:1.4.0")
     implementation("androidx.collection:collection-ktx:1.4.0")
+    implementation("androidx.collection:collection-jvm:1.6.0")
 
     testImplementation(kotlin("test"))
 }

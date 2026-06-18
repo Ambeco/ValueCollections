@@ -27,12 +27,12 @@ class MutableVIntIntMap<K,V>(
 ): VIntIntMap<K,V> {
     constructor(initialCapacity: Int) : this(MutableIntIntMap(initialCapacity))
 
-    context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, keySelector: (S) -> K, valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toInt(keySelector(e)), va.toInt(valueTransform(e)))}}
-    context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, transform: (S) -> VIntIntPair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), va.toInt(p.second))}}
-    context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAllGeneric(source: VIntCollection<S>, transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), va.toInt(p.second))}}
-    context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, keySelector: (S) -> K, valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toInt(keySelector(e)), va.toInt(valueTransform(e)))}}
-    context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, transform: (S) -> VIntIntPair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), va.toInt(p.second))}}
-    context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAllGeneric(source: VLongCollection<S>, transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), va.toInt(p.second))}}
+    context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, crossinline keySelector: (S) -> K, crossinline valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toInt(keySelector(e)), va.toInt(valueTransform(e)))}}
+    context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, crossinline transform: (S) -> VIntIntPair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), va.toInt(p.second))}}
+    context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAllGeneric(source: VIntCollection<S>, crossinline transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), va.toInt(p.second))}}
+    context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, crossinline keySelector: (S) -> K, crossinline valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toInt(keySelector(e)), va.toInt(valueTransform(e)))}}
+    context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, crossinline transform: (S) -> VIntIntPair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), va.toInt(p.second))}}
+    context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAllGeneric(source: VLongCollection<S>, crossinline transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), va.toInt(p.second))}}
 }
 
 
@@ -44,12 +44,12 @@ class MutableVIntLongMap<K,V>(
 ): VIntLongMap<K,V> {
     constructor(initialCapacity: Int) : this(MutableIntLongMap(initialCapacity))
 
-    context(ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, keySelector: (S) -> K, valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toInt(keySelector(e)), va.toLong(valueTransform(e)))}}
-    context(ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, transform: (S) -> VIntLongPair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), va.toLong(p.second))}}
-    context(ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAllGeneric(source: VIntCollection<S>, transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), va.toLong(p.second))}}
-    context(ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, keySelector: (S) -> K, valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toInt(keySelector(e)), va.toLong(valueTransform(e)))}}
-    context(ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, transform: (S) -> VIntLongPair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), va.toLong(p.second))}}
-    context(ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAllGeneric(source: VLongCollection<S>, transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), va.toLong(p.second))}}
+    context(ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, crossinline keySelector: (S) -> K, crossinline valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toInt(keySelector(e)), va.toLong(valueTransform(e)))}}
+    context(ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, crossinline transform: (S) -> VIntLongPair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), va.toLong(p.second))}}
+    context(ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAllGeneric(source: VIntCollection<S>, crossinline transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), va.toLong(p.second))}}
+    context(ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, crossinline keySelector: (S) -> K, crossinline valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toInt(keySelector(e)), va.toLong(valueTransform(e)))}}
+    context(ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, crossinline transform: (S) -> VIntLongPair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), va.toLong(p.second))}}
+    context(ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAllGeneric(source: VLongCollection<S>, crossinline transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), va.toLong(p.second))}}
 }
 
 
@@ -61,10 +61,10 @@ class MutableVIntObjectMap<K,V>(
 ): VIntObjectMap<K,V> {
     constructor(initialCapacity: Int) : this(MutableIntObjectMap(initialCapacity))
 
-    context(ka: ValueIntAdapter<K>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, keySelector: (S) -> K, valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toInt(keySelector(e)), valueTransform(e))}}
-    context(ka: ValueIntAdapter<K>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), p.second)}}
-    context(ka: ValueIntAdapter<K>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, keySelector: (S) -> K, valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toInt(keySelector(e)), valueTransform(e))}}
-    context(ka: ValueIntAdapter<K>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), p.second)}}
+    context(ka: ValueIntAdapter<K>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, crossinline keySelector: (S) -> K, crossinline valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toInt(keySelector(e)), valueTransform(e))}}
+    context(ka: ValueIntAdapter<K>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, crossinline transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), p.second)}}
+    context(ka: ValueIntAdapter<K>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, crossinline keySelector: (S) -> K, crossinline valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toInt(keySelector(e)), valueTransform(e))}}
+    context(ka: ValueIntAdapter<K>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, crossinline transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toInt(p.first), p.second)}}
 }
 
 
@@ -76,10 +76,10 @@ class MutableVObjectIntMap<K,V>(
 ): VObjectIntMap<K,V> {
     constructor(initialCapacity: Int) : this(MutableObjectIntMap(initialCapacity))
     
-    context(va: ValueIntAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, keySelector: (S) -> K, valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(keySelector(e), va.toInt(valueTransform(e)))}}
-    context(va: ValueIntAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(p.first, va.toInt(p.second))}}
-    context(va: ValueIntAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, keySelector: (S) -> K, valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(keySelector(e), va.toInt(valueTransform(e)))}}
-    context(va: ValueIntAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(p.first, va.toInt(p.second))}}
+    context(va: ValueIntAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, crossinline keySelector: (S) -> K, crossinline valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(keySelector(e), va.toInt(valueTransform(e)))}}
+    context(va: ValueIntAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, crossinline transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(p.first, va.toInt(p.second))}}
+    context(va: ValueIntAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, crossinline keySelector: (S) -> K, crossinline valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(keySelector(e), va.toInt(valueTransform(e)))}}
+    context(va: ValueIntAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, crossinline transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(p.first, va.toInt(p.second))}}
 }
 
 
@@ -91,12 +91,12 @@ class MutableVLongIntMap<K,V>(
     : VLongIntMap<K,V> {
     constructor(initialCapacity: Int) : this(MutableLongIntMap(initialCapacity))
 
-    context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, keySelector: (S) -> K, valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toLong(keySelector(e)), va.toInt(valueTransform(e)))}}
-    context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, transform: (S) -> VLongIntPair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), va.toInt(p.second))}}
-    context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAllGeneric(source: VIntCollection<S>, transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), va.toInt(p.second))}}
-    context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, keySelector: (S) -> K, valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toLong(keySelector(e)), va.toInt(valueTransform(e)))}}
-    context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, transform: (S) -> VLongIntPair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), va.toInt(p.second))}}
-    context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAllGeneric(source: VLongCollection<S>, transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), va.toInt(p.second))}}
+    context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, crossinline keySelector: (S) -> K, crossinline valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toLong(keySelector(e)), va.toInt(valueTransform(e)))}}
+    context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, crossinline transform: (S) -> VLongIntPair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), va.toInt(p.second))}}
+    context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAllGeneric(source: VIntCollection<S>, crossinline transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), va.toInt(p.second))}}
+    context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, crossinline keySelector: (S) -> K, crossinline valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toLong(keySelector(e)), va.toInt(valueTransform(e)))}}
+    context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, crossinline transform: (S) -> VLongIntPair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), va.toInt(p.second))}}
+    context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAllGeneric(source: VLongCollection<S>, crossinline transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), va.toInt(p.second))}}
 }
 
 interface VLongLongMap<K,V> {
@@ -107,12 +107,12 @@ class MutableVLongLongMap<K,V>(
     : VLongLongMap<K,V> {
     constructor(initialCapacity: Int) : this(MutableLongLongMap(initialCapacity))
 
-    context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, keySelector: (S) -> K, valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toLong(keySelector(e)), va.toLong(valueTransform(e)))}}
-    context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, transform: (S) -> VLongLongPair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), va.toLong(p.second))}}
-    context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAllGeneric(source: VIntCollection<S>, transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), va.toLong(p.second))}}
-    context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, keySelector: (S) -> K, valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toLong(keySelector(e)), va.toLong(valueTransform(e)))}}
-    context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, transform: (S) -> VLongLongPair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), va.toLong(p.second))}}
-    context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAllGeneric(source: VLongCollection<S>, transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), va.toLong(p.second))}}
+    context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, crossinline keySelector: (S) -> K, crossinline valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toLong(keySelector(e)), va.toLong(valueTransform(e)))}}
+    context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, crossinline transform: (S) -> VLongLongPair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), va.toLong(p.second))}}
+    context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAllGeneric(source: VIntCollection<S>, crossinline transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), va.toLong(p.second))}}
+    context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, crossinline keySelector: (S) -> K, crossinline valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toLong(keySelector(e)), va.toLong(valueTransform(e)))}}
+    context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, crossinline transform: (S) -> VLongLongPair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), va.toLong(p.second))}}
+    context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAllGeneric(source: VLongCollection<S>, crossinline transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), va.toLong(p.second))}}
 }
 
 interface VLongObjectMap<K,V> {
@@ -123,10 +123,10 @@ class MutableVLongObjectMap<K,V>(
     : VLongObjectMap<K,V> {
     constructor(initialCapacity: Int) : this(MutableLongObjectMap(initialCapacity))
 
-    context(ka: ValueLongAdapter<K>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, keySelector: (S) -> K, valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toLong(keySelector(e)), valueTransform(e))}}
-    context(ka: ValueLongAdapter<K>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), p.second)}}
-    context(ka: ValueLongAdapter<K>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, keySelector: (S) -> K, valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toLong(keySelector(e)), valueTransform(e))}}
-    context(ka: ValueLongAdapter<K>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), p.second)}}
+    context(ka: ValueLongAdapter<K>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, crossinline keySelector: (S) -> K, crossinline valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toLong(keySelector(e)), valueTransform(e))}}
+    context(ka: ValueLongAdapter<K>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, crossinline transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), p.second)}}
+    context(ka: ValueLongAdapter<K>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, crossinline keySelector: (S) -> K, crossinline valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(ka.toLong(keySelector(e)), valueTransform(e))}}
+    context(ka: ValueLongAdapter<K>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, crossinline transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(ka.toLong(p.first), p.second)}}
 }
 
 
@@ -138,8 +138,8 @@ class MutableVObjectLongMap<K,V>(
 ): VObjectLongMap<K,V> {
     constructor(initialCapacity: Int) : this(MutableObjectLongMap(initialCapacity))
 
-    context(va: ValueLongAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, keySelector: (S) -> K, valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(keySelector(e), va.toLong(valueTransform(e)))}}
-    context(va: ValueLongAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(p.first, va.toLong(p.second))}}
-    context(va: ValueLongAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, keySelector: (S) -> K, valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(keySelector(e), va.toLong(valueTransform(e)))}}
-    context(va: ValueLongAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(p.first, va.toLong(p.second))}}
+    context(va: ValueLongAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, crossinline keySelector: (S) -> K, crossinline valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(keySelector(e), va.toLong(valueTransform(e)))}}
+    context(va: ValueLongAdapter<V>, sa:ValueIntAdapter<S>) inline fun <S> putAll(source: VIntCollection<S>, crossinline transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(p.first, va.toLong(p.second))}}
+    context(va: ValueLongAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, crossinline keySelector: (S) -> K, crossinline valueTransform: (S) -> V) = context(sa) {source.forEach {e-> collection.put(keySelector(e), va.toLong(valueTransform(e)))}}
+    context(va: ValueLongAdapter<V>, sa:ValueLongAdapter<S>) inline fun <S> putAll(source: VLongCollection<S>, crossinline transform: (S) -> Pair<K, V>) = context(sa) {source.forEach {e-> val p = transform(e); collection.put(p.first, va.toLong(p.second))}}
 }
