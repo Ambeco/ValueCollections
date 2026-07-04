@@ -40,17 +40,21 @@ context(a: ValueIntAdapter<T>) inline fun <T> VIntCollection<T>.fromIntOrNull(bi
 inline fun <T> VIntCollection<T>.allBits(crossinline predicate: (IntBits) -> Boolean): Boolean = anyBits{!predicate(it)} == NULL_VALUE
 inline fun <T> VIntCollection<T>.forEachBits(crossinline action: (bits:IntBits) -> Unit) { anyBits {action(it); false } }
 inline fun <T> VIntCollection<T>.singleBits(crossinline predicate: (bits:IntBits) -> Boolean): IntBits {
-    var matchBits:IntBits = NULL_VALUE
-    val secondMatch = anyBits {
-        if (predicate(it)) {
-            if (matchBits == NULL_VALUE)
-                matchBits = it
-            else 
-                return@anyBits true
+    // we use an anonymous object here to expose the mutated matchBits without extra allocations
+    val matchPredicate = object : (IntBits) -> Boolean {
+        var matchBits:IntBits = NULL_VALUE
+        override fun invoke(bits: IntBits): Boolean {
+            if (predicate(bits)) {
+                if (matchBits == NULL_VALUE)
+                    matchBits = bits
+                else
+                    return true
+            }
+            return false
         }
-        false
     }
-    return if (secondMatch == NULL_VALUE) matchBits else NULL_VALUE
+    val secondMatch = anyBits(matchPredicate)
+    return if (secondMatch == NULL_VALUE) matchPredicate.matchBits else NULL_VALUE
 }
 context(a: ValueIntAdapter<T>) inline fun <T> VIntCollection<T>.any(crossinline predicate: (T) -> Boolean): Boolean = anyBits{predicate(a.fromInt(it))} != NULL_VALUE
 context(a: ValueIntAdapter<T>) inline fun <T> VIntCollection<T>.all(crossinline predicate: (T) -> Boolean): Boolean = allBits {predicate(a.fromInt(it))}
@@ -458,17 +462,21 @@ context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.fromLongOrNull
 inline fun <T> VLongCollection<T>.allBits(crossinline predicate: (LongBits) -> Boolean): Boolean = anyBits{!predicate(it)} == NULL_VALUE
 inline fun <T> VLongCollection<T>.forEachBits(crossinline action: (bits:LongBits) -> Unit) { anyBits {action(it); false } }
 inline fun <T> VLongCollection<T>.singleBits(crossinline predicate: (bits:LongBits) -> Boolean): LongBits {
-    var matchBits:LongBits = NULL_VALUE
-    val secondMatch = anyBits {
-        if (predicate(it)) {
-            if (matchBits == NULL_VALUE)
-                matchBits = it
-            else
-                return@anyBits true
+    // we use an anonymous object here to expose the mutated matchBits without extra allocations
+    val matchPredicate = object : (LongBits) -> Boolean {
+        var matchBits:LongBits = NULL_VALUE
+        override fun invoke(bits: LongBits): Boolean {
+            if (predicate(bits)) {
+                if (matchBits == NULL_VALUE)
+                    matchBits = bits
+                else
+                    return true
+            }
+            return false
         }
-        false
     }
-    return if (secondMatch == NULL_VALUE) matchBits else NULL_VALUE
+    val secondMatch = anyBits(matchPredicate)
+    return if (secondMatch == NULL_VALUE) matchPredicate.matchBits else NULL_VALUE
 }
 context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.any(crossinline predicate: (T) -> Boolean): Boolean = anyBits{predicate(a.fromLong(it))} != NULL_VALUE
 context(a: ValueLongAdapter<T>) inline fun <T> VLongCollection<T>.all(crossinline predicate: (T) -> Boolean): Boolean = allBits {predicate(a.fromLong(it))}

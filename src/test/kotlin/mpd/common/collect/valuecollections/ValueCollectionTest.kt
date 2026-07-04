@@ -1,22 +1,18 @@
 package mpd.common.collect.valuecollections
 
-import mpd.com.common.collect.valuecollections.FlatVIntList
-import mpd.com.common.collect.valuecollections.ValueIntAdapter
-import mpd.com.common.collect.valuecollections.add
-import mpd.com.common.collect.valuecollections.all
-import mpd.com.common.collect.valuecollections.any
-import mpd.com.common.collect.valuecollections.component1
-import mpd.com.common.collect.valuecollections.component2
-import mpd.com.common.collect.valuecollections.component3
-import mpd.com.common.collect.valuecollections.component4
-import mpd.com.common.collect.valuecollections.component5
-import mpd.com.common.collect.valuecollections.contains
-import mpd.com.common.collect.valuecollections.forEach
-import mpd.com.common.collect.valuecollections.single
+import com.sun.management.HotSpotDiagnosticMXBean
+import jdk.jfr.consumer.RecordedEvent
+import jdk.jfr.consumer.RecordingStream
+import mpd.com.common.collect.valuecollections.*
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Assertions.assertTrue
+import java.lang.management.ManagementFactory
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.function.Consumer
 import kotlin.test.Test
 import kotlin.test.assertEquals
+
 
 @JvmInline
 value class MyTestClass(val value: Int) {
@@ -33,6 +29,34 @@ class ValueCollectionTest {
         for (i in 0..9)
             array.add(i, MyTestClass(100*(i+1)))
         return array
+    }
+    
+    private fun trackIntAllocations(op: ()->Unit) {
+        RecordingStream().use { stream ->
+            stream.enable("jdk.ObjectAllocationSample")
+            // 2. Filter events for primitive int arrays or Integer objects
+            stream.onEvent("jdk.ObjectAllocationSample", Consumer { event: RecordedEvent? ->
+                val objectClass = event!!.getClass("objectClass").getName()
+                if (objectClass == "I" || objectClass.endsWith("Int") || objectClass.endsWith("Integer") || objectClass.contains("valuecollections")) {
+                    val stack = event.stackTrace.frames.joinToString(transform= { "\n  at ${it.method.getClass("type").name}#${it.method.name}(${it.lineNumber}) [${it.type}]" })
+                    println("allocated $objectClass at $stack")
+                }
+            })
+            stream.startAsync()
+            op()
+            Thread.sleep(1000)
+            stream.stop()
+        }
+    }
+
+    private fun heap_dump() {
+        val hotspotMBean = ManagementFactory.newPlatformMXBeanProxy<HotSpotDiagnosticMXBean?>(
+            ManagementFactory.getPlatformMBeanServer(),
+            "com.sun.management:type=HotSpotDiagnostic",
+            HotSpotDiagnosticMXBean::class.java
+        )!!
+        val filename = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + ".hprof"
+        hotspotMBean.dumpHeap(filename, false)
     }
 
     @Test
