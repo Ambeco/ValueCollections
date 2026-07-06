@@ -30,5 +30,6 @@ tasks.test {
 kotlin {
     compilerOptions {
         freeCompilerArgs.add("-Xcontext-parameters")
+        freeCompilerArgs.add("-Xexplicit-context-parameters")
     }
 }

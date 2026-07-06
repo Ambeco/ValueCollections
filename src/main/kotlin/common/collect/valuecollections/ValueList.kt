@@ -10,13 +10,13 @@ import kotlin.also
 // inline wrappers around androidx.collection.IntList and LongList
 
 // IntList -> VIntList
-interface VIntList<T>: VIntSequence<T>
+interface VIntList<T>: VIntIndexedCollection<T>
 context(a: ValueIntAdapter<T>) inline operator fun <T> VIntList<T>.get(index: Int): T = if (index in 0..<size) elementAtIndex(index) else throw IndexOutOfBoundsException("$index not in 0..$size")
 
-interface ModifiableVIntList<T>: VIntList<T>, ModifiableVIntSequence<T>
+interface ModifiableVIntList<T>: VIntList<T>, ModifiableVIntIndexedCollection<T>
 context(a: ValueIntAdapter<T>) inline operator fun <T> ModifiableVIntList<T>.set(index: Int, value: T) {setBits(index, a.toInt(value)) }
 
-interface MutableVIntList<T>: ModifiableVIntList<T>, MutableVIntSequence<T> {
+interface MutableVIntList<T>: ModifiableVIntList<T>, MutableVIntIndexedCollection<T> {
     val capacity: Int
 }
 
@@ -28,31 +28,35 @@ class FlatVIntList<T>(val collection: MutableIntList = MutableIntList(), overrid
     override val size inline get() = collection.size
     override inline fun anyBits(predicate: (bits: IntBits) -> Boolean): IntBits = getBits(collection.indexOfFirst { predicate(it) })
     override inline fun containsBits(bits: IntBits): Boolean = collection.contains(bits)
-    override inline fun <C : MutableVIntSequence<T>> copyInto(destination: C, destinationOffset: Int, startIndex: Int, endIndex: Int ): C = copyIntoDefault(destination, destinationOffset, startIndex, endIndex)
-    context(a: ValueIntAdapter<T>) override inline fun <T> asIterable() = throw NotImplementedError()
+    context(a: ValueIntAdapter<T>) override inline fun asIterable(): MutableIterable<T> = throw NotImplementedError()
     context(a: ValueIntAdapter<T>) override inline fun toString(): String = toVString()
-
-
+    
     override val capacity inline get() = collection.capacity
     override inline fun ensureCapacity(newCapacity: Int): Boolean { collection.ensureCapacity(newCapacity); return true;}
     override inline fun trim(minCapacity: Int) = collection.trim(minCapacity)
     override inline fun addBits(bits: IntBits): Boolean = collection.add(bits)
-    override inline fun addAll(elements: IntArray): Boolean = collection.addAll(elements)
     override inline fun removeBits(bits: IntBits): Boolean = collection.remove(bits)
-    override inline fun removeAll(elements: IntArray): Boolean = collection.removeAll(elements)
+
+    context(a: ValueIntAdapter<T>) override inline fun removeAll(predicate: (T) -> Boolean): Boolean  {
+        val removeList = MutableIntList(size)
+        collection.forEach { if (predicate(a.fromInt(it))) removeList.add(it) }
+        collection.removeAll(removeList)
+        return true
+    }
+
     override inline fun clear() = collection.clear()
-    
+
     override inline fun bitsAtIndex(index: Int): IntBits = if (index in 0..<size) collection[index] else NULL_VALUE
     override inline fun indexOfBits(bits: IntBits): Int = collection.indexOf(bits)
-    override inline fun indexOfFirstIndexedBits(crossinline predicate: (index: Int, bits: IntBits) -> Boolean): Int = indexOfFirstIndexedBitsDefault(predicate)
-    override inline fun indexOfLastIndexedBits(crossinline predicate: (index: Int, bits: IntBits) -> Boolean): Int = indexOfLastIndexedBitsDefault(predicate)
     
     override inline fun setBits(index: Int, bits: IntBits) { collection[index] = bits }
 
     override inline fun addBits(index: Int, bits: IntBits) = collection.add(index, bits)
     override inline fun addAll(index: Int, elements: VIntCollection<T>): Boolean = throw NotImplementedError()
     context(a: ValueIntAdapter<T>) override inline fun addAll(index: Int, elements: Collection<T>): Boolean = throw NotImplementedError()
-    override inline fun removeAt(index: Int): Boolean { collection.removeAt(index); return true}
+    context(a: ValueIntAdapter<T>) override inline fun removeAt(index: Int): T = a.fromInt(collection.removeAt(index))
+    override inline fun removeRange(start: Int, end: Int) = collection.removeRange(start, end)
+
     override inline fun removeAllIndexedBits(crossinline predicate: (index: Int, bits: IntBits) -> Boolean): Boolean = throw NotImplementedError()
     
     override inline fun hashCode() = collection.hashCode()
@@ -87,13 +91,13 @@ context(a: ValueIntAdapter<T>) inline fun <T>mutableVIntListOf(vararg elements: 
 
 
 // LongList -> VLongList
-interface VLongList<T>: VLongSequence<T>
+interface VLongList<T>: VLongIndexedCollection<T>
 context(a: ValueLongAdapter<T>) inline operator fun <T> VLongList<T>.get(index: Int): T = if (index in 0..<size) elementAtIndex(index) else throw IndexOutOfBoundsException("$index not in 0..$size")
 
-interface ModifiableVLongList<T>: VLongList<T>, ModifiableVLongSequence<T>
+interface ModifiableVLongList<T>: VLongList<T>, ModifiableVLongIndexedCollection<T>
 context(a: ValueLongAdapter<T>) inline operator fun <T> ModifiableVLongList<T>.set(index: Int, value: T) {setBits(index, a.toLong(value)) }
 
-interface MutableVLongList<T>: ModifiableVLongList<T>, MutableVLongSequence<T> {
+interface MutableVLongList<T>: ModifiableVLongList<T>, MutableVLongIndexedCollection<T> {
     val capacity: Int
 }
 
@@ -105,8 +109,7 @@ class FlatVLongList<T>(val collection: MutableLongList = MutableLongList(), over
     override val size inline get() = collection.size
     override inline fun anyBits(predicate: (bits: LongBits) -> Boolean): LongBits = getBits(collection.indexOfFirst { predicate(it) })
     override inline fun containsBits(bits: LongBits): Boolean = collection.contains(bits)
-    override inline fun <C : MutableVLongSequence<T>> copyInto(destination: C, destinationOffset: Int, startIndex: Int, endIndex: Int ): C = copyIntoDefault(destination, destinationOffset, startIndex, endIndex)
-    context(a: ValueLongAdapter<T>) override inline fun <T> asIterable() = throw NotImplementedError()
+    context(a: ValueLongAdapter<T>) override inline fun asIterable(): MutableIterable<T> = throw NotImplementedError()
     context(a: ValueLongAdapter<T>) override inline fun toString(): String = toVString()
 
     override inline fun setBits(index: Int, bits: LongBits) { collection[index] = bits }
@@ -115,20 +118,24 @@ class FlatVLongList<T>(val collection: MutableLongList = MutableLongList(), over
     override inline fun ensureCapacity(newCapacity: Int): Boolean { collection.ensureCapacity(newCapacity); return true;}
     override inline fun trim(minCapacity: Int) = collection.trim(minCapacity)
     override inline fun addBits(bits: LongBits): Boolean = collection.add(bits)
-    override inline fun addAll(elements: LongArray): Boolean = collection.addAll(elements)
     override inline fun removeBits(bits: LongBits): Boolean = collection.remove(bits)
-    override inline fun removeAll(elements: LongArray): Boolean = collection.removeAll(elements)
-    override inline fun clear() = collection.clear()
 
+    context(a: ValueLongAdapter<T>) override inline fun removeAll(predicate: (T) -> Boolean): Boolean {
+        val removeList = MutableLongList(size)
+        collection.forEach { if (predicate(a.fromLong(it))) removeList.add(it) }
+        collection.removeAll(removeList)
+        return true
+    }
+
+    override inline fun clear() = collection.clear()
     override inline fun bitsAtIndex(index: Int): LongBits = collection[index]
     override inline fun indexOfBits(bits: LongBits): Int = collection.indexOf(bits)
-    override inline fun indexOfFirstIndexedBits(crossinline predicate: (index: Int, bits: LongBits) -> Boolean): Int = indexOfFirstIndexedBitsDefault(predicate)
-    override inline fun indexOfLastIndexedBits(crossinline predicate: (index: Int, bits: LongBits) -> Boolean): Int = indexOfLastIndexedBitsDefault(predicate)
 
     override inline fun addBits(index: Int, bits: LongBits) = collection.add(index, bits)
     override inline fun addAll(index: Int, elements: VLongCollection<T>): Boolean = throw NotImplementedError()
     context(a: ValueLongAdapter<T>) override inline fun addAll(index: Int, elements: Collection<T>): Boolean = throw NotImplementedError()
-    override inline fun removeAt(index: Int): Boolean { collection.removeAt(index); return true}
+    context(a: ValueLongAdapter<T>)  override inline fun removeAt(index: Int): T = a.fromLong(collection.removeAt(index))
+    override inline fun removeRange(start: Int, end: Int) = collection.removeRange(start, end)
     override inline fun removeAllIndexedBits(crossinline predicate: (index: Int, bits: LongBits) -> Boolean): Boolean = throw NotImplementedError()
 
     override inline fun hashCode() = collection.hashCode()

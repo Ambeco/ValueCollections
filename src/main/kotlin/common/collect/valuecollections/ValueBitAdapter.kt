@@ -10,7 +10,7 @@ interface ValueIntAdapter<T> {
     fun toInt(v:T?): IntBits? = if (v == null) null else toInt(v)
     
     companion object PrimitiveIntAdapter: ValueIntAdapter<Int> {
-        override inline fun fromInt(v: IntBits) = v
+        override inline fun fromInt(v: Int): IntBits = v
         override inline fun toInt(v: IntBits): Int = v        
     }
 }
@@ -24,7 +24,12 @@ interface ValueLongAdapter<T> {
     fun toLong(v:T?): LongBits? = if (v == null) null else toLong(v)
     
     companion object PrimitiveLongAdapter: ValueLongAdapter<Long> {
-        override inline fun fromLong(v: LongBits) = v
-        override inline fun toLong(v: Long): LongBits = v
+        override inline fun fromLong(v: Long): LongBits = v
+        override inline fun toLong(v: LongBits): Long = v
     }
+}
+
+object PrimitiveBoolAdapter: ValueIntAdapter<Boolean> {
+    override inline fun fromInt(v: IntBits) = v != 0
+    override inline fun toInt(v: Boolean): IntBits = if (v) 1 else 0
 }
