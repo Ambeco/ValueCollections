@@ -53,22 +53,22 @@ class MutableVIntIteratorGeneric<T>(val delegate:MutableIterator<Int>, val a: Va
     inline fun nextInt(): T = a.fromInt(delegate.next())
     override inline fun forEachRemaining(op: Consumer<in T>) { while (delegate.hasNext()) op.accept(nextInt()) }
 }
-context(a: ValueIntAdapter<T>) fun <T> VIteratorFrom(delegate:Iterator<Int>): PrimitiveIterator<T, Consumer<in T>> = when(delegate) {
+context(a: ValueIntAdapter<T>) fun <T> vIteratorFrom(delegate:Iterator<Int>): PrimitiveIterator<T, Consumer<in T>> = when(delegate) {
     is java.util.PrimitiveIterator.OfInt -> VIntIteratorJava(delegate, a)
     is kotlin.collections.IntIterator -> VIntIteratorKotlin(delegate, a)
     else -> VIntIteratorGeneric(delegate, a)
 }
-context(a: ValueIntAdapter<T>) fun <T> VIteratorFrom(delegate:MutableIterator<Int>): MutableIterator<T> = when(delegate) {
+context(a: ValueIntAdapter<T>) fun <T> mutableVIteratorFrom(delegate:MutableIterator<Int>): MutableIterator<T> = when(delegate) {
     is java.util.PrimitiveIterator.OfInt -> MutableVIntIteratorJava(delegate, a)
     is kotlin.collections.IntIterator -> MutableVIntIteratorKotlin(delegate, a)
     else -> MutableVIntIteratorGeneric(delegate, a)
 }
-context(a: ValueIntAdapter<T>) fun <T> VIteratableFrom(delegate:Iterator<Int>): Iterable<T> = when(delegate) {
+context(a: ValueIntAdapter<T>) fun <T> vIteratableFrom(delegate:Iterator<Int>): Iterable<T> = when(delegate) {
     is java.util.PrimitiveIterator.OfInt -> VIntIteratorJava(delegate, a)
     is kotlin.collections.IntIterator -> VIntIteratorKotlin(delegate, a)
     else -> VIntIteratorGeneric(delegate, a)
 }
-context(a: ValueIntAdapter<T>) fun <T> VIteratableFrom(delegate:MutableIterator<Int>): MutableIterable<T> = when(delegate) {
+context(a: ValueIntAdapter<T>) fun <T> mutableVIteratableFrom(delegate:MutableIterator<Int>): MutableIterable<T> = when(delegate) {
     is java.util.PrimitiveIterator.OfInt -> MutableVIntIteratorJava(delegate, a)
     is kotlin.collections.IntIterator -> MutableVIntIteratorKotlin(delegate, a)
     else -> MutableVIntIteratorGeneric(delegate, a)
@@ -143,7 +143,7 @@ context(a: ValueLongAdapter<T>) fun <T> vIteratorFrom(delegate:MutableIterator<L
     is kotlin.collections.LongIterator -> MutableVLongIteratorKotlin(delegate, a)
     else -> MutableVLongIteratorGeneric(delegate, a)
 }
-context(a: ValueLongAdapter<T>) fun <T> vIteratableFrom(delegate:Iterator<Long>): Iterable<T> = when(delegate) {
+context(a: ValueLongAdapter<T>) fun <T> mutableVIteratableFrom(delegate:Iterator<Long>): Iterable<T> = when(delegate) {
     is java.util.PrimitiveIterator.OfLong -> VLongIteratorJava(delegate, a)
     is kotlin.collections.LongIterator -> VLongIteratorKotlin(delegate, a)
     else -> VLongIteratorGeneric(delegate, a)

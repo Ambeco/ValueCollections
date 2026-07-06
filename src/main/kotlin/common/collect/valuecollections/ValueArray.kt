@@ -22,7 +22,7 @@ class VIntArray<T>(val collection:IntArray, override val NULL_VALUE: IntBits=Int
     override inline fun containsBits(bits: IntBits): Boolean = collection.contains(bits)
 
     context(a: ValueIntAdapter<T>) override inline fun asModifiableIterable(): MutableIterable<T> = MutableVIntIteratorKotlin(collection.iterator(), a)
-    context(a: ValueIntAdapter<T>) override inline fun asIterable(): Iterable<T> = VIteratableFrom(collection.iterator())
+    context(a: ValueIntAdapter<T>) override inline fun asIterable(): Iterable<T> = VIntIteratorKotlin(collection.iterator(),a)
 
     context(a: ValueIntAdapter<T>) inline operator fun get(index: Int): T = a.fromInt(collection.get(index))
     context(a: ValueIntAdapter<T>) inline operator fun set(index: Int, value: T) = collection.set(index, a.toInt(value))

@@ -1,10 +1,9 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.3.10"
+    kotlin("jvm") version "2.4.0"
 }
 
-group = "mpd.com"
+group = "com.mpd.valuecollections"
 version = "1.0-SNAPSHOT"
 
 repositories {
