@@ -1,6 +1,9 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.4.0"
+    // 2.4.20-Beta1 contains fixes for https://youtrack.jetbrains.com/issue/KT-87474/Kotlin-compiler-error-IndexOutOfBoundsException-Cannot-pop-operand-off-an-empty-stack
+    // and https://youtrack.jetbrains.com/issue/KT-87470/Kotlin-compiler-throwing-VerifyError-Operand-stack-underflow
+    kotlin("jvm") version "2.4.20-Beta1"
 }
 
 group = "com.mpd.valuecollections"
@@ -28,7 +31,10 @@ tasks.test {
 }
 kotlin {
     compilerOptions {
-        freeCompilerArgs.add("-Xcontext-parameters")
         freeCompilerArgs.add("-Xexplicit-context-parameters")
     }
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.compilerOptions {
+    freeCompilerArgs.set(listOf("-Xcontext-parameters"))
 }
