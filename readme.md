@@ -50,8 +50,8 @@ https://github.com/androidx/androidx/tree/0a6843ad7cd148b7128d4db9e3c9299c5e58fa
   - `interface ModifiableVLongList<T>`
   - `interface MutableVIntList<T>`
   - `interface MutableVLongList<T>`
-  - `class FlatVIntList<T>`
-  - `class FlatVLongList<T>`
+  - `class ArrayVIntList<T>`
+  - `class ArrayVLongList<T>`
 - Sets (TODO)
     - `interface VIntSet<T>`
     - `interface VLongSet<T>`
@@ -59,8 +59,8 @@ https://github.com/androidx/androidx/tree/0a6843ad7cd148b7128d4db9e3c9299c5e58fa
     - `interface ModifiableVLongSet<T>` 
     - `interface MutableVIntSet<T>` 
     - `interface MutableVLongSet<T>` 
-    - `class FlatVIntSet<T>`
-    - `class FlatVLongSet<T>`
+    - `class ArrayVIntSet<T>`
+    - `class ArrayVLongSet<T>`
 - Maps  (TODO)
   - `VIntDoubleMap<K>`
   - `VIntIntMap<K,V>`

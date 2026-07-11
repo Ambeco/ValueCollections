@@ -12,7 +12,7 @@ interface ModifiableVIntSet<T>: VIntSet<T>, ModifiableVIntCollection<T>
 
 interface MutableVIntSet<T>: ModifiableVIntSet<T>, MutableVIntCollection<T>
 
-class FlatVIntSet<T>(val collection: MutableIntSet, override val NULL_VALUE: IntBits=Int.MIN_VALUE): MutableVIntSet<T>, MutableVIntCollection<T> {
+class ArrayVIntSet<T>(val collection: MutableIntSet, override val NULL_VALUE: IntBits=Int.MIN_VALUE): MutableVIntSet<T>, MutableVIntCollection<T> {
     constructor(initialCapacity: Int, NO_VALUE: IntBits=Int.MIN_VALUE) : this(MutableIntSet(initialCapacity), NO_VALUE)
 
     override val size: Int = collection.size
@@ -45,7 +45,7 @@ interface ModifiableVLongSet<T>: VLongSet<T>, ModifiableVLongCollection<T>
 
 interface MutableVLongSet<T>: ModifiableVLongSet<T>, MutableVLongCollection<T>
 
-class FlatVLongSet<T>(val collection: MutableLongSet, override val NULL_VALUE: LongBits=Long.MIN_VALUE): MutableVLongSet<T>, MutableVLongCollection<T> {
+class ArrayVLongSet<T>(val collection: MutableLongSet, override val NULL_VALUE: LongBits=Long.MIN_VALUE): MutableVLongSet<T>, MutableVLongCollection<T> {
     constructor(initialCapacity: Int, NO_VALUE: LongBits=Long.MIN_VALUE) : this(MutableLongSet(initialCapacity), NO_VALUE)
 
     override val size: Int = collection.size

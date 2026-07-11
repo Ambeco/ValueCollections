@@ -20,7 +20,7 @@ interface MutableVIntList<T>: ModifiableVIntList<T>, MutableVIntIndexedCollectio
     val capacity: Int
 }
 
-class FlatVIntList<T>(val collection: MutableIntList = MutableIntList(), override val NULL_VALUE: IntBits=Int.MIN_VALUE): MutableVIntList<T> {
+class ArrayVIntList<T>(val collection: MutableIntList = MutableIntList(), override val NULL_VALUE: IntBits=Int.MIN_VALUE): MutableVIntList<T> {
     constructor(capacity: Int, NO_VALUE:IntBits=Int.MIN_VALUE) : this(MutableIntList(capacity), NO_VALUE)
     constructor(other: VIntCollection<T>, NO_VALUE:IntBits=Int.MIN_VALUE) : this(MutableIntList(other.size), NO_VALUE) {}//TODO: other.copyInto(this,0,0,size)}
     constructor(other: VIntList<T>, NO_VALUE:IntBits=Int.MIN_VALUE) : this(MutableIntList(other.size), NO_VALUE) {other.copyInto(this,0,0,size)}
@@ -66,10 +66,10 @@ class FlatVIntList<T>(val collection: MutableIntList = MutableIntList(), overrid
     override inline fun toString() = collection.toString() // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
 }
 
-val <T> FlatVIntList<T>.lastIndex inline get() = collection.lastIndex
-val <T> FlatVIntList<T>.indices inline get() = collection.indices
+val <T> ArrayVIntList<T>.lastIndex inline get() = collection.lastIndex
+val <T> ArrayVIntList<T>.indices inline get() = collection.indices
 
-private val EmptyVIntList: VIntList<Nothing> = FlatVIntList(0)
+private val EmptyVIntList: VIntList<Nothing> = ArrayVIntList(0)
 @Suppress("UNCHECKED_CAST")
 fun <T>emptyVIntList(): VIntList<T> = EmptyVIntList as VIntList<T>
 @Suppress("UNCHECKED_CAST")
@@ -77,15 +77,15 @@ fun <T>vIntListOf(): VIntList<T> = EmptyVIntList as VIntList<T>
 context(a: ValueIntAdapter<T>) inline fun <T>vIntListOf(element1: T): VIntList<T> = mutableVIntListOf(element1)
 context(a: ValueIntAdapter<T>) inline fun <T>vIntListOf(element1: T, element2: T): VIntList<T> = mutableVIntListOf(element1, element2)
 context(a: ValueIntAdapter<T>) inline fun <T>vIntListOf(element1: T, element2: T, element3: T): VIntList<T> = mutableVIntListOf(element1, element2, element3)
-context(a: ValueIntAdapter<T>) inline fun <T>vIntListOf(vararg elements: T): VIntList<T> = FlatVIntList<T>(elements.size).apply { plusAssign(elements) }
-inline fun <T>mutableVIntListOf(): FlatVIntList<T> = FlatVIntList(8)
-context(a: ValueIntAdapter<T>) inline fun <T>mutableVIntListOf(element1: T): FlatVIntList<T> 
-        = FlatVIntList<T>(1).also { it += element1 }
-context(a: ValueIntAdapter<T>) inline fun <T>mutableVIntListOf(element1: T, element2: T): FlatVIntList<T>
-        = FlatVIntList<T>(2).also { it += element1; it += element2 }
-context(a: ValueIntAdapter<T>) inline fun <T>mutableVIntListOf(element1: T, element2: T, element3: T): FlatVIntList<T>
-        = FlatVIntList<T>(3).also { it += element1; it += element2; it += element3 }
-context(a: ValueIntAdapter<T>) inline fun <T>mutableVIntListOf(vararg elements: T): FlatVIntList<T> = FlatVIntList<T>(elements.size).apply { plusAssign(elements) }
+context(a: ValueIntAdapter<T>) inline fun <T>vIntListOf(vararg elements: T): VIntList<T> = ArrayVIntList<T>(elements.size).apply { plusAssign(elements) }
+inline fun <T>mutableVIntListOf(): ArrayVIntList<T> = ArrayVIntList(8)
+context(a: ValueIntAdapter<T>) inline fun <T>mutableVIntListOf(element1: T): ArrayVIntList<T> 
+        = ArrayVIntList<T>(1).also { it += element1 }
+context(a: ValueIntAdapter<T>) inline fun <T>mutableVIntListOf(element1: T, element2: T): ArrayVIntList<T>
+        = ArrayVIntList<T>(2).also { it += element1; it += element2 }
+context(a: ValueIntAdapter<T>) inline fun <T>mutableVIntListOf(element1: T, element2: T, element3: T): ArrayVIntList<T>
+        = ArrayVIntList<T>(3).also { it += element1; it += element2; it += element3 }
+context(a: ValueIntAdapter<T>) inline fun <T>mutableVIntListOf(vararg elements: T): ArrayVIntList<T> = ArrayVIntList<T>(elements.size).apply { plusAssign(elements) }
 
 
 
@@ -101,7 +101,7 @@ interface MutableVLongList<T>: ModifiableVLongList<T>, MutableVLongIndexedCollec
     val capacity: Int
 }
 
-class FlatVLongList<T>(val collection: MutableLongList = MutableLongList(), override val NULL_VALUE: LongBits=Long.MIN_VALUE): MutableVLongList<T> {
+class ArrayVLongList<T>(val collection: MutableLongList = MutableLongList(), override val NULL_VALUE: LongBits=Long.MIN_VALUE): MutableVLongList<T> {
     constructor(capacity: Int,  NO_VALUE: LongBits=Long.MIN_VALUE) : this(MutableLongList(capacity), NO_VALUE)
     constructor(other: VLongCollection<T>, NO_VALUE: LongBits=Long.MIN_VALUE) : this(MutableLongList(other.size), NO_VALUE) {}//TODO: other.copyInto(this,0,0,size)}
     constructor(other: VLongList<T>, NO_VALUE: LongBits) : this(MutableLongList(other.size), NO_VALUE) {other.copyInto(this,0,0,size)}
@@ -145,7 +145,7 @@ class FlatVLongList<T>(val collection: MutableLongList = MutableLongList(), over
     override inline fun toString() = collection.toString() // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
 }
 
-private val EmptyVLongList: VLongList<Nothing> = FlatVLongList(0)
+private val EmptyVLongList: VLongList<Nothing> = ArrayVLongList(0)
 @Suppress("UNCHECKED_CAST")
 fun <T>emptyVLongList(): VLongList<T> = EmptyVLongList as VLongList<T>
 @Suppress("UNCHECKED_CAST")
@@ -154,13 +154,13 @@ fun <T>vLongListOf(): VLongList<T> = EmptyVLongList as VLongList<T>
 context(a: ValueLongAdapter<T>) inline fun <T>vLongListOf(element1: T): VLongList<T> = mutableVLongListOf(element1)
 context(a: ValueLongAdapter<T>) inline fun <T>vLongListOf(element1: T, element2: T): VLongList<T> = mutableVLongListOf(element1, element2)
 context(a: ValueLongAdapter<T>) inline fun <T>vLongListOf(element1: T, element2: T, element3: T): VLongList<T> = mutableVLongListOf(element1, element2, element3)
-context(a: ValueLongAdapter<T>) inline fun <T>vLongListOf(vararg elements: T): VLongList<T> = FlatVLongList<T>(elements.size).apply { plusAssign(elements as Array<T>) }
-inline fun <T>mutableVLongListOf(): FlatVLongList<T> = FlatVLongList()
-context(a: ValueLongAdapter<T>) inline fun <T>mutableVLongListOf(element1: T): FlatVLongList<T>
-        = FlatVLongList<T>(1).also { it += element1 }
-context(a: ValueLongAdapter<T>) inline fun <T>mutableVLongListOf(element1: T, element2: T): FlatVLongList<T>
-        = FlatVLongList<T>(2).also { it += element1; it += element2 }
-context(a: ValueLongAdapter<T>) inline fun <T>mutableVLongListOf(element1: T, element2: T, element3: T): FlatVLongList<T>
-        = FlatVLongList<T>(2).also { it += element1; it += element2; it += element3 }
-context(a: ValueLongAdapter<T>) inline fun <T>mutableVLongListOf(vararg elements: T): FlatVLongList<T> = FlatVLongList<T>(elements.size).apply { plusAssign(elements as Array<T>) }
+context(a: ValueLongAdapter<T>) inline fun <T>vLongListOf(vararg elements: T): VLongList<T> = ArrayVLongList<T>(elements.size).apply { plusAssign(elements as Array<T>) }
+inline fun <T>mutableVLongListOf(): ArrayVLongList<T> = ArrayVLongList()
+context(a: ValueLongAdapter<T>) inline fun <T>mutableVLongListOf(element1: T): ArrayVLongList<T>
+        = ArrayVLongList<T>(1).also { it += element1 }
+context(a: ValueLongAdapter<T>) inline fun <T>mutableVLongListOf(element1: T, element2: T): ArrayVLongList<T>
+        = ArrayVLongList<T>(2).also { it += element1; it += element2 }
+context(a: ValueLongAdapter<T>) inline fun <T>mutableVLongListOf(element1: T, element2: T, element3: T): ArrayVLongList<T>
+        = ArrayVLongList<T>(2).also { it += element1; it += element2; it += element3 }
+context(a: ValueLongAdapter<T>) inline fun <T>mutableVLongListOf(vararg elements: T): ArrayVLongList<T> = ArrayVLongList<T>(elements.size).apply { plusAssign(elements as Array<T>) }
 */

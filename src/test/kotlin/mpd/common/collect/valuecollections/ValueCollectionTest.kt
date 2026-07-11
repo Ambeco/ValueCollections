@@ -24,8 +24,8 @@ value class MyTestClass(val value: Int) {
 }
 
 class ValueCollectionTest {
-    private fun simpleList(): FlatVIntList<MyTestClass> = with (MyTestClass) {
-        val array = FlatVIntList<MyTestClass>(10)
+    private fun simpleList(): ArrayVIntList<MyTestClass> = with (MyTestClass) {
+        val array = ArrayVIntList<MyTestClass>(10)
         for (i in 0..9)
             array.add(i, MyTestClass(100*(i+1)))
         return array
