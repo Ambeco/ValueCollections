@@ -9,66 +9,82 @@ aggressive inlining should eliminate any boxing, and also any unnecessary captur
 overhead should be one additional allocation per collection.
 
 `IntArray` and `LongArray` extension methods that returned `List<X>` are reimplemented to instead return 
-`VIntList` or `VLongList`, to reduce allocations. These are the `filter`, `take`, `drop`, `slice`, `sorted`,
+`ListVInt` or `ListVLong`, to reduce allocations. These are the `filter`, `take`, `drop`, `slice`, `sorted`,
 `distinct`, `intersect`, `subtract`, and `union` methods.
 
 ## Java Collections
 - Pairs
+    - `PairVIntDouble<F,S>` (TODO)
+    - `PairVIntFloat<F,S>` (TODO)
     - `PairVIntInt<F,S>`
     - `PairVIntLong<F,S>`
+    - `PairVIntObject<F,S>`
+    - `PairVLongDouble<F,S>` (TODO)
+    - `PairVLongFloat<F,S>` (TODO)
     - `PairVLongInt<F,S>`
     - `PairVLongLong<F,S>`
-- Collections (Declared, ~76% Implemented)
-    - `interface VIntCollection<T>`
-    - `interface VLongCollection<T>`
-    - `interface ModifiableVIntCollection<T>` 
-    - `interface ModifiableVLongCollection<T>`
-    - `interface MutableVIntCollection<T>` 
-    - `interface MutableVLongCollection<T>`
+    - `PairVLongObject<F,S>`
+    - `PairVObjectInt<F,S>`
+    - `PairVObjectLong<F,S>`
+- Collections (~95% Implemented)
+    - `interface CollectionVInt<T>`
+    - `interface CollectionVLong<T>`
+    - `interface ModifiableCollectionVInt<T>` 
+    - `interface ModifiableCollectionVLong<T>`
+    - `interface MutableCollectionVInt<T>` 
+    - `interface MutableCollectionVLong<T>`
 - Queues  (TODO)
-  - `IntArrayDeque` (actual `int` implementation, not a wrapper)
-  - `LongArrayDeque` (actual `int` implementation, not a wrapper)
-  - `VIntArrayDeque<T>`
-  - `VIntArrayDeque<T>`
-  - `IntPriorityBlockingArrayQueue` (actual `int` implementation, not a wrapper)
-  - `LongPriorityBlockingArrayQueue` (actual `int` implementation, not a wrapper)
-  - `VIntPriorityBlockingArrayQueue<T>` 
-  - `VIntPriorityBlockingArrayQueue<T>`
+  - `ArrayDequeInt` (actual `int` implementation, not a wrapper)
+  - `ArrayDequeLong` (actual `int` implementation, not a wrapper)
+  - `ArrayDequeVInt<T>`
+  - `ArrayDequeVInt<T>`
+  - `PriorityBlockingArrayQueueInt` (actual `int` implementation, not a wrapper)
+  - `PriorityBlockingArrayQueueLong` (actual `int` implementation, not a wrapper)
+  - `PriorityBlockingArrayQueueVInt<T>` 
+  - `PriorityBlockingArrayQueueVLong<T>`
 
 ## Thin AndroidX wrappers
 https://github.com/androidx/androidx/tree/0a6843ad7cd148b7128d4db9e3c9299c5e58fa6d/collection/collection/src/commonMain/kotlin/androidx/collection
 
 - Arrays
-    - `class VIntArray<T>`
-    - `class VLongArray<T>`
-    - `class VIntSparseArray<T>` (TODO)
-    - `class VLongSparseArray<T>` (TODO)
-- Lists (Declared, ~78% Implemented)
-  - `interface VIntList<T>`
-  - `interface VLongList<T>` 
-  - `interface ModifiableVIntList<T>`
-  - `interface ModifiableVLongList<T>`
-  - `interface MutableVIntList<T>`
-  - `interface MutableVLongList<T>`
-  - `class ArrayVIntList<T>`
-  - `class ArrayVLongList<T>`
-- Sets (TODO)
-    - `interface VIntSet<T>`
-    - `interface VLongSet<T>`
-    - `interface ModifiableVIntSet<T>` 
-    - `interface ModifiableVLongSet<T>` 
-    - `interface MutableVIntSet<T>` 
-    - `interface MutableVLongSet<T>` 
-    - `class ArrayVIntSet<T>`
-    - `class ArrayVLongSet<T>`
-- Maps  (TODO)
-  - `VIntDoubleMap<K>`
-  - `VIntIntMap<K,V>`
-  - `VIntLongMap<K,V>`
-  - `VIntObjectMap<K,V>`
-  - `VLongDoubleMap<K>`
-  - `VLongIntMap<K,V>`
-  - `VLongLongMap<K,V>`
-  - `VLongObjectMap<K,V>`
-  - `ObjectVIntMap<K,V>`
-  - `ObjectVLongMap<K,V>`
+  - `class ArrayVInt<T>`
+  - `class ArrayVLong<T>`
+  - `class SparseArrayVInt<T>` (TODO)
+  - `class SparseArrayVLong<T>` (TODO)
+- Lists (~95% Implemented)
+  - `class ArrayListVInt<T>`
+  - `class ArrayListVLong<T>`
+  - `class CircularArrayVInt<T>` (TODO)
+  - `class CircularArrayVLong<T>` (TODO)
+  - `interface ListVInt<T>`
+  - `interface ListVLong<T>` 
+  - `interface ModifiableListVInt<T>`
+  - `interface ModifiableListVLong<T>`
+  - `interface MutableListVInt<T>`
+  - `interface MutableListVLong<T>`
+- Sets  (~95% Implemented)
+  - `class ArraySetVInt<T>`
+  - `class ArraySetVLong<T>`
+  - `interface ModifiableSetVInt<T>`
+  - `interface ModifiableSetVLong<T>`
+  - `interface MutableSetVInt<T>`
+  - `interface MutableSetVLong<T>`
+  - `interface SetVInt<T>`
+  - `interface SetVLong<T>`
+- Maps  (~25% Implemented)
+  - `MapVDoubleInt<V>` (TODO)
+  - `MapVDoubleLong<V>` (TODO)
+  - `MapVIntDouble<K>` (TODO)
+  - `MapVIntFloat<K>` (TODO)
+  - `MapVIntInt<K,V>`
+  - `MapVIntLong<K,V>`
+  - `MapVIntObject<K,V>`
+  - `MapVFloatInt<V>` (TODO)
+  - `MapVFloatLong<V>` (TODO)
+  - `MapVLongDouble<K>` (TODO)
+  - `MapVLongFloat<K>` (TODO)
+  - `MapVLongInt<K,V>`
+  - `MapVLongLong<K,V>`
+  - `MapVLongObject<K,V>`
+  - `MapVObjectInt<K,V>`
+  - `MapVObjectLong<K,V>`
