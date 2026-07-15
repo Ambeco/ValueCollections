@@ -14,10 +14,10 @@ overhead should be one additional allocation per collection.
 
 ## Java Collections
 - Pairs
-    - `VIntIntPair<F,S>`
-    - `VIntLongPair<F,S>`
-    - `VLongIntPair<F,S>`
-    - `VLongLongPair<F,S>`
+    - `PairVIntInt<F,S>`
+    - `PairVIntLong<F,S>`
+    - `PairVLongInt<F,S>`
+    - `PairVLongLong<F,S>`
 - Collections (Declared, ~76% Implemented)
     - `interface VIntCollection<T>`
     - `interface VLongCollection<T>`
