@@ -15,7 +15,7 @@ import java.util.stream.StreamSupport
 // A PriorityQueue<Int>, except that it minimizes memory allocations
 // 
 // This does NOT extend any interfaces to avoid boxing Int to Int Objects.
-class IntPriorityBlockingArrayQueue(
+class PriorityBlockingArrayQueueInt(
     initialCapacity: Int = 100,
     val comparator : Comparator = DefaultComparator
 ) {
@@ -255,15 +255,15 @@ class IntPriorityBlockingArrayQueue(
         return newArray
     }
 
-    fun clone() : IntPriorityBlockingArrayQueue {
-        val c = IntPriorityBlockingArrayQueue(size, comparator)
+    fun clone() : PriorityBlockingArrayQueueInt {
+        val c = PriorityBlockingArrayQueueInt(size, comparator)
         queue.copyInto(c.queue, 0, size)
         c.size = size
         return c
     }
 
     override fun equals(other: Any?) : Boolean {
-        if (other !is IntPriorityBlockingArrayQueue) return false
+        if (other !is PriorityBlockingArrayQueueInt) return false
         if (comparator != other.comparator) return false
         if (size != other.size) return false
         for (i in 0..<size) {

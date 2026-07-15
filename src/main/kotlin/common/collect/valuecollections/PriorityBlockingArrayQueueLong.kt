@@ -15,7 +15,7 @@ import java.util.stream.StreamSupport
 // A PriorityQueue<Long>, except that it minimizes memory allocations
 // 
 // This does NOT extend any interfaces to avoid boxing Long to Long Objects.
-class LongPriorityBlockingArrayQueue(
+class PriorityBlockingArrayQueueLong(
     initialCapacity: Int = 100,
     val comparator : Comparator = DefaultComparator
 ) {
@@ -255,15 +255,15 @@ class LongPriorityBlockingArrayQueue(
         return newArray
     }
 
-    fun clone() : LongPriorityBlockingArrayQueue {
-        val c = LongPriorityBlockingArrayQueue(size, comparator)
+    fun clone() : PriorityBlockingArrayQueueLong {
+        val c = PriorityBlockingArrayQueueLong(size, comparator)
         queue.copyInto(c.queue, 0, size)
         c.size = size
         return c
     }
 
     override fun equals(other: Any?) : Boolean {
-        if (other !is LongPriorityBlockingArrayQueue) return false
+        if (other !is PriorityBlockingArrayQueueLong) return false
         if (comparator != other.comparator) return false
         if (size != other.size) return false
         for (i in 0..<size) {
