@@ -27,7 +27,7 @@ class ArrayVIntList<T>(val collection: MutableIntList = MutableIntList(), overri
     override inline fun anyBits(predicate: (bits: IntBits) -> Boolean): IntBits = getBits(collection.indexOfFirst { predicate(it) })
     override inline fun containsBits(bits: IntBits): Boolean = collection.contains(bits)
     context(a: ValueIntAdapter<T>) override inline fun asIterable(): MutableIterable<T> = throw NotImplementedError()
-    context(a: ValueIntAdapter<T>) override inline fun toString(): String = toVString()
+    context(a: ValueIntAdapter<T>) override inline fun toString(): String = toStringV()
     
     override val capacity inline get() = collection.capacity
     override inline fun ensureCapacity(newCapacity: Int): Boolean { collection.ensureCapacity(newCapacity); return true;}
@@ -60,7 +60,7 @@ class ArrayVIntList<T>(val collection: MutableIntList = MutableIntList(), overri
     override inline fun hashCode() = collection.hashCode()
     override inline fun equals(other: Any?) = collection == other
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
-    @Deprecated("toString() prints Integers. Use toVString() to print K.toString", ReplaceWith("toVString()"))
+    @Deprecated("toString() prints Integers. Use toStringV() to print K.toString", ReplaceWith("toStringV()"))
     override inline fun toString() = collection.toString() // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
 }
 

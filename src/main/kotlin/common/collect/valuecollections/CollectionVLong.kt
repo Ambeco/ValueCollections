@@ -23,10 +23,11 @@ interface CollectionVLong<T> {
     fun containsBits(bits: LongBits): Boolean
 
     context(a: ValueLongAdapter<T>) fun asIterable(): Iterable<T>
-    context(a: ValueLongAdapter<T>) fun toString(): String = toVString()
+    @JvmName("toStringV") @Suppress("INAPPLICABLE_JVM_NAME")
+    context(a: ValueLongAdapter<T>) fun toString(): String = toStringV()
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
-    @Deprecated("toString() prints Integers. Use toString(ValueLongAdapter) to print K.toString", ReplaceWith("toVString()"))
+    @Deprecated("toString() prints Integers. Use toString(ValueLongAdapter) to print K.toString", ReplaceWith("toStringV()"))
     override fun toString(): String // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
 }
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.asCollectionGeneric(): Collection<T> = object: Collection<T> {
@@ -300,7 +301,7 @@ context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.plus(
  inline operator fun <T> CollectionVLong<T>.plus(elements: CollectionVLong<T>): VLongList<T> = ArrayVLongList<T>(size+elements.size).also {it.addAll(this); it.addAll(elements) }
 context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.plus(elements: Iterable<T>): VLongList<T> = ArrayVLongList<T>(size+1).also {it.addAll(this); it.addAll(elements) }
 context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.plus(elements: Array<out T>): VLongList<T> = ArrayVLongList<T>(size+1).also {it.addAll(this); it.addAll(elements) }
-context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.minus(element: T): VLongList<T> = ArrayVLongList<T>(size).also { c-> forEach { if (it != element) c.add(it) } }
+context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.minus(element: T): VLongList<T> = ArrayVLongList<T>(size).also { c-> forEach { if (it != element) c.add(it) } }
 context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.minus(elements: Array<out T>): VLongList<T> = ArrayVLongList<T>(size).also { c-> forEach { if (!c.contains(it)) c.add(it) } }
 context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.minus(elements:CollectionVLong<T>): VLongList<T> = ArrayVLongList<T>(size).also { c-> forEach { if (!c.contains(it)) c.add(it) } }
 context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.minus(elements:Iterable<T>): VLongList<T> = ArrayVLongList<T>(size).also { c-> forEach { if (!c.contains(it)) c.add(it) } }
@@ -353,7 +354,7 @@ context(a: ValueLongAdapter<T>) inline fun <T, A : Appendable> CollectionVLong<T
 }
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", crossinline transform: ((T) -> CharSequence) = { it.toString() }): String
         = joinTo(StringBuilder(), separator, prefix, postfix, limit, truncated, transform).toString()
-context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.toVString() = joinToString(", ","{","}")
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.toStringV() = joinToString(", ","{","}")
 context(a: ValueLongAdapter<T>) inline fun <S, R : S, T> CollectionVLong<T>.mapReduce(crossinline map:(T)->S, crossinline operation: (acc: S, S) -> S): S = mapReduceIndexed(map){ i, acc, e->operation(acc,e)}
 context(a: ValueLongAdapter<T>) inline fun <S, R : S, T> CollectionVLong<T>.mapReduceIndexed(crossinline map:(T)->R, crossinline operation: (index:Int, acc: S, next:R) -> S): S {
     val accumulator = object: (Int,T)->Unit {

@@ -30,6 +30,6 @@ class ArrayVLong<T>(val collection:LongArray, override val NULL_VALUE: LongBits=
     override inline operator fun equals(other: Any?): Boolean = collection == other
     override inline fun hashCode(): Int = collection.hashCode()
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
-    @Deprecated("toString() prints Longs. Use toVString() to print K.toString", ReplaceWith("toVString()"))
+    @Deprecated("toString() prints Longs. Use toStringV() to print K.toString", ReplaceWith("toStringV()"))
     override inline fun toString(): String = collection.toString()
 }

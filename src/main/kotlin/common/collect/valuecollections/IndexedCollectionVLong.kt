@@ -1,3 +1,6 @@
+@file:Suppress("NOTHING_TO_INLINE","OVERRIDE_BY_INLINE", "unused", "RedundantNullableReturnType",
+    "KotlinConstantConditions", "KotlinConstantConditions"
+)
 package mpd.com.common.collect.valuecollections
 
 import java.util.BitSet
@@ -8,9 +11,6 @@ import kotlin.collections.sortDescending
 import kotlin.collections.sortWith
 import kotlin.random.Random
 
-
-
-
 interface VLongIndexedCollection<T> : CollectionVLong<T> {
     fun bitsAtIndex(index: Int): LongBits
 
@@ -19,7 +19,7 @@ interface VLongIndexedCollection<T> : CollectionVLong<T> {
     fun indexOfLastIndexedBits(endIndex:Int=-1, predicate: (index:Int, bits:LongBits) -> Boolean): Int = indexOfLastIndexedBitsDefault(endIndex, predicate)
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
-    @Deprecated("toString() prints Integers. Use toString(ValueLongAdapter) to print K.toString", ReplaceWith("toVString()"))
+    @Deprecated("toString() prints Integers. Use toString(ValueLongAdapter) to print K.toString", ReplaceWith("toStringV()"))
     override fun toString(): String // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
 }
 context(a: ValueLongAdapter<T>) inline fun <T> VLongIndexedCollection<T>.asListGeneric() = object: List<T> {
@@ -112,7 +112,6 @@ context(a: ValueLongAdapter<T>) inline fun <T> VLongIndexedCollection<T>.takeWhi
 inline fun <T, C: MutableVLongIndexedCollection<T>> VLongIndexedCollection<T>.copyInto(destination: C, destinationOffset: Int = 0, startIndex: Int = 0, endIndex: Int = size): C = destination.also{forEachIndexedBits{i,e-> if(i in startIndex..endIndex) destination.addBits(i-startIndex+destinationOffset, e)}}
 context(a: ValueLongAdapter<T>) inline fun <T, C: MutableList<T>> VLongIndexedCollection<T>.copyInto(destination: C, destinationOffset: Int = 0, startIndex: Int = 0, endIndex: Int = size): C = destination.also{forEachIndexed{i,e-> if(i in startIndex..endIndex) destination.add(i-startIndex+destinationOffset, e)}}
 inline fun <T> VLongIndexedCollection<T>.reversed(): ArrayVLongList<T> = ArrayVLongList<T>(size).also {forEachIndexedBits{i,e-> it.setBits(size-i-1, e) }}
-context(a: ValueLongAdapter<T>) inline fun <T> VLongIndexedCollection<T>.contentEquals(other: VLongIndexedCollection<T>?): Boolean = other != null && size == other.size && this.indexOfFirstIndexedBits {i,e-> other.bitsAtIndex(i) != e } == -1
 context(a: ValueLongAdapter<T>) inline fun <T> VLongIndexedCollection<T>.shuffle(): Unit = shuffle(Random.Default)
 context(a: ValueLongAdapter<T>) inline fun <T> VLongIndexedCollection<T>.shuffle(random: Random): Unit {
 }

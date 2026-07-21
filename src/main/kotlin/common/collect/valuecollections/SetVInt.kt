@@ -32,6 +32,6 @@ class ArraySetVInt<T>(val collection: MutableIntSet, override val NULL_VALUE: In
     override inline fun clear()  = collection.clear()
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
-    @Deprecated("toString() prints Integers. Use toVString() to print K.toString", ReplaceWith("toVString()"))
+    @Deprecated("toString() prints Integers. Use toStringV() to print K.toString", ReplaceWith("toStringV()"))
     override inline fun toString(): String = collection.toString()
 }

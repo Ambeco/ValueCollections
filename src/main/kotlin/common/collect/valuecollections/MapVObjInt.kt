@@ -15,11 +15,11 @@ interface MapVObjInt<K,V> {
 
     context(va: ValueIntAdapter<V>) fun asIterable(): Iterable<PairVIntInt<K,V>>
 
-    @JvmName("toVString") @Suppress("INAPPLICABLE_JVM_NAME")
-    context(va: ValueIntAdapter<V>) fun toString(): String = toVString()
+    @JvmName("toStringV") @Suppress("INAPPLICABLE_JVM_NAME")
+    context(va: ValueIntAdapter<V>) fun toString(): String = toStringV()
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
-    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toVString()"))
+    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toStringV()"))
     override fun toString(): String // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
 }
 context(va: ValueIntAdapter<V>)  inline fun <K,V> MapVObjInt<K,V>.asMapGeneric(): Map<K,V> = object: Map<K,V> {
@@ -97,7 +97,7 @@ context(va: ValueIntAdapter<V>) inline fun <K,V, A : Appendable> MapVObjInt<K,V>
 }
 context(va: ValueIntAdapter<V>) inline fun <K,V> MapVObjInt<K,V>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): String
         = joinTo(StringBuilder(), separator, prefix, postfix, limit, truncated, transform).toString()
-context(va: ValueIntAdapter<V>) inline fun <K,V> MapVObjInt<K,V>.toVString() = joinToString(", ","{","}")
+context(va: ValueIntAdapter<V>) inline fun <K,V> MapVObjInt<K,V>.toStringV() = joinToString(", ","{","}")
 
 
 
@@ -114,7 +114,7 @@ interface MutableMapVObjInt<K,V>: MapVObjInt<K,V> {
     context(va: ValueIntAdapter<V>) override fun asIterable(): MutableIterable<PairVIntInt<K,V>>
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
-    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toVString()"))
+    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toStringV()"))
     override fun toString(): String // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
 }
 inline fun <K,V> MutableMapVObjInt<K,V>.preallocateFor(newSize: Int) {ensureCapacity(newSize + newSize/4) }
@@ -170,7 +170,7 @@ class HashMapVObjInt<K,V>(val collection: MutableObjectIntMap<K> =MutableObjectI
     context(va: ValueIntAdapter<V>) override inline fun asIterable(): MutableIterable<PairVIntInt<K,V>> = throw NotImplementedError()
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
-    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toVString()"))
+    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toStringV()"))
     override inline fun toString(): String = collection.toString()
 }
 

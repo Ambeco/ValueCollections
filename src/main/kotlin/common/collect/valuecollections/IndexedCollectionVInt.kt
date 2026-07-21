@@ -1,3 +1,6 @@
+@file:Suppress("NOTHING_TO_INLINE","OVERRIDE_BY_INLINE", "unused", "RedundantNullableReturnType",
+    "KotlinConstantConditions", "KotlinConstantConditions"
+)
 package mpd.com.common.collect.valuecollections
 
 import java.util.BitSet
@@ -12,7 +15,7 @@ interface VIntIndexedCollection<T> : CollectionVInt<T> {
     fun indexOfLastIndexedBits(endIndex:Int=-1, predicate: (index:Int, bits:IntBits) -> Boolean): Int = indexOfLastIndexedBitsDefault(endIndex, predicate)
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
-    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toVString()"))
+    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toStringV()"))
     override fun toString(): String // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
 }
 context(a: ValueIntAdapter<T>) inline fun <T> VIntIndexedCollection<T>.asListGeneric() = object: List<T> {
@@ -105,7 +108,6 @@ context(a: ValueIntAdapter<T>) inline fun <T> VIntIndexedCollection<T>.takeWhile
 inline fun <T, C: MutableVIntIndexedCollection<T>> VIntIndexedCollection<T>.copyInto(destination: C, destinationOffset: Int = 0, startIndex: Int = 0, endIndex: Int = size): C = destination.also{forEachIndexedBits{i,e-> if(i in startIndex..endIndex) destination.addBits(i-startIndex+destinationOffset, e)}}
 context(a: ValueIntAdapter<T>) inline fun <T, C: MutableList<T>> VIntIndexedCollection<T>.copyInto(destination: C, destinationOffset: Int = 0, startIndex: Int = 0, endIndex: Int = size): C = destination.also{forEachIndexed{i,e-> if(i in startIndex..endIndex) destination.add(i-startIndex+destinationOffset, e)}}
 inline fun <T> VIntIndexedCollection<T>.reversed(): ArrayVIntList<T> = ArrayVIntList<T>(size, NULL_VALUE).also {forEachIndexedBits{i,e-> it.setBits(size-i-1, e) }}
-context(a: ValueIntAdapter<T>) inline fun <T> VIntIndexedCollection<T>.contentEquals(other: VIntIndexedCollection<T>?): Boolean = other != null && size == other.size && this.indexOfFirstIndexedBits {i,e-> other.bitsAtIndex(i) != e } == -1
 context(a: ValueIntAdapter<T>) inline fun <T> VIntIndexedCollection<T>.shuffle(): Unit = shuffle(Random.Default)
 context(a: ValueIntAdapter<T>) inline fun <T> VIntIndexedCollection<T>.shuffle(random: Random): Unit {
 }

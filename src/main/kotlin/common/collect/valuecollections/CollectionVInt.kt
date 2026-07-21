@@ -30,11 +30,11 @@ interface CollectionVInt<T> {
     
     context(a: ValueIntAdapter<T>) fun asIterable(): Iterable<T>
     
-    @JvmName("toVString") @Suppress("INAPPLICABLE_JVM_NAME")
-    context(a: ValueIntAdapter<T>) fun toString(): String = toVString()
+    @JvmName("toStringV") @Suppress("INAPPLICABLE_JVM_NAME")
+    context(a: ValueIntAdapter<T>) fun toString(): String = toStringV()
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
-    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toVString()"))
+    @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toStringV()"))
     override fun toString(): String // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
 }
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.asCollectionGeneric(): Collection<T> = object: Collection<T> {
@@ -308,7 +308,7 @@ context(a: ValueIntAdapter<T>) inline operator fun <T> CollectionVInt<T>.plus(el
  inline operator fun <T> CollectionVInt<T>.plus(elements: CollectionVInt<T>): VIntList<T> = ArrayVIntList<T>(size+elements.size, NULL_VALUE).also {it.addAll(this); it.addAll(elements) }
 context(a: ValueIntAdapter<T>) inline operator fun <T> CollectionVInt<T>.plus(elements: Iterable<T>): VIntList<T> = ArrayVIntList<T>(size+1, NULL_VALUE).also {it.addAll(this); it.addAll(elements) }
 context(a: ValueIntAdapter<T>) inline operator fun <T> CollectionVInt<T>.plus(elements: Array<out T>): VIntList<T> = ArrayVIntList<T>(size+1, NULL_VALUE).also {it.addAll(this); it.addAll(elements) }
-context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.minus(element: T): VIntList<T> = ArrayVIntList<T>(size, NULL_VALUE).also { c-> forEach { if (it != element) c.add(it) } }
+context(a: ValueIntAdapter<T>) inline operator fun <T> CollectionVInt<T>.minus(element: T): VIntList<T> = ArrayVIntList<T>(size, NULL_VALUE).also { c-> forEach { if (it != element) c.add(it) } }
 context(a: ValueIntAdapter<T>) inline operator fun <T> CollectionVInt<T>.minus(elements: Array<out T>): VIntList<T> = ArrayVIntList<T>(size, NULL_VALUE).also { c-> forEach { if (!c.contains(it)) c.add(it) } }
 context(a: ValueIntAdapter<T>) inline operator fun <T> CollectionVInt<T>.minus(elements:CollectionVInt<T>): VIntList<T> = ArrayVIntList<T>(size, NULL_VALUE).also { c-> forEach { if (!c.contains(it)) c.add(it) } }
 context(a: ValueIntAdapter<T>) inline operator fun <T> CollectionVInt<T>.minus(elements:Iterable<T>): VIntList<T> = ArrayVIntList<T>(size, NULL_VALUE).also { c-> forEach { if (!c.contains(it)) c.add(it) } }
@@ -363,7 +363,7 @@ context(a: ValueIntAdapter<T>) inline fun <T, A : Appendable> CollectionVInt<T>.
 }
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", crossinline transform: ((T) -> CharSequence) = { it.toString() }): String 
     = joinTo(StringBuilder(), separator, prefix, postfix, limit, truncated, transform).toString()
-context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.toVString() = joinToString(", ","{","}")
+context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.toStringV() = joinToString(", ","{","}")
 context(a: ValueIntAdapter<T>) inline fun <S, R : S, T> CollectionVInt<T>.mapReduce(crossinline map:(T)->S, crossinline operation: (acc: S, S) -> S): S = mapReduceIndexed(map){ i, acc, e->operation(acc,e)}
 context(a: ValueIntAdapter<T>) inline fun <S, R : S, T> CollectionVInt<T>.mapReduceIndexed(crossinline map:(T)->R, crossinline operation: (index:Int, acc: S, next:R) -> S): S {
     val accumulator = object: (Int,T)->Unit {
