@@ -23,6 +23,7 @@ interface CollectionVLong<T> {
     fun containsBits(bits: LongBits): Boolean
 
     context(a: ValueLongAdapter<T>) fun asIterable(): Iterable<T>
+
     @JvmName("toStringV") @Suppress("INAPPLICABLE_JVM_NAME")
     context(a: ValueLongAdapter<T>) fun toString(): String = toStringV()
 
@@ -108,9 +109,9 @@ context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.find(crossinli
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.findOrElse(crossinline predicate: (T) -> Boolean, defaultValue:T): T = findOr(predicate) {defaultValue}
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.findOr(crossinline predicate: (T) -> Boolean, provider: ()->T): T = fromLongOr(anyBits{predicate(a.fromLong(it))}, provider)
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.findOrThrow(crossinline predicate: (T) -> Boolean): T = fromLong(anyBits{predicate(a.fromLong(it))})
-context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.filter(crossinline predicate: (T) -> Boolean): ArrayVLongList<T> = filterTo(ArrayVLongList(), predicate)
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.filter(crossinline predicate: (T) -> Boolean): ArrayListVLong<T> = filterTo(ArrayListVLong(), predicate)
 context(a: ValueLongAdapter<T>) inline fun <T, C : MutableCollectionVLong<T>> CollectionVLong<T>.filterTo(destination: C, crossinline predicate: (T) -> Boolean): C = destination.also { forEach { if (predicate(it)) destination.add(it) } }
-context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.filterNot(crossinline predicate: (T) -> Boolean): ArrayVLongList<T> = filter {!predicate(it)}
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.filterNot(crossinline predicate: (T) -> Boolean): ArrayListVLong<T> = filter {!predicate(it)}
 context(a: ValueLongAdapter<T>) inline fun <T, C : MutableCollectionVLong<T>> CollectionVLong<T>.filterNotTo(destination: C, crossinline predicate: (T) -> Boolean): C = filterTo(destination) {!predicate(it)}
 context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) inline fun <T, K, V> CollectionVLong<T>.associateVIntInt(crossinline transform: (T) -> PairVIntInt<K, V>): MapVIntInt<K, V> = associateTo(HashMapVIntInt(size), transform)
 context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>) inline fun <T, K, V> CollectionVLong<T>.associateVIntLong(crossinline transform: (T) -> PairVIntLong<K, V>): MapVIntLong<K, V> = associateTo(HashMapVIntLong(size), transform)
@@ -122,10 +123,10 @@ context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>)
 context(a: ValueLongAdapter<T>, ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <T, K, V> CollectionVLong<T>.associateVLongInt(crossinline keySelector: (T) -> K, crossinline valueTransform: (T) -> V): MutableMapVLongInt<K,V> = associateTo(HashMapVLongInt(size), keySelector,valueTransform)
 context(a: ValueLongAdapter<T>, ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>) inline fun <T, K, V> CollectionVLong<T>.associateVLongLong(crossinline keySelector: (T) -> K, crossinline valueTransform: (T) -> V): MutableMapVLongLong<K,V> = associateTo(HashMapVLongLong(size), keySelector,valueTransform)
 context(a: ValueLongAdapter<T>) inline fun <T, K, V> CollectionVLong<T>.associateGeneric(crossinline keySelector: (T) -> K, crossinline valueTransform: (T) -> V): Map<K, V> = associateTo(HashMap(size+size/4), keySelector, valueTransform)
-context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) inline fun <T, K, V, C:MutableMapVIntInt<K,V>> CollectionVLong<T>.associateTo(destination: C, crossinline transform: (T) -> PairVIntInt<K, V>): C = destination.also{ c->forEach {c.putAll(this, transform)}}
-context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>) inline fun <T, K, V, C:MutableMapVIntLong<K,V>> CollectionVLong<T>.associateTo(destination: C, crossinline transform: (T) -> PairVIntLong<K, V>): C = destination.also{ c->forEach {c.putAll(this, transform)}}
-context(a: ValueLongAdapter<T>, ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <T, K, V, C:MutableMapVLongInt<K,V>> CollectionVLong<T>.associateTo(destination: C, crossinline transform: (T) -> PairVLongInt<K, V>): C = destination.also{ c->forEach {c.putAll(this, transform)}}
-context(a: ValueLongAdapter<T>, ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>) inline fun <T, K, V, C:MutableMapVLongLong<K,V>> CollectionVLong<T>.associateTo(destination: C, crossinline transform: (T) -> PairVLongLong<K, V>): C = destination.also{ c->forEach {c.putAll(this, transform)}}
+context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) inline fun <T, K, V, C:MutableMapVIntInt<K,V>> CollectionVLong<T>.associateTo(destination: C, crossinline transform: (T) -> PairVIntInt<K, V>): C = destination.also{ c-> c.putAll(this, transform) }
+context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>) inline fun <T, K, V, C:MutableMapVIntLong<K,V>> CollectionVLong<T>.associateTo(destination: C, crossinline transform: (T) -> PairVIntLong<K, V>): C = destination.also{ c-> c.putAll(this, transform) }
+context(a: ValueLongAdapter<T>, ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <T, K, V, C:MutableMapVLongInt<K,V>> CollectionVLong<T>.associateTo(destination: C, crossinline transform: (T) -> PairVLongInt<K, V>): C = destination.also{ c-> c.putAll(this, transform) }
+context(a: ValueLongAdapter<T>, ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>) inline fun <T, K, V, C:MutableMapVLongLong<K,V>> CollectionVLong<T>.associateTo(destination: C, crossinline transform: (T) -> PairVLongLong<K, V>): C = destination.also{ c-> c.putAll(this, transform) }
 context(a: ValueLongAdapter<T>) inline fun <T, K, V, M : MutableMap<in K, in V>> CollectionVLong<T>.associateTo(destination: M, crossinline transform: (T) -> Pair<K, V>): M = destination.also{ c->forEach {val v=transform(it); c[v.first] = v.second}}
 context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) inline fun <T, K, V, C:MutableMapVIntInt<K,V>> CollectionVLong<T>.associateTo(destination: C, crossinline keySelector: (T) -> K, crossinline valueTransform: (T) -> V): C = destination.also{ c->c.putAll(this, keySelector,valueTransform)}
 context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>) inline fun <T, K, V, C:MutableMapVIntLong<K,V>> CollectionVLong<T>.associateTo(destination: C, crossinline keySelector: (T) -> K, crossinline valueTransform: (T) -> V): C = destination.also{ c->c.putAll(this, keySelector,valueTransform)}
@@ -135,14 +136,14 @@ context(a: ValueLongAdapter<T>) inline fun <T, K, V, M : MutableMap<in K, in V>>
 context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>,) inline fun <T, K> CollectionVLong<T>.associateByVIntLong(crossinline keySelector: (T) -> K): MutableMapVIntLong<K,T> = associateTo(HashMapVIntLong<K,T>(size), keySelector, {it})
 context(a: ValueLongAdapter<T>, ka: ValueLongAdapter<K>) inline fun <T, K> CollectionVLong<T>.associateByVLongLong(crossinline keySelector: (T) -> K): MutableMapVLongLong<K,T> = associateTo(HashMapVLongLong<K,T>(size), keySelector,{it})
 context(a: ValueLongAdapter<T>) inline fun <T, K> CollectionVLong<T>.associateByGeneric(crossinline keySelector: (T) -> K): Map<K, T> = associateTo(HashMap(size+size/4), keySelector, {it})
-context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>) inline fun <T, K, C:MutableMapVIntLong<K,T>> CollectionVLong<T>.associateByVIntLongTo(destination: C, crossinline keySelector: (T) -> K): MutableMapVIntLong<K,T> = associateTo(HashMapVIntLong<K,T>(size), keySelector, {it})
-context(a: ValueLongAdapter<T>, ka: ValueLongAdapter<K>) inline fun <T, K, C:MutableMapVLongInt<K,T>> CollectionVLong<T>.associateByVLongLongTo(destination: C, crossinline keySelector: (T) -> K): MutableMapVLongLong<K,T> = associateTo(HashMapVLongLong<K,T>(size), keySelector,{it})
-context(a: ValueLongAdapter<T>) inline fun <T, K, C:MutableMap<K,T>> CollectionVLong<T>.associateByGenericTo(destination: C, crossinline keySelector: (T) -> K): Map<K, T> = associateTo(HashMap(size+size/4), keySelector, {it})
+context(a: ValueLongAdapter<T>, ka: ValueIntAdapter<K>) inline fun <T, K, C:MutableMapVIntLong<K,T>> CollectionVLong<T>.associateByVIntLongTo(destination: C, crossinline keySelector: (T) -> K): MutableMapVIntLong<K,T> = associateTo(destination, keySelector, {it})
+context(a: ValueLongAdapter<T>, ka: ValueLongAdapter<K>) inline fun <T, K, C:MutableMapVLongLong<K,T>> CollectionVLong<T>.associateByVLongLongTo(destination: C, crossinline keySelector: (T) -> K): MutableMapVLongLong<K,T> = associateTo(destination, keySelector,{it})
+context(a: ValueLongAdapter<T>) inline fun <T, K, C:MutableMap<K,T>> CollectionVLong<T>.associateByGenericTo(destination: C, crossinline keySelector: (T) -> K): Map<K, T> = associateTo(destination, keySelector, {it})
  inline fun <T, C : MutableCollectionVLong<T>> CollectionVLong<T>.toCollection(destination: C): C = destination.also{ c -> c.addAll(this) }
 context(a: ValueLongAdapter<T>) inline fun <T, C : MutableCollection<T>> CollectionVLong<T>.toCollection(destination: C): C = destination.also{ c->forEach {c.add(it)}}
- inline fun <T> CollectionVLong<T>.toList(): VLongList<T> = this as? VLongList<T> ?: toMutableList()
+ inline fun <T> CollectionVLong<T>.toList(): ListVLong<T> = this as? ListVLong<T> ?: toMutableList()
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.toListGeneric(): List<T> = toMutableListGeneric()
- inline fun <T> CollectionVLong<T>.toMutableList(): ArrayVLongList<T> = this as? ArrayVLongList<T> ?: toCollection(ArrayVLongList<T>(size))
+ inline fun <T> CollectionVLong<T>.toMutableList(): ArrayListVLong<T> = this as? ArrayListVLong<T> ?: toCollection(ArrayListVLong<T>(size))
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.toMutableListGeneric(): MutableList<T> = toCollection(ArrayList(size))
  inline fun <T> CollectionVLong<T>.toSet(): SetVLong<T> = this as? SetVLong<T> ?: toMutableSet()
  inline fun <T> CollectionVLong<T>.toMutableSet(): MutableSetVLong<T> = this as? MutableSetVLong<T> ?: toCollection(ArraySetVLong<T>(size))
@@ -152,27 +153,29 @@ context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.toHashSet(): H
  inline fun <T> CollectionVLong<T>.toVLongArray(): ArrayVLong<T> = this as? ArrayVLong<T> ?: ArrayVLong(this)
  inline fun <T> CollectionVLong<T>.toArrayGenericBits(): Array<LongBits> = (this as? ArrayVLong<T>)?.collection?.toTypedArray() ?: Array(size,{NULL_VALUE}).also { c->forEachIndexedBits{ i, e-> c[i]=e}}
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.asSequence(): Sequence<T> = asIterable().asSequence()
- inline fun <T> CollectionVLong<T>.asList(): VLongList<T> = throw NotImplementedError()
-context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.asListGeneric(): List<T> = throw NotImplementedError()
+ inline fun <T> CollectionVLong<T>.asList(): ListVLong<T> = this as? ListVLong<T> ?: toMutableList()
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.asListGeneric(): List<T> = toMutableListGeneric()
  inline fun <T> CollectionVLong<T>.contentEquals(other: CollectionVLong<T>?): Boolean = other != null && size == other.size && allBits { other.containsBits(it) }
-context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.flatMap(crossinline transform: (T) ->CollectionVInt<R>): ArrayVIntList<R> = flatMapTo(ArrayVIntList(size*2), transform)
-context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.flatMap(crossinline transform: (T) ->CollectionVLong<R>): ArrayVLongList<R> = flatMapTo(ArrayVLongList(size*2), transform)
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.contentEquals(other: Collection<T>?): Boolean = other != null && size == other.size && all { other.contains(it) }
+inline fun <T> CollectionVLong<T>.contentHashCode(): Int { var h = 1; forEachBits { h = 31 * h + it.hashCode() }; return h }
+context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.flatMap(crossinline transform: (T) ->CollectionVInt<R>): ArrayListVInt<R> = flatMapTo(ArrayListVInt(size*2), transform)
+context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.flatMap(crossinline transform: (T) ->CollectionVLong<R>): ArrayListVLong<R> = flatMapTo(ArrayListVLong(size*2), transform)
 context(a: ValueLongAdapter<T>) inline fun <T, R, C : MutableCollectionVInt<R>> CollectionVLong<T>.flatMapTo(destination: C, crossinline transform: (T) ->CollectionVInt<R>): C = destination.also{forEach { destination.addAll(transform(it)) }}
 context(a: ValueLongAdapter<T>) inline fun <T, R, C : MutableCollectionVLong<R>> CollectionVLong<T>.flatMapTo(destination: C, crossinline transform: (T) ->CollectionVLong<R>): C = destination.also{forEach { destination.addAll(transform(it)) }}
-context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.flatMapIndexed(crossinline transform: (Int, T) ->CollectionVInt<R>): ArrayVIntList<R> = flatMapIndexedTo(ArrayVIntList(size*2), transform)
-context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.flatMapIndexed(crossinline transform: (Int, T) ->CollectionVLong<R>): ArrayVLongList<R> = flatMapIndexedTo(ArrayVLongList(size*2), transform)
+context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.flatMapIndexed(crossinline transform: (Int, T) ->CollectionVInt<R>): ArrayListVInt<R> = flatMapIndexedTo(ArrayListVInt(size*2), transform)
+context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.flatMapIndexed(crossinline transform: (Int, T) ->CollectionVLong<R>): ArrayListVLong<R> = flatMapIndexedTo(ArrayListVLong(size*2), transform)
 context(a: ValueLongAdapter<T>) inline fun <T, R, C : MutableCollectionVInt<R>> CollectionVLong<T>.flatMapIndexedTo(destination: C, crossinline transform: (Int, T) ->CollectionVInt<R>): C = destination.also{forEachIndexed { i, e-> destination.addAll(transform(i,e)) }}
 context(a: ValueLongAdapter<T>) inline fun <T, R, C : MutableCollectionVLong<R>> CollectionVLong<T>.flatMapIndexedTo(destination: C, crossinline transform: (Int, T) ->CollectionVLong<R>): C = destination.also{forEachIndexed { i, e-> destination.addAll(transform(i,e)) }}
-context(a: ValueLongAdapter<T>) inline fun <T, K> CollectionVLong<T>.groupBy(crossinline keySelector: (T) -> K): MutableMap<K, MutableVLongList<T>> = groupByTo(HashMap<K,MutableVLongList<T>>(), keySelector)
-context(a: ValueLongAdapter<T>) inline fun <T, K, M : MutableMap<K, MutableVLongList<T>>> CollectionVLong<T>.groupByTo(destination: M, crossinline keySelector: (T) -> K): M = destination.also{ c-> forEach { c.getOrPut(keySelector(it),{ ArrayVLongList(size) }).add(it) }}
-context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R> CollectionVLong<T>.mapVInt(crossinline transform: (T) -> R): ArrayVIntList<R> = mapTo(ArrayVIntList<R>(size), transform)
-context(a: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R> CollectionVLong<T>.mapVLong(crossinline transform: (T) -> R): ArrayVLongList<R> = mapTo(ArrayVLongList<R>(size), transform)
+context(a: ValueLongAdapter<T>) inline fun <T, K> CollectionVLong<T>.groupBy(crossinline keySelector: (T) -> K): MutableMap<K, MutableListVLong<T>> = groupByTo(HashMap<K,MutableListVLong<T>>(), keySelector)
+context(a: ValueLongAdapter<T>) inline fun <T, K, M : MutableMap<K, MutableListVLong<T>>> CollectionVLong<T>.groupByTo(destination: M, crossinline keySelector: (T) -> K): M = destination.also{ c-> forEach { c.getOrPut(keySelector(it),{ ArrayListVLong(size) }).add(it) }}
+context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R> CollectionVLong<T>.mapVInt(crossinline transform: (T) -> R): ArrayListVInt<R> = mapTo(ArrayListVInt<R>(size), transform)
+context(a: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R> CollectionVLong<T>.mapVLong(crossinline transform: (T) -> R): ArrayListVLong<R> = mapTo(ArrayListVLong<R>(size), transform)
 context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.mapGeneric(crossinline transform: (T) -> R): MutableList<R> = mapTo(ArrayList<R>(size), transform)
-context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R> CollectionVLong<T>.mapIndexedVLong(crossinline transform: (index: Int, T) -> R): ArrayVIntList<R> = mapIndexedTo(ArrayVIntList<R>(size), transform)
-context(a: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R> CollectionVLong<T>.mapIndexedVLong(crossinline transform: (index: Int, T) -> R): ArrayVLongList<R> = mapIndexedTo(ArrayVLongList<R>(size), transform)
+context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R> CollectionVLong<T>.mapIndexedVLong(crossinline transform: (index: Int, T) -> R): ArrayListVInt<R> = mapIndexedTo(ArrayListVInt<R>(size), transform)
+context(a: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R> CollectionVLong<T>.mapIndexedVLong(crossinline transform: (index: Int, T) -> R): ArrayListVLong<R> = mapIndexedTo(ArrayListVLong<R>(size), transform)
 context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.mapIndexedGeneric(crossinline transform: (index: Int, T) -> R): List<R> = mapIndexedTo(ArrayList<R>(size), transform)
-context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R> CollectionVLong<T>.mapIndexedVLongNotNull(crossinline transform: (index: Int, T) -> R?): ArrayVIntList<R> = mapIndexedNotNullTo(ArrayVIntList<R>(size), transform)
-context(a: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R> CollectionVLong<T>.mapIndexedVLongNotNull(crossinline transform: (index: Int, T) -> R?): ArrayVLongList<R> = mapIndexedNotNullTo(ArrayVLongList<R>(size), transform)
+context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R> CollectionVLong<T>.mapIndexedVLongNotNull(crossinline transform: (index: Int, T) -> R?): ArrayListVInt<R> = mapIndexedNotNullTo(ArrayListVInt<R>(size), transform)
+context(a: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R> CollectionVLong<T>.mapIndexedVLongNotNull(crossinline transform: (index: Int, T) -> R?): ArrayListVLong<R> = mapIndexedNotNullTo(ArrayListVLong<R>(size), transform)
 context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.mapIndexedGenericNotNull(crossinline transform: (index: Int, T) -> R?): List<R> = mapIndexedNotNullTo(ArrayList<R>(size), transform)
 context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R, C : MutableCollectionVInt<R>> CollectionVLong<T>.mapIndexedNotNullTo(destination: C, crossinline transform: (index: Int, T) -> R?): C = destination.also{ c->forEachIndexed{ i, e->transform(i,e)?.also{c.add(it)} } }
 context(a: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R, C : MutableCollectionVLong<R>> CollectionVLong<T>.mapIndexedNotNullTo(destination: C, crossinline transform: (index: Int, T) -> R?): C = destination.also{ c->forEachIndexed{ i, e->transform(i,e)?.also{c.add(it)} } }
@@ -229,7 +232,7 @@ context(a: ValueLongAdapter<T>) inline fun <T, C: CollectionVLong<T>> C.onEach(c
 context(a: ValueLongAdapter<T>) inline fun <T, C: CollectionVLong<T>> C.onEachIndexed(crossinline action: (Int, T) -> Unit): C = apply{forEachIndexed(action)}
 context(a: ValueLongAdapter<T>) inline fun <T : Comparable<T>> CollectionVLong<T>.max(): T = reduce { l, r -> if(r>l) r else l}
 context(a: ValueLongAdapter<T>) inline fun <T : Comparable<T>> CollectionVLong<T>.maxOrNull(): T? = if(isEmpty()) null else max()
-context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.maxWith(comparator: Comparator<in T>): T = reduce { l, r -> if(comparator.compare(r,l)<0) r else l}
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.maxWith(comparator: Comparator<in T>): T = reduce { l, r -> if(comparator.compare(r,l)>0) r else l}
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.maxWithOrNull(comparator: Comparator<in T>): T? = if(isEmpty()) null else maxWith(comparator)
 context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> CollectionVLong<T>.maxBy(crossinline selector: (T) -> R): T {
     val accumulator = object: (Int,T,T)->T {
@@ -248,7 +251,7 @@ context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> CollectionVLon
 context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> CollectionVLong<T>.maxByOrNull(crossinline selector: (T) -> R): T? = if(isEmpty()) null else maxBy(selector)
 context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> CollectionVLong<T>.maxOf(crossinline selector: (T) -> R): R = mapReduce(selector) { max, e-> if (e>max) e else max}
 context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> CollectionVLong<T>.maxOfOrNull(crossinline selector: (T) -> R): R? = if(isEmpty()) null else maxOf(selector)
-context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.maxOfWith(comparator: Comparator<in R>, crossinline selector: (T) -> R): R = mapReduce(selector) { max, e-> if (comparator.compare(e,max)>1) e else max}
+context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.maxOfWith(comparator: Comparator<in R>, crossinline selector: (T) -> R): R = mapReduce(selector) { max, e-> if (comparator.compare(e,max)>0) e else max}
 context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.maxOfWithOrNull(comparator: Comparator<in R>, crossinline selector: (T) -> R): R? = if(isEmpty()) null else maxOfWith(comparator, selector)
 context(a: ValueLongAdapter<T>) inline fun <T : Comparable<T>> CollectionVLong<T>.min(): T = reduce { l, r -> if(r<l) r else l}
 context(a: ValueLongAdapter<T>) inline fun <T : Comparable<T>> CollectionVLong<T>.minOrNull(): T? = if(isEmpty()) null else min()
@@ -271,17 +274,17 @@ context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> CollectionVLon
 context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> CollectionVLong<T>.minByOrNull(crossinline selector: (T) -> R): T? = if(isEmpty()) null else minBy(selector)
 context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> CollectionVLong<T>.minOf(crossinline selector: (T) -> R): R = mapReduce(selector) { min, e-> if (e<min) e else min}
 context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> CollectionVLong<T>.minOfOrNull(crossinline selector: (T) -> R): R? = if(isEmpty()) null else minOf(selector)
-context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.minOfWith(comparator: Comparator<in R>, crossinline selector: (T) -> R): R = mapReduce(selector) { min, e-> if (comparator.compare(e,min)<1) e else min}
+context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.minOfWith(comparator: Comparator<in R>, crossinline selector: (T) -> R): R = mapReduce(selector) { min, e-> if (comparator.compare(e,min)<0) e else min}
 context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.minOfWithOrNull(comparator: Comparator<in R>, crossinline selector: (T) -> R): R? = if(isEmpty()) null else minOfWith(comparator, selector)
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.none(): Boolean = size==0
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.none(crossinline predicate: (T) -> Boolean): Boolean = any { !predicate(it) }
-context(a: ValueLongAdapter<T>) inline fun <T: Comparable<T>> CollectionVLong<T>.sorted(): ArrayVLongList<T> = ArrayVLongList<T>(this).also{it.sort()}
+context(a: ValueLongAdapter<T>) inline fun <T: Comparable<T>> CollectionVLong<T>.sorted(): ArrayListVLong<T> = ArrayListVLong<T>(this).also{it.sort()}
 context(a: ValueLongAdapter<T>) inline fun <T: Comparable<T>> CollectionVLong<T>.sortedArray(): ArrayVLong<T> = toVLongArray().also{it.sort()}
 context(a: ValueLongAdapter<T>) inline fun <T: Comparable<T>> CollectionVLong<T>.sortedArrayDescending(): ArrayVLong<T> = toVLongArray().also{it.sortDescending()}
-context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> CollectionVLong<T>.sortedBy(crossinline selector: (T) -> R?): ArrayVLongList<T> =  toMutableList().also{it.sortBy(selector)}
-context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> CollectionVLong<T>.sortedByDescending(crossinline selector: (T) -> R?): ArrayVLongList<T> = toMutableList().also{it.sortByDescending(selector)}
-context(a: ValueLongAdapter<T>) inline fun <T: Comparable<T>> CollectionVLong<T>.sortedDescending(): ArrayVLongList<T> = toMutableList().also{it.sortDescending()}
-context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.sortedWith(comparator: Comparator<in T>): ArrayVLongList<T> = toMutableList().also{it.sortWith(comparator)}
+context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> CollectionVLong<T>.sortedBy(crossinline selector: (T) -> R?): ArrayListVLong<T> =  toMutableList().also{it.sortBy(selector)}
+context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> CollectionVLong<T>.sortedByDescending(crossinline selector: (T) -> R?): ArrayListVLong<T> = toMutableList().also{it.sortByDescending(selector)}
+context(a: ValueLongAdapter<T>) inline fun <T: Comparable<T>> CollectionVLong<T>.sortedDescending(): ArrayListVLong<T> = toMutableList().also{it.sortDescending()}
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.sortedWith(comparator: Comparator<in T>): ArrayListVLong<T> = toMutableList().also{it.sortWith(comparator)}
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.sumBy(crossinline selector: (T) -> Int): Int = mapReduce(selector) { acc, e->acc+e}
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.sumByDouble(crossinline selector: (T) -> Double): Double = mapReduce(selector) { acc, e->acc+e}
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.sumOf(crossinline selector: (T) -> Double): Double = mapReduce(selector) { acc, e->acc+e}
@@ -289,37 +292,37 @@ context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.sumOf(crossinl
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.sumOf(crossinline selector: (T) -> Long): Long = mapReduce(selector) { acc, e->acc+e}
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.sumOfUInt(crossinline selector: (T) -> UInt): UInt = mapReduce(selector) { acc, e->acc+e}
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.sumOfULong(crossinline selector: (T) -> ULong): ULong = mapReduce(selector) { acc, e->acc+e}
-context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.chunked(size: Int): List<ArrayVLongList<T>>{
-    val results = List<ArrayVLongList<T>>((this.size + size - 1)/size) {ArrayVLongList(size)}
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.chunked(size: Int): List<ArrayListVLong<T>>{
+    val results = List<ArrayListVLong<T>>((this.size + size - 1)/size) {ArrayListVLong(size)}
     val acc = object: (Int,T)->Unit {
         var listIdx=0
         var rollover=size
         override inline fun invoke(index:Int, e: T) {
-            results[listIdx].add(e)
             if (index==rollover) {
                 listIdx++
                 rollover+=size
             }
+            results[listIdx].add(e)
         }
     }
     forEachIndexed(acc)
     return results
 }
-context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.chunked(size: Int, crossinline transform: (VLongList<T>) -> R): List<R> = chunked(size).map(transform)
-context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.plusElement(element: T): VLongList<T> = plus(element)
-context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.plus(element: T): VLongList<T> = ArrayVLongList<T>(size+1).also {it.addAll(this); it.add(element) }
- inline operator fun <T> CollectionVLong<T>.plus(elements: CollectionVLong<T>): VLongList<T> = ArrayVLongList<T>(size+elements.size).also {it.addAll(this); it.addAll(elements) }
-context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.plus(elements: Iterable<T>): VLongList<T> = ArrayVLongList<T>(size+1).also {it.addAll(this); it.addAll(elements) }
-context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.plus(elements: Array<out T>): VLongList<T> = ArrayVLongList<T>(size+1).also {it.addAll(this); it.addAll(elements) }
-context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.minus(element: T): VLongList<T> = ArrayVLongList<T>(size).also { c-> forEach { if (it != element) c.add(it) } }
-context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.minus(elements: Array<out T>): VLongList<T> = ArrayVLongList<T>(size).also { c-> forEach { if (!c.contains(it)) c.add(it) } }
-context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.minus(elements:CollectionVLong<T>): VLongList<T> = ArrayVLongList<T>(size).also { c-> forEach { if (!c.contains(it)) c.add(it) } }
-context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.minus(elements:Iterable<T>): VLongList<T> = ArrayVLongList<T>(size).also { c-> forEach { if (!c.contains(it)) c.add(it) } }
-context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.minus(elements: Sequence<T>): VLongList<T> = ArrayVLongList<T>(size).also { c-> forEach { if (!c.contains(it)) c.add(it) } }
-context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.minusElement(element: T): VLongList<T> = minus(element)
-context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.partition(crossinline predicate: (T) -> Boolean): Pair<VLongList<T>, VLongList<T>> {
-    val trueList = ArrayVLongList<T>(size)
-    val falseList = ArrayVLongList<T>(size)
+context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.chunked(size: Int, crossinline transform: (ListVLong<T>) -> R): List<R> = chunked(size).map(transform)
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.plusElement(element: T): ListVLong<T> = plus(element)
+context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.plus(element: T): ListVLong<T> = ArrayListVLong<T>(size+1).also {it.addAll(this); it.add(element) }
+ inline operator fun <T> CollectionVLong<T>.plus(elements: CollectionVLong<T>): ListVLong<T> = ArrayListVLong<T>(size+elements.size).also {it.addAll(this); it.addAll(elements) }
+context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.plus(elements: Iterable<T>): ListVLong<T> = ArrayListVLong<T>(size+1).also {it.addAll(this); it.addAll(elements) }
+context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.plus(elements: Array<out T>): ListVLong<T> = ArrayListVLong<T>(size+1).also {it.addAll(this); it.addAll(elements) }
+context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.minus(element: T): ListVLong<T> = ArrayListVLong<T>(size).also { c-> forEach { if (it != element) c.add(it) } }
+context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.minus(elements: Array<out T>): ListVLong<T> = ArrayListVLong<T>(size).also { c-> forEach { if (!elements.contains(it)) c.add(it) } }
+context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.minus(elements:CollectionVLong<T>): ListVLong<T> = ArrayListVLong<T>(size).also { c-> forEach { if (!elements.contains(it)) c.add(it) } }
+context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.minus(elements:Iterable<T>): ListVLong<T> = ArrayListVLong<T>(size).also { c-> forEach { if (!elements.contains(it)) c.add(it) } }
+context(a: ValueLongAdapter<T>) inline operator fun <T> CollectionVLong<T>.minus(elements: Sequence<T>): ListVLong<T> = ArrayListVLong<T>(size).also { c-> forEach { if (!elements.contains(it)) c.add(it) } }
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.minusElement(element: T): ListVLong<T> = minus(element)
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.partition(crossinline predicate: (T) -> Boolean): Pair<ListVLong<T>, ListVLong<T>> {
+    val trueList = ArrayListVLong<T>(size)
+    val falseList = ArrayListVLong<T>(size)
     forEach { if (predicate(it)) trueList.add(it) else falseList.add(it) }
     return trueList to falseList
 }
@@ -337,8 +340,8 @@ context(a: ValueLongAdapter<T>) inline fun <T, R, V> CollectionVLong<T>.zip(othe
     forEachIndexed { i, e -> if (i < other.size) r.add(i, transform(e, other[i])) }
     return r
 }
-context(ta: ValueLongAdapter<T>, ra: ValueLongAdapter<R>, va: ValueLongAdapter<V>) inline fun <T, R, V> CollectionVLong<T>.zipPairVLongInt(other:VLongIndexedCollection<R>, crossinline transform: (a: T, b: R) -> V): MutableVLongList<V> {
-    val r = ArrayVLongList<V>(min(size, other.size))
+context(ta: ValueLongAdapter<T>, ra: ValueLongAdapter<R>, va: ValueLongAdapter<V>) inline fun <T, R, V> CollectionVLong<T>.zipPairVLongInt(other:IndexedCollectionVLong<R>, crossinline transform: (a: T, b: R) -> V): MutableListVLong<V> {
+    val r = ArrayListVLong<V>(min(size, other.size))
     forEachIndexed { i, e -> if (i < other.size) r.add(i, transform(e, other.get(i))) }
     return r
 }
@@ -378,21 +381,21 @@ context(a: ValueLongAdapter<T>) inline fun <S, T : S> CollectionVLong<T>.reduce(
 context(a: ValueLongAdapter<T>) inline fun <S, T : S> CollectionVLong<T>.reduceIndexed(crossinline operation: (index: Int, acc: S, T) -> S): S = mapReduceIndexed({it}, operation)
 context(a: ValueLongAdapter<T>) inline fun <S, T : S> CollectionVLong<T>.reduceIndexedOrNull(crossinline operation: (index: Int, acc: S, T) -> S): S? = if (size==0) return null else reduceIndexed(operation)
 context(a: ValueLongAdapter<T>) inline fun <S, T : S> CollectionVLong<T>.reduceOrNull(crossinline operation: (acc: S, T) -> S): S? = if (size==0) return null else reduce(operation)
-context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R> CollectionVLong<T>.runningFoldVInt(initial: R, crossinline operation: (acc: R, T) -> R): MutableVIntList<R> = runningFoldVIntIndexed(initial) { i, acc, e->operation(acc,e)}
-context(ta: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R> CollectionVLong<T>.runningFoldVIntIndexed(initial: R, crossinline operation: (index: Int, acc: R, T) -> R): MutableVIntList<R> {
+context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R> CollectionVLong<T>.runningFoldVInt(initial: R, crossinline operation: (acc: R, T) -> R): MutableListVInt<R> = runningFoldVIntIndexed(initial) { i, acc, e->operation(acc,e)}
+context(ta: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R> CollectionVLong<T>.runningFoldVIntIndexed(initial: R, crossinline operation: (index: Int, acc: R, T) -> R): MutableListVInt<R> {
     val accumulator = object: (Int,T)->Unit {
         var acc = initial
-        var result = ArrayVIntList<R>()
+        var result = ArrayListVInt<R>()
         override inline fun invoke(i:Int, e: T) { acc = operation(i, acc, e); result.add(acc) }
     }
     forEachIndexed(accumulator)
     return accumulator.result
 }
-context(a: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R> CollectionVLong<T>.runningFoldVLong(initial: R, crossinline operation: (acc: R, T) -> R): MutableVLongList<R> = runningFoldVLongIndexed(initial) { i, acc, e->operation(acc,e)}
-context(ta: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R> CollectionVLong<T>.runningFoldVLongIndexed(initial: R, crossinline operation: (index: Int, acc: R, T) -> R): MutableVLongList<R> {
+context(a: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R> CollectionVLong<T>.runningFoldVLong(initial: R, crossinline operation: (acc: R, T) -> R): MutableListVLong<R> = runningFoldVLongIndexed(initial) { i, acc, e->operation(acc,e)}
+context(ta: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R> CollectionVLong<T>.runningFoldVLongIndexed(initial: R, crossinline operation: (index: Int, acc: R, T) -> R): MutableListVLong<R> {
     val accumulator = object: (Int,T)->Unit {
         var acc = initial
-        var result = ArrayVLongList<R>()
+        var result = ArrayListVLong<R>()
         override inline fun invoke(i:Int, e: T) { acc = operation(i, acc, e); result.add(acc) }
     }
     forEachIndexed(accumulator)
@@ -408,12 +411,12 @@ context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.runningFold
     forEachIndexed(accumulator)
     return accumulator.result
 }
-context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<S>) inline fun <S, T : S> CollectionVLong<T>.runningReduceVInt(crossinline operation: (acc: S, T) -> S): MutableVIntList<S> = with(ra){runningReduceVIntIndexed { i, acc, e -> operation(acc,e)}}
-context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<S>) inline fun <S, T : S> CollectionVLong<T>.runningReduceVIntIndexed(crossinline operation: (index: Int, acc: S, T) -> S): MutableVIntList<S>  {
-    if (size<=1) return ArrayVIntList()
+context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<S>) inline fun <S, T : S> CollectionVLong<T>.runningReduceVInt(crossinline operation: (acc: S, T) -> S): MutableListVInt<S> = with(ra){runningReduceVIntIndexed { i, acc, e -> operation(acc,e)}}
+context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<S>) inline fun <S, T : S> CollectionVLong<T>.runningReduceVIntIndexed(crossinline operation: (index: Int, acc: S, T) -> S): MutableListVInt<S>  {
+    if (size<=1) return ArrayListVInt()
     val accumulator = object: (Int,T)->Unit {
         var acc: S = findOrThrow{true}
-        var result = ArrayVIntList<S>(size-1)
+        var result = ArrayListVInt<S>(size-1)
         override inline fun invoke(i:Int, e: T) {
             if (i ==0) return
             acc = operation(i-1, acc, e)
@@ -423,12 +426,12 @@ context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<S>) inline fun <S, T : S> Co
     forEachIndexed(accumulator)
     return accumulator.result
 }
-context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.runningReduceVLong(crossinline operation: (acc: T, T) -> T): MutableVLongList<T> = runningReduceVLongIndexed { i, acc, e -> operation(acc,e)}
-context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.runningReduceVLongIndexed(crossinline operation: (index: Int, acc: T, T) -> T): MutableVLongList<T> {
-    if (size<=1) return ArrayVLongList()
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.runningReduceVLong(crossinline operation: (acc: T, T) -> T): MutableListVLong<T> = runningReduceVLongIndexed { i, acc, e -> operation(acc,e)}
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.runningReduceVLongIndexed(crossinline operation: (index: Int, acc: T, T) -> T): MutableListVLong<T> {
+    if (size<=1) return ArrayListVLong()
     val accumulator = object: (Int,T)->Unit {
         var acc: T = findOrThrow{true}
-        var result = ArrayVLongList<T>(size-1)
+        var result = ArrayListVLong<T>(size-1)
         override inline fun invoke(i:Int, e: T) {
             if (i ==0) return
             acc = operation(i-1, acc, e)

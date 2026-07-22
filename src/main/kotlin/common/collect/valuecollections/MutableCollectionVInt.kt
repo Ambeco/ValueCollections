@@ -57,14 +57,14 @@ context(a: ValueIntAdapter<T>) inline operator fun <T> MutableCollectionVInt<T>.
 context(a: ValueIntAdapter<T>) inline operator fun <T> MutableCollectionVInt<T>.plusAssign(element: T): Unit = check(add(element))
 context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.remove(element: T): Boolean = removeBits(a.toInt(element))
 context(a: ValueIntAdapter<T>) inline operator fun <T> MutableCollectionVInt<T>.minusAssign(element: T): Unit = check(remove(element))
-context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.removeAll(elements: VIntList<T>): Boolean = elements.all { remove(it)}
+context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.removeAll(elements: ListVInt<T>): Boolean = elements.all { remove(it)}
 context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.removeAll(elements: Array<T>): Boolean= elements.all { remove(it)}
 context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.removeAll(elements: Iterable<T>): Boolean= elements.all { remove(it)}
 context(a: ValueIntAdapter<T>) fun <T> MutableCollectionVInt<T>.removeAll(elements:Collection<T>): Boolean = elements.all { remove(it)}
 fun <T> MutableCollectionVInt<T>.removeAll(elements: CollectionVInt<T>): Boolean = elements.allBits { removeBits(it) }
-context(a: ValueIntAdapter<T>) inline operator fun <T> MutableCollectionVInt<T>.minusAssign(elements: VIntList<T>): Unit = check(removeAll(elements))
+context(a: ValueIntAdapter<T>) inline operator fun <T> MutableCollectionVInt<T>.minusAssign(elements: ListVInt<T>): Unit = check(removeAll(elements))
 context(a: ValueIntAdapter<T>) inline operator fun <T> MutableCollectionVInt<T>.minusAssign(elements: Array<T>): Unit = check(removeAll(elements))
 context(a: ValueIntAdapter<T>) inline operator fun <T> MutableCollectionVInt<T>.minusAssign(elements: Collection<T>): Unit = check(removeAll(elements))
 context(a: ValueIntAdapter<T>) inline operator fun <T> MutableCollectionVInt<T>.minusAssign(elements: Iterable<T>): Unit = check(removeAll(elements))
 context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.retainAll(elements: Collection<T>): Boolean = removeAll {!elements.contains(it)}
-context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.retainAll(elements: VIntList<T>): Unit = check(removeAll {!elements.contains(it)})
+context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.retainAll(elements: ListVInt<T>): Unit = check(removeAll {!elements.contains(it)})

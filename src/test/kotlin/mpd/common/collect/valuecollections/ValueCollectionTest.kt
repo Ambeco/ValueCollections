@@ -17,6 +17,7 @@ import kotlin.test.assertEquals
 @JvmInline
 value class MyTestClass(val value: Int): Comparable<MyTestClass> {
     override operator fun compareTo(other: MyTestClass): Int = value.compareTo(other.value)
+    override fun toString(): String = value.toString()
     @Suppress("OVERRIDE_BY_INLINE", "NOTHING_TO_INLINE")
     companion object PrimitiveIntAdapter: ValueIntAdapter<MyTestClass> {
         override inline fun fromInt(v: Int) = MyTestClass(v)
@@ -45,8 +46,8 @@ value class MyLongTestClass(val value: Long): Comparable<MyLongTestClass> {
 }
 
 class ValueCollectionTest {
-    private fun simpleList(): ArrayVIntList<MyTestClass> = with (MyTestClass) {
-        val array = ArrayVIntList<MyTestClass>(10)
+    private fun simpleList(): ArrayListVInt<MyTestClass> = with (MyTestClass) {
+        val array = ArrayListVInt<MyTestClass>(10)
         for (i in 0..9)
             array.add(i, MyTestClass(100*(i+1)))
         return array
@@ -195,7 +196,7 @@ class ValueCollectionTest {
         val array = simpleList()
         assertEquals(false, array.isEmpty())
         assertEquals(true, array.isNotEmpty())
-        assertEquals(true, ArrayVIntList<MyTestClass>().isEmpty())
+        assertEquals(true, ArrayListVInt<MyTestClass>().isEmpty())
     }
 
     @Test
@@ -302,8 +303,8 @@ class ValueCollectionTest {
     fun groupBy() = with (MyTestClass) {
         val array = simpleList()
         val groups = array.groupBy { it.value % 200 }
-        assertEquals(5, groups.size)
-        assertEquals(2, groups[0]!!.size)
+        assertEquals(2, groups.size)
+        assertEquals(5, groups[0]!!.size)
     }
 
     @Test
@@ -358,10 +359,10 @@ class ValueCollectionTest {
     @Test
     fun filterToAndFilterNotTo() = with (MyTestClass) {
         val array = simpleList()
-        val destination = ArrayVIntList<MyTestClass>()
+        val destination = ArrayListVInt<MyTestClass>()
         array.filterTo(destination) { it.value >= 800 }
         assertEquals(vIntListOf(MyTestClass(800), MyTestClass(900), MyTestClass(1000)), destination)
-        val notDestination = ArrayVIntList<MyTestClass>()
+        val notDestination = ArrayListVInt<MyTestClass>()
         array.filterNotTo(notDestination) { it.value >= 300 }
         assertEquals(vIntListOf(MyTestClass(100), MyTestClass(200)), notDestination)
     }
@@ -467,7 +468,7 @@ class ValueCollectionTest {
     @Test
     fun withIndex() = context (MyTestClass, IndexedVInt.VLongAdapter<MyTestClass>()) {
         val array = simpleList()
-        val indexed: MutableVLongList<IndexedVInt<MyTestClass>> = array.withIndex()
+        val indexed: MutableListVLong<IndexedVInt<MyTestClass>> = array.withIndex()
         assertEquals(0, indexed[0].index)
         assertEquals(MyTestClass(100), indexed[0].value)
     }
@@ -476,21 +477,21 @@ class ValueCollectionTest {
     fun flatMapVariants() {
         context (MyTestClass, MyLongTestClass) {
             val array = vIntListOf(MyTestClass(1), MyTestClass(2))
-            val flatVInt: ArrayVIntList<MyTestClass> = array.flatMap(fun(e: MyTestClass): CollectionVInt<MyTestClass> = vIntListOf(e, MyTestClass(e.value * 10)))
+            val flatVInt: ArrayListVInt<MyTestClass> = array.flatMap(fun(e: MyTestClass): CollectionVInt<MyTestClass> = vIntListOf(e, MyTestClass(e.value * 10)))
             assertEquals(listOf(1, 10, 2, 20), flatVInt.mapGeneric { it.value })
-            val flatVIntTo: ArrayVIntList<MyTestClass> = array.flatMapTo(ArrayVIntList<MyTestClass>()) { e: MyTestClass -> vIntListOf(e) }
+            val flatVIntTo: ArrayListVInt<MyTestClass> = array.flatMapTo(ArrayListVInt<MyTestClass>()) { e: MyTestClass -> vIntListOf(e) }
             assertEquals(2, flatVIntTo.size)
-            val flatIndexedVInt: ArrayVIntList<MyTestClass> = array.flatMapIndexed(fun(i: Int, e: MyTestClass): CollectionVInt<MyTestClass> = vIntListOf(MyTestClass(i), e))
+            val flatIndexedVInt: ArrayListVInt<MyTestClass> = array.flatMapIndexed(fun(i: Int, e: MyTestClass): CollectionVInt<MyTestClass> = vIntListOf(MyTestClass(i), e))
             assertEquals(4, flatIndexedVInt.size)
-            val flatIndexedVIntTo: ArrayVIntList<MyTestClass> = array.flatMapIndexedTo(ArrayVIntList<MyTestClass>()) { i: Int, e: MyTestClass -> vIntListOf(e) }
+            val flatIndexedVIntTo: ArrayListVInt<MyTestClass> = array.flatMapIndexedTo(ArrayListVInt<MyTestClass>()) { i: Int, e: MyTestClass -> vIntListOf(e) }
             assertEquals(2, flatIndexedVIntTo.size)
-            val flatVLong: ArrayVLongList<MyLongTestClass> = array.flatMap(fun(e: MyTestClass): CollectionVLong<MyLongTestClass> = vLongListOf(MyLongTestClass(e.value.toLong())))
+            val flatVLong: ArrayListVLong<MyLongTestClass> = array.flatMap(fun(e: MyTestClass): CollectionVLong<MyLongTestClass> = vLongListOf(MyLongTestClass(e.value.toLong())))
             assertEquals(listOf(1L, 2L), flatVLong.mapGeneric { it.value })
-            val flatVLongTo: ArrayVLongList<MyLongTestClass> = array.flatMapTo(ArrayVLongList<MyLongTestClass>()) { e: MyTestClass -> vLongListOf(MyLongTestClass(e.value.toLong())) }
+            val flatVLongTo: ArrayListVLong<MyLongTestClass> = array.flatMapTo(ArrayListVLong<MyLongTestClass>()) { e: MyTestClass -> vLongListOf(MyLongTestClass(e.value.toLong())) }
             assertEquals(2, flatVLongTo.size)
-            val flatIndexedVLong: ArrayVLongList<MyLongTestClass> = array.flatMapIndexed(fun(i: Int, e: MyTestClass): CollectionVLong<MyLongTestClass> = vLongListOf(MyLongTestClass((i + e.value).toLong())))
+            val flatIndexedVLong: ArrayListVLong<MyLongTestClass> = array.flatMapIndexed(fun(i: Int, e: MyTestClass): CollectionVLong<MyLongTestClass> = vLongListOf(MyLongTestClass((i + e.value).toLong())))
             assertEquals(2, flatIndexedVLong.size)
-            val flatIndexedVLongTo: ArrayVLongList<MyLongTestClass> = array.flatMapIndexedTo(ArrayVLongList<MyLongTestClass>()) { i: Int, e: MyTestClass -> vLongListOf(MyLongTestClass(e.value.toLong())) }
+            val flatIndexedVLongTo: ArrayListVLong<MyLongTestClass> = array.flatMapIndexedTo(ArrayListVLong<MyLongTestClass>()) { i: Int, e: MyTestClass -> vLongListOf(MyLongTestClass(e.value.toLong())) }
             assertEquals(2, flatIndexedVLongTo.size)
         }
     }
@@ -498,9 +499,9 @@ class ValueCollectionTest {
     @Test
     fun groupByTo() = with (MyTestClass) {
         val array = simpleList()
-        val destination = HashMap<Int, MutableVIntList<MyTestClass>>()
+        val destination = HashMap<Int, MutableListVInt<MyTestClass>>()
         array.groupByTo(destination) { it.value % 2 }
-        assertEquals(2, destination.size)
+        assertEquals(1, destination.size)
     }
 
     @Test
@@ -510,8 +511,8 @@ class ValueCollectionTest {
             assertEquals(listOf(2, 4), array.mapVInt { MyTestClass(it.value * 2) }.mapGeneric { it.value })
             assertEquals(listOf(1L, 2L), array.mapVLong { MyLongTestClass(it.value.toLong()) }.mapGeneric { it.value })
             assertEquals(listOf(0, 2), array.mapIndexedVInt { i, e -> MyTestClass(i * e.value) }.mapGeneric { it.value })
-            assertEquals(listOf(0L, 3L), array.mapIndexedVLong { i, e -> MyLongTestClass((i * e.value).toLong()) }.mapGeneric { it.value })
-            assertEquals(listOf(0, 3), array.mapIndexedGeneric { i, e -> i * e.value })
+            assertEquals(listOf(0L, 2L), array.mapIndexedVLong { i, e -> MyLongTestClass((i * e.value).toLong()) }.mapGeneric { it.value })
+            assertEquals(listOf(0, 2), array.mapIndexedGeneric { i, e -> i * e.value })
             assertEquals(vIntListOf(MyTestClass(2)), array.mapIndexedVIntNotNull { i, e -> if (i == 1) e else null })
             assertEquals(vLongListOf(MyLongTestClass(2L)), array.mapIndexedVLongNotNull { i, e -> if (i == 1) MyLongTestClass(e.value.toLong()) else null })
             assertEquals(listOf(2), array.mapIndexedGenericNotNull { i, e -> if (i == 1) e.value else null })
@@ -585,7 +586,7 @@ class ValueCollectionTest {
         assertEquals(vIntListOf(MyTestClass(1), MyTestClass(2), MyTestClass(3)), (array + listOf(MyTestClass(3))))
         assertEquals(vIntListOf(MyTestClass(1), MyTestClass(2), MyTestClass(3)), (array + arrayOf(MyTestClass(3))))
         assertEquals(vIntListOf(MyTestClass(1)), (array - arrayOf(MyTestClass(2))))
-        assertEquals(vIntListOf(MyTestClass(1)), (array - otherVInt))
+        assertEquals(vIntListOf(MyTestClass(1), MyTestClass(2)), (array - otherVInt))
         assertEquals(vIntListOf(MyTestClass(1)), (array - listOf(MyTestClass(2))))
         assertEquals(vIntListOf(MyTestClass(1)), (array - sequenceOf(MyTestClass(2))))
     }
@@ -596,7 +597,7 @@ class ValueCollectionTest {
         assertEquals(true, array.contains(array.random()))
         assertEquals(true, array.contains(array.random(kotlin.random.Random(42))))
         assertEquals(true, array.contains(array.randomOrNull()!!))
-        assertEquals(null, ArrayVIntList<MyTestClass>().randomOrNull())
+        assertEquals(null, ArrayListVInt<MyTestClass>().randomOrNull())
     }
 
     @Test
@@ -637,7 +638,7 @@ class ValueCollectionTest {
         assertEquals(MyTestClass(1000), array.reduceIndexed { _, acc, e -> if (e.value > acc.value) e else acc })
         assertEquals(MyTestClass(1000), array.reduceIndexedOrNull { _, acc, e -> if (e.value > acc.value) e else acc })
         assertEquals(MyTestClass(1000), array.reduceOrNull { acc, e -> if (e.value > acc.value) e else acc })
-        assertEquals(null, ArrayVIntList<MyTestClass>().reduceOrNull { acc, e -> if (e.value > acc.value) e else acc })
+        assertEquals(null, ArrayListVInt<MyTestClass>().reduceOrNull { acc, e -> if (e.value > acc.value) e else acc })
     }
 
     @Test

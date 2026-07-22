@@ -30,8 +30,9 @@ class ArraySetVLong<T>(val collection: MutableLongSet, override val NULL_VALUE: 
     }
     
     override inline fun clear()  = collection.clear()
-    override inline fun hashCode() = collection.hashCode()
-    override inline fun equals(other: Any?) = other is ArraySetVLong<*> && collection == other.collection
+    override fun hashCode() = contentHashCode()
+    @Suppress("UNCHECKED_CAST")
+    override fun equals(other: Any?) = other is CollectionVLong<*> && contentEquals(other as CollectionVLong<T>)
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toStringV() to print K.toString", ReplaceWith("toStringV()"))
     override inline fun toString(): String = collection.toString()

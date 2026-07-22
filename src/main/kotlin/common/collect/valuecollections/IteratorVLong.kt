@@ -5,7 +5,7 @@ package mpd.com.common.collect.valuecollections
 import java.util.PrimitiveIterator
 import java.util.function.Consumer
 
-class VLongIteratorJava<T>(val delegate: PrimitiveIterator.OfLong, val a: ValueLongAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, Iterable<T> {
+class IteratorVLongJava<T>(val delegate: PrimitiveIterator.OfLong, val a: ValueLongAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, Iterable<T> {
     override inline fun iterator(): PrimitiveIterator<T, Consumer<in T>> = this
     override inline fun hasNext(): Boolean = delegate.hasNext()
     override inline fun remove(): Unit = throw UnsupportedOperationException("remove")
@@ -13,7 +13,7 @@ class VLongIteratorJava<T>(val delegate: PrimitiveIterator.OfLong, val a: ValueL
     inline fun nextLong(): T = a.fromLong(delegate.nextLong())
     override inline fun forEachRemaining(op: Consumer<in T>) { while (delegate.hasNext()) op.accept(nextLong()) }
 }
-class MutableVLongIteratorJava<T>(val delegate: PrimitiveIterator.OfLong, val a: ValueLongAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, MutableIterable<T>  {
+class MutableIteratorVLongJava<T>(val delegate: PrimitiveIterator.OfLong, val a: ValueLongAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, MutableIterable<T>  {
     override inline fun iterator(): PrimitiveIterator<T, Consumer<in T>> = this
     override inline fun hasNext(): Boolean = delegate.hasNext()
     override inline fun remove(): Unit = delegate.remove()
@@ -21,7 +21,7 @@ class MutableVLongIteratorJava<T>(val delegate: PrimitiveIterator.OfLong, val a:
     inline fun nextInt(): T = a.fromLong(delegate.nextLong())
     override inline fun forEachRemaining(op: Consumer<in T>) { while (delegate.hasNext()) op.accept(nextInt()) }
 }
-class VLongIteratorKotlin<T>(val delegate: LongIterator, val a: ValueLongAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, Iterable<T> {
+class IteratorVLongKotlin<T>(val delegate: LongIterator, val a: ValueLongAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, Iterable<T> {
     override inline fun iterator(): PrimitiveIterator<T, Consumer<in T>> = this
     override inline fun hasNext(): Boolean = delegate.hasNext()
     override inline fun remove(): Unit = throw UnsupportedOperationException("remove")
@@ -29,7 +29,7 @@ class VLongIteratorKotlin<T>(val delegate: LongIterator, val a: ValueLongAdapter
     inline fun nextLong(): T = a.fromLong(delegate.nextLong())
     override inline fun forEachRemaining(op: Consumer<in T>) { while (delegate.hasNext()) op.accept(nextLong()) }
 }
-class MutableVLongIteratorKotlin<T>(val delegate: LongIterator, val a: ValueLongAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, MutableIterable<T> {
+class MutableIteratorVLongKotlin<T>(val delegate: LongIterator, val a: ValueLongAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, MutableIterable<T> {
     override inline fun iterator(): PrimitiveIterator<T, Consumer<in T>> = this
     override inline fun hasNext(): Boolean = delegate.hasNext()
     override inline fun remove(): Unit = (delegate as MutableIterator<Long>).remove()
@@ -37,7 +37,7 @@ class MutableVLongIteratorKotlin<T>(val delegate: LongIterator, val a: ValueLong
     inline fun nextInt(): T = a.fromLong(delegate.nextLong())
     override inline fun forEachRemaining(op: Consumer<in T>) { while (delegate.hasNext()) op.accept(nextInt()) }
 }
-class VLongIteratorGeneric<T>(val delegate:Iterator<Long>, val a: ValueLongAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, Iterable<T> {
+class IteratorVLongGeneric<T>(val delegate:Iterator<Long>, val a: ValueLongAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, Iterable<T> {
     override inline fun iterator(): PrimitiveIterator<T, Consumer<in T>> = this
     override inline fun hasNext(): Boolean = delegate.hasNext()
     override inline fun remove(): Unit = throw UnsupportedOperationException("remove")
@@ -45,7 +45,7 @@ class VLongIteratorGeneric<T>(val delegate:Iterator<Long>, val a: ValueLongAdapt
     inline fun nextLong(): T = a.fromLong(delegate.next())
     override inline fun forEachRemaining(op: Consumer<in T>) { while (delegate.hasNext()) op.accept(nextLong()) }
 }
-class MutableVLongIteratorGeneric<T>(val delegate:MutableIterator<Long>, val a: ValueLongAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, MutableIterable<T> {
+class MutableIteratorVLongGeneric<T>(val delegate:MutableIterator<Long>, val a: ValueLongAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, MutableIterable<T> {
     override inline fun iterator(): PrimitiveIterator<T, Consumer<in T>> = this
     override inline fun hasNext(): Boolean = delegate.hasNext()
     override inline fun remove(): Unit = delegate.remove()
@@ -54,24 +54,24 @@ class MutableVLongIteratorGeneric<T>(val delegate:MutableIterator<Long>, val a: 
     override inline fun forEachRemaining(op: Consumer<in T>) { while (delegate.hasNext()) op.accept(nextInt()) }
 }
 context(a: ValueLongAdapter<T>) fun <T> vIteratorFrom(delegate:Iterator<Long>): PrimitiveIterator<T, Consumer<in T>> = when(delegate) {
-    is PrimitiveIterator.OfLong -> VLongIteratorJava(delegate, a)
-    is LongIterator -> VLongIteratorKotlin(delegate, a)
-    else -> VLongIteratorGeneric(delegate, a)
+    is PrimitiveIterator.OfLong -> IteratorVLongJava(delegate, a)
+    is LongIterator -> IteratorVLongKotlin(delegate, a)
+    else -> IteratorVLongGeneric(delegate, a)
 }
 context(a: ValueLongAdapter<T>) fun <T> vIteratorFrom(delegate:MutableIterator<Long>): MutableIterator<T> = when(delegate) {
-    is PrimitiveIterator.OfLong -> MutableVLongIteratorJava(delegate, a)
-    is LongIterator -> MutableVLongIteratorKotlin(delegate, a)
-    else -> MutableVLongIteratorGeneric(delegate, a)
+    is PrimitiveIterator.OfLong -> MutableIteratorVLongJava(delegate, a)
+    is LongIterator -> MutableIteratorVLongKotlin(delegate, a)
+    else -> MutableIteratorVLongGeneric(delegate, a)
 }
 context(a: ValueLongAdapter<T>) fun <T> mutableVIteratableFrom(delegate:Iterator<Long>): Iterable<T> = when(delegate) {
-    is PrimitiveIterator.OfLong -> VLongIteratorJava(delegate, a)
-    is LongIterator -> VLongIteratorKotlin(delegate, a)
-    else -> VLongIteratorGeneric(delegate, a)
+    is PrimitiveIterator.OfLong -> IteratorVLongJava(delegate, a)
+    is LongIterator -> IteratorVLongKotlin(delegate, a)
+    else -> IteratorVLongGeneric(delegate, a)
 }
 context(a: ValueLongAdapter<T>) fun <T> vIteratableFrom(delegate:MutableIterator<Long>): MutableIterable<T> = when(delegate) {
-    is PrimitiveIterator.OfLong -> MutableVLongIteratorJava(delegate, a)
-    is LongIterator -> MutableVLongIteratorKotlin(delegate, a)
-    else -> MutableVLongIteratorGeneric(delegate, a)
+    is PrimitiveIterator.OfLong -> MutableIteratorVLongJava(delegate, a)
+    is LongIterator -> MutableIteratorVLongKotlin(delegate, a)
+    else -> MutableIteratorVLongGeneric(delegate, a)
 }
 class VIteratorIndexedValueLong<T>(val delegate:Iterator<IndexedValue<Long>>, val a: ValueLongAdapter<T>): Iterator<IndexedValue<T>>, Iterable<IndexedValue<T>> {
     override inline fun iterator(): VIteratorIndexedValueLong<T> = this

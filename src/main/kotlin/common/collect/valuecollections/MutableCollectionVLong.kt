@@ -57,16 +57,16 @@ context(a: ValueLongAdapter<T>) inline operator fun <T> MutableCollectionVLong<T
 context(a: ValueLongAdapter<T>) inline operator fun <T> MutableCollectionVLong<T>.plusAssign(element: T): Unit = check(add(element))
 context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.remove(element: T): Boolean = removeBits(a.toLong(element))
 context(a: ValueLongAdapter<T>) inline operator fun <T> MutableCollectionVLong<T>.minusAssign(element: T): Unit = check(remove(element))
-context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.removeAll(elements: VLongList<T>): Boolean = elements.all { remove(it)}
+context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.removeAll(elements: ListVLong<T>): Boolean = elements.all { remove(it)}
 context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.removeAll(elements: Array<T>): Boolean= elements.all { remove(it)}
 context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.removeAll(elements: Iterable<T>): Boolean= elements.all { remove(it)}
 context(a: ValueLongAdapter<T>) fun <T> MutableCollectionVLong<T>.removeAll(elements:Collection<T>): Boolean = elements.all { remove(it)}
 fun <T> MutableCollectionVLong<T>.removeAll(elements: CollectionVLong<T>): Boolean = elements.allBits { removeBits(it) }
-context(a: ValueLongAdapter<T>) inline operator fun <T> MutableCollectionVLong<T>.minusAssign(elements: VLongList<T>): Unit = check(removeAll(elements))
+context(a: ValueLongAdapter<T>) inline operator fun <T> MutableCollectionVLong<T>.minusAssign(elements: ListVLong<T>): Unit = check(removeAll(elements))
 context(a: ValueLongAdapter<T>) inline operator fun <T> MutableCollectionVLong<T>.minusAssign(elements: Array<T>): Unit = check(removeAll(elements))
 context(a: ValueLongAdapter<T>) inline operator fun <T> MutableCollectionVLong<T>.minusAssign(elements: Collection<T>): Unit = check(removeAll(elements))
 context(a: ValueLongAdapter<T>) inline operator fun <T> MutableCollectionVLong<T>.minusAssign(elements: Iterable<T>): Unit = check(removeAll(elements))
 context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.retainAll(elements: Collection<T>): Boolean = removeAll {!elements.contains(it)}
-context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.retainAll(elements: VLongList<T>): Unit = check(removeAll {!elements.contains(it)})
+context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.retainAll(elements: ListVLong<T>): Unit = check(removeAll {!elements.contains(it)})
 
 

@@ -5,7 +5,7 @@ package mpd.com.common.collect.valuecollections
 import java.util.PrimitiveIterator
 import java.util.function.Consumer
 
-class VIntIteratorJava<T>(val delegate:java.util.PrimitiveIterator.OfInt, val a: ValueIntAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, Iterable<T> {
+class IteratorVIntJava<T>(val delegate:java.util.PrimitiveIterator.OfInt, val a: ValueIntAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, Iterable<T> {
     override inline fun iterator(): PrimitiveIterator<T, Consumer<in T>> = this
     override inline fun hasNext(): Boolean = delegate.hasNext()
     override inline fun remove(): Unit = delegate.remove()
@@ -13,7 +13,7 @@ class VIntIteratorJava<T>(val delegate:java.util.PrimitiveIterator.OfInt, val a:
     inline fun nextInt(): T = a.fromInt(delegate.nextInt())
     override inline fun forEachRemaining(op: Consumer<in T>) { while (delegate.hasNext()) op.accept(nextInt()) }
 }
-class MutableVIntIteratorJava<T>(val delegate:java.util.PrimitiveIterator.OfInt, val a: ValueIntAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, MutableIterable<T>  {
+class MutableIteratorVIntJava<T>(val delegate:java.util.PrimitiveIterator.OfInt, val a: ValueIntAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, MutableIterable<T>  {
     override inline fun iterator(): PrimitiveIterator<T, Consumer<in T>> = this
     override inline fun hasNext(): Boolean = delegate.hasNext()
     override inline fun remove(): Unit = delegate.remove()
@@ -21,7 +21,7 @@ class MutableVIntIteratorJava<T>(val delegate:java.util.PrimitiveIterator.OfInt,
     inline fun nextInt(): T = a.fromInt(delegate.nextInt())
     override inline fun forEachRemaining(op: Consumer<in T>) { while (delegate.hasNext()) op.accept(nextInt()) }
 }
-class VIntIteratorKotlin<T>(val delegate:kotlin.collections.IntIterator, val a: ValueIntAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, Iterable<T> {
+class IteratorVIntKotlin<T>(val delegate:kotlin.collections.IntIterator, val a: ValueIntAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, Iterable<T> {
     override inline fun iterator(): PrimitiveIterator<T, Consumer<in T>> = this
     override inline fun hasNext(): Boolean = delegate.hasNext()
     override inline fun remove(): Unit = throw UnsupportedOperationException("remove")
@@ -29,7 +29,7 @@ class VIntIteratorKotlin<T>(val delegate:kotlin.collections.IntIterator, val a: 
     inline fun nextInt(): T = a.fromInt(delegate.nextInt())
     override inline fun forEachRemaining(op: Consumer<in T>) { while (delegate.hasNext()) op.accept(nextInt()) }
 }
-class MutableVIntIteratorKotlin<T>(val delegate:kotlin.collections.IntIterator, val a: ValueIntAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, MutableIterable<T> {
+class MutableIteratorVIntKotlin<T>(val delegate:kotlin.collections.IntIterator, val a: ValueIntAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, MutableIterable<T> {
     override inline fun iterator(): PrimitiveIterator<T, Consumer<in T>> = this
     override inline fun hasNext(): Boolean = delegate.hasNext()
     override inline fun remove(): Unit = (delegate as MutableIterator<Int>).remove()
@@ -37,7 +37,7 @@ class MutableVIntIteratorKotlin<T>(val delegate:kotlin.collections.IntIterator, 
     inline fun nextInt(): T = a.fromInt(delegate.nextInt())
     override inline fun forEachRemaining(op: Consumer<in T>) { while (delegate.hasNext()) op.accept(nextInt()) }
 }
-class VIntIteratorGeneric<T>(val delegate:Iterator<Int>, val a: ValueIntAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, Iterable<T> {
+class IteratorVIntGeneric<T>(val delegate:Iterator<Int>, val a: ValueIntAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, Iterable<T> {
     override inline fun iterator(): PrimitiveIterator<T, Consumer<in T>> = this
     override inline fun hasNext(): Boolean = delegate.hasNext()
     override inline fun remove(): Unit = throw UnsupportedOperationException("remove")
@@ -45,7 +45,7 @@ class VIntIteratorGeneric<T>(val delegate:Iterator<Int>, val a: ValueIntAdapter<
     inline fun nextInt(): T = a.fromInt(delegate.next())
     override inline fun forEachRemaining(op: Consumer<in T>) { while (delegate.hasNext()) op.accept(nextInt()) }
 }
-class MutableVIntIteratorGeneric<T>(val delegate:MutableIterator<Int>, val a: ValueIntAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, MutableIterable<T> {
+class MutableIteratorVIntGeneric<T>(val delegate:MutableIterator<Int>, val a: ValueIntAdapter<T>): PrimitiveIterator<T, Consumer<in T>>, MutableIterable<T> {
     override inline fun iterator(): PrimitiveIterator<T, Consumer<in T>> = this
     override inline fun hasNext(): Boolean = delegate.hasNext()
     override inline fun remove(): Unit = delegate.remove()
@@ -54,24 +54,24 @@ class MutableVIntIteratorGeneric<T>(val delegate:MutableIterator<Int>, val a: Va
     override inline fun forEachRemaining(op: Consumer<in T>) { while (delegate.hasNext()) op.accept(nextInt()) }
 }
 context(a: ValueIntAdapter<T>) fun <T> vIteratorFrom(delegate:Iterator<Int>): PrimitiveIterator<T, Consumer<in T>> = when(delegate) {
-    is java.util.PrimitiveIterator.OfInt -> VIntIteratorJava(delegate, a)
-    is kotlin.collections.IntIterator -> VIntIteratorKotlin(delegate, a)
-    else -> VIntIteratorGeneric(delegate, a)
+    is java.util.PrimitiveIterator.OfInt -> IteratorVIntJava(delegate, a)
+    is kotlin.collections.IntIterator -> IteratorVIntKotlin(delegate, a)
+    else -> IteratorVIntGeneric(delegate, a)
 }
 context(a: ValueIntAdapter<T>) fun <T> mutableVIteratorFrom(delegate:MutableIterator<Int>): MutableIterator<T> = when(delegate) {
-    is java.util.PrimitiveIterator.OfInt -> MutableVIntIteratorJava(delegate, a)
-    is kotlin.collections.IntIterator -> MutableVIntIteratorKotlin(delegate, a)
-    else -> MutableVIntIteratorGeneric(delegate, a)
+    is java.util.PrimitiveIterator.OfInt -> MutableIteratorVIntJava(delegate, a)
+    is kotlin.collections.IntIterator -> MutableIteratorVIntKotlin(delegate, a)
+    else -> MutableIteratorVIntGeneric(delegate, a)
 }
 context(a: ValueIntAdapter<T>) fun <T> vIteratableFrom(delegate:Iterator<Int>): Iterable<T> = when(delegate) {
-    is java.util.PrimitiveIterator.OfInt -> VIntIteratorJava(delegate, a)
-    is kotlin.collections.IntIterator -> VIntIteratorKotlin(delegate, a)
-    else -> VIntIteratorGeneric(delegate, a)
+    is java.util.PrimitiveIterator.OfInt -> IteratorVIntJava(delegate, a)
+    is kotlin.collections.IntIterator -> IteratorVIntKotlin(delegate, a)
+    else -> IteratorVIntGeneric(delegate, a)
 }
 context(a: ValueIntAdapter<T>) fun <T> mutableVIteratableFrom(delegate:MutableIterator<Int>): MutableIterable<T> = when(delegate) {
-    is java.util.PrimitiveIterator.OfInt -> MutableVIntIteratorJava(delegate, a)
-    is kotlin.collections.IntIterator -> MutableVIntIteratorKotlin(delegate, a)
-    else -> MutableVIntIteratorGeneric(delegate, a)
+    is java.util.PrimitiveIterator.OfInt -> MutableIteratorVIntJava(delegate, a)
+    is kotlin.collections.IntIterator -> MutableIteratorVIntKotlin(delegate, a)
+    else -> MutableIteratorVIntGeneric(delegate, a)
 }
     
 class VIteratorIndexedValueInt<T>(val delegate:Iterator<IndexedValue<Int>>, val a: ValueIntAdapter<T>): Iterator<IndexedValue<T>>, Iterable<IndexedValue<T>> {

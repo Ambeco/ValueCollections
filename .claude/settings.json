@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew *)",
+      "Bash(gradlew.bat *)",
+      "Bash(./gradlew.bat *)",
+      "PowerShell(.\\gradlew.bat *)",
+      "PowerShell(gradlew.bat *)"
+    ]
+  }
+}
