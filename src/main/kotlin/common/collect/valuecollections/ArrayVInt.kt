@@ -27,8 +27,8 @@ class ArrayVInt<T>(val collection:IntArray, override val NULL_VALUE: IntBits=Int
 
     override inline fun indexOfBits(bits: IntBits) = collection.indexOf(bits)
     
-    override inline operator fun equals(other: Any?): Boolean = collection == other
-    override inline fun hashCode(): Int = collection.hashCode()
+    override inline operator fun equals(other: Any?): Boolean = other is ArrayVInt<*> && collection.contentEquals(other.collection)
+    override inline fun hashCode(): Int = collection.contentHashCode()
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toStringV() to print K.toString", ReplaceWith("toStringV()"))
     override inline fun toString(): String = collection.toString()

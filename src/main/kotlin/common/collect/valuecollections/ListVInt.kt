@@ -9,7 +9,6 @@ import kotlin.also
 
 // IntList -> VIntList
 interface VIntList<T>: VIntIndexedCollection<T>
-context(a: ValueIntAdapter<T>) inline operator fun <T> VIntList<T>.get(index: Int): T = if (index in 0..<size) elementAtIndex(index) else throw IndexOutOfBoundsException("$index not in 0..$size")
 
 interface ModifiableVIntList<T>: VIntList<T>, ModifiableVIntIndexedCollection<T>
 context(a: ValueIntAdapter<T>) inline operator fun <T> ModifiableVIntList<T>.set(index: Int, value: T) {setBits(index, a.toInt(value)) }
@@ -58,7 +57,7 @@ class ArrayVIntList<T>(val collection: MutableIntList = MutableIntList(), overri
     override inline fun removeAllIndexedBits(crossinline predicate: (index: Int, bits: IntBits) -> Boolean): Boolean = throw NotImplementedError()
     
     override inline fun hashCode() = collection.hashCode()
-    override inline fun equals(other: Any?) = collection == other
+    override inline fun equals(other: Any?) = other is ArrayVIntList<*> && collection == other.collection
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toStringV() to print K.toString", ReplaceWith("toStringV()"))
     override inline fun toString() = collection.toString() // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!

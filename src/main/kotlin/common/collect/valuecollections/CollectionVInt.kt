@@ -97,7 +97,7 @@ context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.forEachIndexed(c
  inline fun <T> CollectionVInt<T>.containsAll(bits: IntList): Boolean = bits.first { !containsBits(it) } == NULL_VALUE
  inline fun <T> CollectionVInt<T>.containsAll(bits: IntSet): Boolean = bits.first { !containsBits(it) } == NULL_VALUE
  inline fun <T> CollectionVInt<T>.containsAll(bits: CollectionVInt<T>): Boolean = bits.anyBits({ !containsBits(it) }) == NULL_VALUE
-context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.containsAll(other: Collection<T>): Boolean = other.any({ !contains(it) })
+context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.containsAll(other: Collection<T>): Boolean = other.all({ contains(it) })
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.single(): T = single {true}
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.singleOr(provider: ()->T): T = fromIntOr(singleBits {true}, provider)
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.singleOrElse(defaultValue:T): T = singleOr {defaultValue}
@@ -159,8 +159,8 @@ context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.toHashSet(): Has
  inline fun <T> CollectionVInt<T>.toVIntArray(): ArrayVInt<T> = this as? ArrayVInt<T> ?: ArrayVInt(this)
  inline fun <T> CollectionVInt<T>.toArrayGenericBits(): Array<IntBits> = (this as? ArrayVInt<T>)?.collection?.toTypedArray() ?: Array(size,{NULL_VALUE}).also { c->forEachIndexedBits{ i, e-> c[i]=e}}
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.asSequence(): Sequence<T> = asIterable().asSequence()
- inline fun <T> CollectionVInt<T>.asList(): VIntList<T> = toList()
-context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.asListGeneric(): List<T> = toListGeneric()
+ inline fun <T> CollectionVInt<T>.asList(): VIntList<T> = throw NotImplementedError()
+context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.asListGeneric(): List<T> = throw NotImplementedError()
  inline fun <T> CollectionVInt<T>.contentEquals(other: CollectionVInt<T>?): Boolean = other != null && size == other.size && allBits { other.containsBits(it) }
 context(a: ValueIntAdapter<T>) inline fun <T, R> CollectionVInt<T>.flatMap(crossinline transform: (T) ->CollectionVInt<R>): ArrayVIntList<R> = flatMapTo(ArrayVIntList(size*2), transform)
 context(a: ValueIntAdapter<T>) inline fun <T, R> CollectionVInt<T>.flatMap(crossinline transform: (T) ->CollectionVLong<R>): ArrayVLongList<R> = flatMapTo(ArrayVLongList(size*2), transform)
@@ -192,7 +192,7 @@ context(a: ValueIntAdapter<T>) inline fun <T, R, C : MutableCollection<R>> Colle
 context(a: ValueIntAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R, C : MutableCollectionVInt<R>> CollectionVInt<T>.mapTo(destination: C, crossinline transform: (T) -> R): C = destination.also {forEach{destination.add(transform(it)) } }
 context(a: ValueIntAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R, C : MutableCollectionVLong<R>> CollectionVInt<T>.mapTo(destination: C, crossinline transform: (T) -> R): C = destination.also {forEach{destination.add(transform(it)) } }
 context(a: ValueIntAdapter<T>) inline fun <T, R, C : MutableCollection<R>> CollectionVInt<T>.mapTo(destination: C, crossinline transform: (T) -> R): C = destination.also {forEach{destination.add(transform(it)) } }
-context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.withIndex():CollectionVLong<IndexedVInt<T>> = with(IndexedVInt.VLongAdapter<T>()) {mapIndexedVLong{ i, e-> IndexedVInt.of(i,e)}}
+context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.withIndex():MutableVLongList<IndexedVInt<T>> = with(IndexedVInt.VLongAdapter<T>()) {mapIndexedVLong{ i, e-> IndexedVInt.of(i,e)}}
  inline fun <T> CollectionVInt<T>.distinct(): SetVInt<T> = ArraySetVInt<T>(size).also{ c-> forEachBits {c.addBits(it)}}
 context(a: ValueIntAdapter<T>) inline fun <T, K> CollectionVInt<T>.distinctBy(crossinline selector: (T) -> K): SetVInt<T> {
     val distinct = HashSet<K>()
@@ -220,6 +220,16 @@ context(a: ValueIntAdapter<T>) inline fun <T, R> CollectionVInt<T>.foldIndexed(i
         override inline fun invoke(i:Int, e: T) { acc = operation(i, acc, e) }
     }
     forEachIndexed(accumulator)
+    return accumulator.acc
+}
+inline fun <T, R> CollectionVInt<T>.foldBits(initial: R, crossinline operation: (acc: R, IntBits) -> R): R = foldIndexedBits(initial,{ _, acc, e->operation(acc,e)})
+inline fun <T, R> CollectionVInt<T>.foldIndexedBits(initial: R, crossinline operation: (index: Int, acc: R, IntBits) -> R): R {
+    val accumulator = object: (Int,IntBits)->Unit {
+        var index=0
+        var acc = initial
+        override inline fun invoke(i:Int, e: IntBits) { acc = operation(i, acc, e) }
+    }
+    forEachIndexedBits(accumulator)
     return accumulator.acc
 }
 context(a: ValueIntAdapter<T>) inline fun <T, C: CollectionVInt<T>> C.onEach(crossinline action: (T) -> Unit): C = apply{forEach(action)}
@@ -271,7 +281,7 @@ context(a: ValueIntAdapter<T>) inline fun <T, R : Comparable<R>> CollectionVInt<
 context(a: ValueIntAdapter<T>) inline fun <T, R> CollectionVInt<T>.minOfWith(comparator: Comparator<in R>, crossinline selector: (T) -> R): R = mapReduce(selector) { min, e-> if (comparator.compare(e,min)<1) e else min}
 context(a: ValueIntAdapter<T>) inline fun <T, R> CollectionVInt<T>.minOfWithOrNull(comparator: Comparator<in R>, crossinline selector: (T) -> R): R? = if(isEmpty()) null else minOfWith(comparator, selector)
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.none(): Boolean = size==0
-context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.none(crossinline predicate: (T) -> Boolean): Boolean = any { !predicate(it) }
+context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.none(crossinline predicate: (T) -> Boolean): Boolean = !any(predicate)
 context(a: ValueIntAdapter<T>) inline fun <T : Comparable<T>> CollectionVInt<T>.sorted(): ArrayVIntList<T> = ArrayVIntList<T>(this).also{it.sort()}
 context(a: ValueIntAdapter<T>) inline fun <T : Comparable<T>> CollectionVInt<T>.sortedArray(): ArrayVInt<T> = toVIntArray().also{it.sort()}
 context(a: ValueIntAdapter<T>) inline fun <T : Comparable<T>> CollectionVInt<T>.sortedArrayDescending(): ArrayVInt<T> = toVIntArray().also{it.sortDescending()}
@@ -345,13 +355,14 @@ context(a: ValueIntAdapter<T>) inline fun <T, A : Appendable> CollectionVInt<T>.
     val appender = object: (Int,T)-> Boolean {
         var count=0
         override inline fun invoke(index: Int, e: T): Boolean {
-            if (limit<0 || count++ < limit) {
+            if (limit<0 || count < limit) {
+                count++
                 if (count != 1) buffer.append(separator)
                 buffer.append(transform(e))
-                if (count < limit)
+                if (limit<0 || count < limit)
                     return false
             }
-            if (count >= limit)
+            if (limit>=0 && count >= limit)
                 buffer.append(truncated)
             return true
         }

@@ -40,17 +40,17 @@ context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.asCollect
 context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.add(element: T): Boolean = addBits(a.toInt(element))
 context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.addAll(elements: Collection<T>): Boolean {
     ensureCapacity(size+elements.size)
-    return elements.all { add(it) }
+    return elements.fold(true) {acc,e-> add(e) || acc }
 }
  inline fun <T> MutableCollectionVInt<T>.addAll(elements: CollectionVInt<T>): Boolean {
     ensureCapacity(size+elements.size)
-    return elements.allBits { addBits(it) }
+     return elements.foldBits(true) {acc,e-> addBits(e) || acc }
 }
 context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.addAll(elements: Array<out T>): Boolean {
     ensureCapacity(size+elements.size)
-    return elements.all { add(it) }
+    return elements.fold(true) {acc,e-> add(e) || acc }
 }
-context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.addAll(elements: Iterable<T>): Boolean = elements.all { add(it) }
+context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.addAll(elements: Iterable<T>): Boolean = elements.fold(true) {acc,e-> add(e) || acc }
 context(a: ValueIntAdapter<T>) inline operator fun <T> MutableCollectionVInt<T>.plusAssign(elements: Array<out T>): Unit = check(addAll(elements))
 context(a: ValueIntAdapter<T>) inline operator fun <T> MutableCollectionVInt<T>.plusAssign(elements: Collection<T>): Unit = check(addAll(elements))
 context(a: ValueIntAdapter<T>) inline operator fun <T> MutableCollectionVInt<T>.plusAssign(elements: Iterable<T>): Unit = check(addAll(elements))

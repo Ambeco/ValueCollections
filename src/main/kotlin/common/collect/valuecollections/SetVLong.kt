@@ -30,7 +30,28 @@ class ArraySetVLong<T>(val collection: MutableLongSet, override val NULL_VALUE: 
     }
     
     override inline fun clear()  = collection.clear()
+    override inline fun hashCode() = collection.hashCode()
+    override inline fun equals(other: Any?) = other is ArraySetVLong<*> && collection == other.collection
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toStringV() to print K.toString", ReplaceWith("toStringV()"))
     override inline fun toString(): String = collection.toString()
 }
+
+
+private val EmptySetVLong: SetVLong<Nothing> = ArraySetVLong(0)
+@Suppress("UNCHECKED_CAST")
+fun <T>emptySetVLong(): SetVLong<T> = EmptySetVLong as SetVLong<T>
+@Suppress("UNCHECKED_CAST")
+fun <T>vLongSetOf(): SetVLong<T> = EmptySetVLong as SetVLong<T>
+context(a: ValueLongAdapter<T>) inline fun <T>vLongSetOf(element1: T): SetVLong<T> = mutableSetVLongOf(element1)
+context(a: ValueLongAdapter<T>) inline fun <T>vLongSetOf(element1: T, element2: T): SetVLong<T> = mutableSetVLongOf(element1, element2)
+context(a: ValueLongAdapter<T>) inline fun <T>vLongSetOf(element1: T, element2: T, element3: T): SetVLong<T> = mutableSetVLongOf(element1, element2, element3)
+context(a: ValueLongAdapter<T>) inline fun <T>vLongSetOf(vararg elements: T): SetVLong<T> = ArraySetVLong<T>(elements.size).apply { plusAssign(elements) }
+inline fun <T>mutableSetVLongOf(): ArraySetVLong<T> = ArraySetVLong(8)
+context(a: ValueLongAdapter<T>) inline fun <T>mutableSetVLongOf(element1: T): ArraySetVLong<T>
+        = ArraySetVLong<T>(1).also { it += element1 }
+context(a: ValueLongAdapter<T>) inline fun <T>mutableSetVLongOf(element1: T, element2: T): ArraySetVLong<T>
+        = ArraySetVLong<T>(2).also { it += element1; it += element2 }
+context(a: ValueLongAdapter<T>) inline fun <T>mutableSetVLongOf(element1: T, element2: T, element3: T): ArraySetVLong<T>
+        = ArraySetVLong<T>(3).also { it += element1; it += element2; it += element3 }
+context(a: ValueLongAdapter<T>) inline fun <T>mutableSetVLongOf(vararg elements: T): ArraySetVLong<T> = ArraySetVLong<T>(elements.size).apply { plusAssign(elements) }

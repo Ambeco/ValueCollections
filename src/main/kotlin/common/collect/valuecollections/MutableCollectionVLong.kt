@@ -7,6 +7,7 @@
 package mpd.com.common.collect.valuecollections
 
 import kotlin.collections.all
+import kotlin.collections.fold
 
 interface ModifiableCollectionVLong<T>: CollectionVLong<T> {
     context(a: ValueLongAdapter<T>) fun asModifiableIterable(): MutableIterable<T>
@@ -39,17 +40,17 @@ context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.asColle
 context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.add(element: T): Boolean = addBits(a.toLong(element))
 context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.addAll(elements: Collection<T>): Boolean {
     ensureCapacity(size+elements.size)
-    return elements.all { add(it) }
+    return elements.fold(true) {acc,e-> add(e) || acc }
 }
  inline fun <T> MutableCollectionVLong<T>.addAll(elements: CollectionVLong<T>): Boolean {
     ensureCapacity(size+elements.size)
-    return elements.allBits { addBits(it) }
+     return elements.foldBits(true) {acc,e-> addBits(e) || acc }
 }
 context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.addAll(elements: Array<out T>): Boolean {
     ensureCapacity(size+elements.size)
-    return elements.all { add(it) }
+    return elements.fold(true) {acc,e-> add(e) || acc }
 }
-context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.addAll(elements: Iterable<T>): Boolean = elements.all { add(it) }
+context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.addAll(elements: Iterable<T>): Boolean = elements.fold(true) {acc,e-> add(e) || acc }
 context(a: ValueLongAdapter<T>) inline operator fun <T> MutableCollectionVLong<T>.plusAssign(elements: Array<out T>): Unit = check(addAll(elements))
 context(a: ValueLongAdapter<T>) inline operator fun <T> MutableCollectionVLong<T>.plusAssign(elements: Collection<T>): Unit = check(addAll(elements))
 context(a: ValueLongAdapter<T>) inline operator fun <T> MutableCollectionVLong<T>.plusAssign(elements: Iterable<T>): Unit = check(addAll(elements))

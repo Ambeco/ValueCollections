@@ -152,6 +152,7 @@ value class IndexedVInt<T>(val bits: Long) {
 
     companion object {
         context(a: ValueIntAdapter<T>) inline fun<T> of(index:Int, value: T) = IndexedVInt<T>(index, a.toInt(value))
+        context(a: ValueIntAdapter<T>) inline fun<T> ofBits(index:Int, bits: IntBits) = IndexedVInt<T>(index, bits)
     }
     
     class VLongAdapter<T>: ValueLongAdapter<IndexedVInt<T>> {
@@ -168,5 +169,6 @@ data class IndexedVLong<T>(var index: Int, var secondBits: LongBits) {
 
     companion object {
         context(a: ValueLongAdapter<T>) inline fun<T> of(index:Int, value: T) = IndexedVLong<T>(index, a.toLong(value))
+        inline fun<T> ofBits(index:Int, bits: LongBits) = IndexedVLong<T>(index, bits)
     }
 }

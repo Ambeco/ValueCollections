@@ -152,8 +152,8 @@ context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.toHashSet(): H
  inline fun <T> CollectionVLong<T>.toVLongArray(): ArrayVLong<T> = this as? ArrayVLong<T> ?: ArrayVLong(this)
  inline fun <T> CollectionVLong<T>.toArrayGenericBits(): Array<LongBits> = (this as? ArrayVLong<T>)?.collection?.toTypedArray() ?: Array(size,{NULL_VALUE}).also { c->forEachIndexedBits{ i, e-> c[i]=e}}
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.asSequence(): Sequence<T> = asIterable().asSequence()
- inline fun <T> CollectionVLong<T>.asList(): VLongList<T> = toList()
-context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.asListGeneric(): List<T> = toListGeneric()
+ inline fun <T> CollectionVLong<T>.asList(): VLongList<T> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.asListGeneric(): List<T> = throw NotImplementedError()
  inline fun <T> CollectionVLong<T>.contentEquals(other: CollectionVLong<T>?): Boolean = other != null && size == other.size && allBits { other.containsBits(it) }
 context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.flatMap(crossinline transform: (T) ->CollectionVInt<R>): ArrayVIntList<R> = flatMapTo(ArrayVIntList(size*2), transform)
 context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.flatMap(crossinline transform: (T) ->CollectionVLong<R>): ArrayVLongList<R> = flatMapTo(ArrayVLongList(size*2), transform)
@@ -213,6 +213,16 @@ context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.foldIndexed
         override inline fun invoke(i:Int, e: T) { acc = operation(i, acc, e) }
     }
     forEachIndexed(accumulator)
+    return accumulator.acc
+}
+inline fun <T, R> CollectionVLong<T>.foldBits(initial: R, crossinline operation: (acc: R, LongBits) -> R): R = foldIndexedBits(initial,{ _, acc, e->operation(acc,e)})
+inline fun <T, R> CollectionVLong<T>.foldIndexedBits(initial: R, crossinline operation: (index: Int, acc: R, LongBits) -> R): R {
+    val accumulator = object: (Int,LongBits)->Unit {
+        var index=0
+        var acc = initial
+        override inline fun invoke(i:Int, e: LongBits) { acc = operation(i, acc, e) }
+    }
+    forEachIndexedBits(accumulator)
     return accumulator.acc
 }
 context(a: ValueLongAdapter<T>) inline fun <T, C: CollectionVLong<T>> C.onEach(crossinline action: (T) -> Unit): C = apply{forEach(action)}

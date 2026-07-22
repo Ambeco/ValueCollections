@@ -86,7 +86,7 @@ class MutMapVLongFloat<K>(override val collection: MutableLongFloatMap = Mutable
     fun clear() = collection.clear()
     fun trim() = collection.trim()
     override inline fun hashCode() = collection.hashCode()
-    override inline fun equals(other: Any?) = collection == other
+    override inline fun equals(other: Any?) = other is MutMapVLongFloat<*> && collection == other.collection
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toStringV() to print K.toString", ReplaceWith("toStringV()"))
     override inline fun toString() = collection.toString() // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!

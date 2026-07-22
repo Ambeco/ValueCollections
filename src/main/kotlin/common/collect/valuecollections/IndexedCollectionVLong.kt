@@ -58,7 +58,7 @@ context(a: ValueLongAdapter<T>) inline fun <T> VLongIndexedCollection<T>.element
 context(a: ValueLongAdapter<T>) inline fun <T> VLongIndexedCollection<T>.elementAtOrNull(index: Int): T? = if(index in 0..<size) elementAtIndex(index) else null
 context(a: ValueLongAdapter<T>) inline fun <T> VLongIndexedCollection<T>.elementAtOrElse(index: Int, defaultValue: (index:Int) -> T): T = if(index in 0..<size)elementAtIndex(index) else defaultValue(index)
 inline fun <T> VLongIndexedCollection<T>.getBits(index: Int): LongBits = if (index in 0..<size) bitsAtIndex(index) else NULL_VALUE
-context(a: ValueLongAdapter<T>) inline fun <T> VLongIndexedCollection<T>.get(index: Int): T = if (index in 0..<size) elementAtIndex(index) else throw IndexOutOfBoundsException("$index not in 0..$size")
+context(a: ValueLongAdapter<T>) inline operator fun <T> VLongIndexedCollection<T>.get(index: Int): T = if (index in 0..<size) elementAtIndex(index) else throw IndexOutOfBoundsException("$index not in 0..$size")
 context(a: ValueLongAdapter<T>) inline fun <T> VLongIndexedCollection<T>.getOrElse(index: Int, defaultValue: (index:Int) -> T): T = if (index in 0..<size) elementAtIndex(index) else defaultValue(index)
 context(a: ValueLongAdapter<T>) inline fun <T> VLongIndexedCollection<T>.getOrNull(index: Int): T? = if (index in 0..<size) elementAtIndex(index) else null
 context(a: ValueLongAdapter<T>) inline fun <T> VLongIndexedCollection<T>.findLast(crossinline predicate: (T) -> Boolean): T? = elementAtOrNull(indexOfLast(predicate))

@@ -6,7 +6,6 @@ import androidx.collection.MutableLongList
 
 // LongList -> VLongList
 interface VLongList<T>: VLongIndexedCollection<T>
-context(a: ValueLongAdapter<T>) inline operator fun <T> VLongList<T>.get(index: Int): T = if (index in 0..<size) elementAtIndex(index) else throw IndexOutOfBoundsException("$index not in 0..$size")
 
 interface ModifiableVLongList<T>: VLongList<T>, ModifiableVLongIndexedCollection<T>
 context(a: ValueLongAdapter<T>) inline operator fun <T> ModifiableVLongList<T>.set(index: Int, value: T) {setBits(index, a.toLong(value)) }
@@ -53,7 +52,7 @@ class ArrayVLongList<T>(val collection: MutableLongList = MutableLongList(), ove
     override inline fun removeAllIndexedBits(crossinline predicate: (index: Int, bits: LongBits) -> Boolean): Boolean = throw NotImplementedError()
 
     override inline fun hashCode() = collection.hashCode()
-    override inline fun equals(other: Any?) = collection == other
+    override inline fun equals(other: Any?) = other is ArrayVLongList<*> && collection == other.collection
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toStringV() to print K.toString", ReplaceWith("toStringV()"))
     override inline fun toString() = collection.toString() // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
@@ -64,7 +63,7 @@ private val EmptyVLongList: VLongList<Nothing> = ArrayVLongList(0)
 fun <T>emptyVLongList(): VLongList<T> = EmptyVLongList as VLongList<T>
 @Suppress("UNCHECKED_CAST")
 fun <T>vLongListOf(): VLongList<T> = EmptyVLongList as VLongList<T>
-/*
+
 context(a: ValueLongAdapter<T>) inline fun <T>vLongListOf(element1: T): VLongList<T> = mutableVLongListOf(element1)
 context(a: ValueLongAdapter<T>) inline fun <T>vLongListOf(element1: T, element2: T): VLongList<T> = mutableVLongListOf(element1, element2)
 context(a: ValueLongAdapter<T>) inline fun <T>vLongListOf(element1: T, element2: T, element3: T): VLongList<T> = mutableVLongListOf(element1, element2, element3)
@@ -77,4 +76,3 @@ context(a: ValueLongAdapter<T>) inline fun <T>mutableVLongListOf(element1: T, el
 context(a: ValueLongAdapter<T>) inline fun <T>mutableVLongListOf(element1: T, element2: T, element3: T): ArrayVLongList<T>
         = ArrayVLongList<T>(2).also { it += element1; it += element2; it += element3 }
 context(a: ValueLongAdapter<T>) inline fun <T>mutableVLongListOf(vararg elements: T): ArrayVLongList<T> = ArrayVLongList<T>(elements.size).apply { plusAssign(elements as Array<T>) }
-*/

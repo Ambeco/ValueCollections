@@ -54,7 +54,7 @@ context(a: ValueIntAdapter<T>) inline fun <T> VIntIndexedCollection<T>.elementAt
 context(a: ValueIntAdapter<T>) inline fun <T> VIntIndexedCollection<T>.elementAtOrNull(index: Int): T? = if(index in 0..<size) elementAtIndex(index) else null
 context(a: ValueIntAdapter<T>) inline fun <T> VIntIndexedCollection<T>.elementAtOrElse(index: Int, defaultValue: (index:Int) -> T): T = if(index in 0..<size)elementAtIndex(index) else defaultValue(index)
 inline fun <T> VIntIndexedCollection<T>.getBits(index: Int): IntBits = if (index in 0..<size) bitsAtIndex(index) else NULL_VALUE
-context(a: ValueIntAdapter<T>) inline fun <T> VIntIndexedCollection<T>.get(index: Int): T = if (index in 0..<size) elementAtIndex(index) else throw IndexOutOfBoundsException("$index not in 0..$size")
+context(a: ValueIntAdapter<T>) inline operator fun <T> VIntIndexedCollection<T>.get(index: Int): T = if (index in 0..<size) elementAtIndex(index) else throw IndexOutOfBoundsException("$index not in 0..$size")
 context(a: ValueIntAdapter<T>) inline fun <T> VIntIndexedCollection<T>.getOrElse(index: Int, defaultValue: (index:Int) -> T): T = if (index in 0..<size) elementAtIndex(index) else defaultValue(index)
 context(a: ValueIntAdapter<T>) inline fun <T> VIntIndexedCollection<T>.getOrNull(index: Int): T? = if (index in 0..<size) elementAtIndex(index) else null
 context(a: ValueIntAdapter<T>) inline fun <T> VIntIndexedCollection<T>.findLast(crossinline predicate: (T) -> Boolean): T? = elementAtOrNull(indexOfLast(predicate))

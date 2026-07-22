@@ -9,7 +9,7 @@ aggressive inlining should eliminate any boxing, and also any unnecessary captur
 overhead should be one additional allocation per collection.
 
 `IntArray` and `LongArray` extension methods that returned `List<X>` are reimplemented to instead return 
-`ListVInt` or `ListVLong`, to reduce allocations. These are the `filter`, `take`, `drop`, `slice`, `sorted`,
+`VIntList` or `ListVLong`, to reduce allocations. These are the `filter`, `take`, `drop`, `slice`, `sorted`,
 `distinct`, `intersect`, `subtract`, and `union` methods.
 
 ## Java Collections
@@ -52,15 +52,15 @@ https://github.com/androidx/androidx/tree/0a6843ad7cd148b7128d4db9e3c9299c5e58fa
   - `class SparseArrayVInt<T>` (TODO)
   - `class SparseArrayVLong<T>` (TODO)
 - Lists (~95% Implemented)
-  - `class ArrayListVInt<T>`
+  - `class MutableVIntList<T>`
   - `class ArrayListVLong<T>`
   - `class CircularArrayVInt<T>` (TODO)
   - `class CircularArrayVLong<T>` (TODO)
-  - `interface ListVInt<T>`
+  - `interface VIntList<T>`
   - `interface ListVLong<T>` 
-  - `interface ModifiableListVInt<T>`
+  - `interface VIntList<T>`
   - `interface ModifiableListVLong<T>`
-  - `interface MutableListVInt<T>`
+  - `interface MutableVIntList<T>`
   - `interface MutableListVLong<T>`
 - Sets  (~95% Implemented)
   - `class ArraySetVInt<T>`
