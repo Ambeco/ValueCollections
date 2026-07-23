@@ -75,7 +75,7 @@ inline val <K,V> MapVObjInt<K,V>.isEmpty get() = size == 0
 inline fun <K,V> MapVObjInt<K,V>.isNotEmpty() = size > 0
 inline fun <K,V> MapVObjInt<K,V>.containsKey(k: K) = getBits(k) != NULL_VALUE_BITS
 context(va: ValueIntAdapter<V>) inline fun <K,V> MapVObjInt<K,V>.containsValue(findV: V) = anyBits { k, v-> v==findV} != null
-context(va: ValueIntAdapter<V>) inline fun <K,V, A : Appendable> MapVObjInt<K,V>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): A {
+context(va: ValueIntAdapter<V>) inline fun <K,V, A : Appendable> MapVObjInt<K,V>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): A {
     val appender = object: (Int,K,V)-> Boolean {
         var count=0
         override inline fun invoke(index: Int, k:K, v:V): Boolean {
@@ -95,7 +95,7 @@ context(va: ValueIntAdapter<V>) inline fun <K,V, A : Appendable> MapVObjInt<K,V>
     buffer.append(postfix)
     return buffer
 }
-context(va: ValueIntAdapter<V>) inline fun <K,V> MapVObjInt<K,V>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): String
+context(va: ValueIntAdapter<V>) inline fun <K,V> MapVObjInt<K,V>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): String
         = joinTo(StringBuilder(), separator, prefix, postfix, limit, truncated, transform).toString()
 context(va: ValueIntAdapter<V>) inline fun <K,V> MapVObjInt<K,V>.toStringV() = joinToString(", ","{","}")
 

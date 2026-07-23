@@ -353,18 +353,17 @@ context(ta: ValueIntAdapter<T>, ra: ValueIntAdapter<R>, va: ValueLongAdapter<V>)
     forEachIndexed { i, e -> if (i < other.size) r.add(i, transform(e, other.get(i))) }
     return r
 }
-context(a: ValueIntAdapter<T>) inline fun <T, A : Appendable> CollectionVInt<T>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", crossinline transform: ((T) -> CharSequence) = { it.toString() }): A {
+context(a: ValueIntAdapter<T>) inline fun <T, A : Appendable> CollectionVInt<T>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: ((T) -> CharSequence) = { it.toString() }): A {
     val appender = object: (Int,T)-> Boolean {
         var count=0
         override inline fun invoke(index: Int, e: T): Boolean {
-            if (limit<0 || count < limit) {
-                count++
+            if (limit<0 || count++ < limit) {
                 if (count != 1) buffer.append(separator)
                 buffer.append(transform(e))
-                if (limit<0 || count < limit)
+                if (count < limit)
                     return false
             }
-            if (limit>=0 && count >= limit)
+            if (count > limit)
                 buffer.append(truncated)
             return true
         }
@@ -374,7 +373,7 @@ context(a: ValueIntAdapter<T>) inline fun <T, A : Appendable> CollectionVInt<T>.
     buffer.append(postfix)
     return buffer
 }
-context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", crossinline transform: ((T) -> CharSequence) = { it.toString() }): String 
+context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: ((T) -> CharSequence) = { it.toString() }): String 
     = joinTo(StringBuilder(), separator, prefix, postfix, limit, truncated, transform).toString()
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.toStringV() = joinToString(", ","{","}")
 context(a: ValueIntAdapter<T>) inline fun <S, R : S, T> CollectionVInt<T>.mapReduce(crossinline map:(T)->S, crossinline operation: (acc: S, S) -> S): S = mapReduceIndexed(map){ i, acc, e->operation(acc,e)}

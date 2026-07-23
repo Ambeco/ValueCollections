@@ -91,7 +91,7 @@ context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.forEachIndexed
  inline fun <T> CollectionVLong<T>.containsAll(bits: LongList): Boolean = bits.first { !containsBits(it) } == NULL_VALUE
  inline fun <T> CollectionVLong<T>.containsAll(bits: LongSet): Boolean = bits.first { !containsBits(it) } == NULL_VALUE
  inline fun <T> CollectionVLong<T>.containsAll(bits: CollectionVLong<T>): Boolean = bits.anyBits({ !containsBits(it) }) == NULL_VALUE
-context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.containsAll(other: Collection<T>): Boolean = other.any({ !contains(it) })
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.containsAll(other: Collection<T>): Boolean = other.all({ contains(it) })
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.single(): T = single {true}
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.singleOr(provider: ()->T): T = fromLongOr(singleBits {true}, provider)
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.singleOrElse(defaultValue:T): T = singleOr {defaultValue}
@@ -171,7 +171,7 @@ context(a: ValueLongAdapter<T>) inline fun <T, K, M : MutableMap<K, MutableListV
 context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R> CollectionVLong<T>.mapVInt(crossinline transform: (T) -> R): ArrayListVInt<R> = mapTo(ArrayListVInt<R>(size), transform)
 context(a: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R> CollectionVLong<T>.mapVLong(crossinline transform: (T) -> R): ArrayListVLong<R> = mapTo(ArrayListVLong<R>(size), transform)
 context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.mapGeneric(crossinline transform: (T) -> R): MutableList<R> = mapTo(ArrayList<R>(size), transform)
-Addcontext(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R> CollectionVLong<T>.mapIndexedVInt(crossinline transform: (index: Int, T) -> R): ArrayListVInt<R> = mapIndexedTo(ArrayListVInt<R>(size), transform)
+context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R> CollectionVLong<T>.mapIndexedVInt(crossinline transform: (index: Int, T) -> R): ArrayListVInt<R> = mapIndexedTo(ArrayListVInt<R>(size), transform)
 context(a: ValueLongAdapter<T>, ra: ValueLongAdapter<R>) inline fun <T, R> CollectionVLong<T>.mapIndexedVLong(crossinline transform: (index: Int, T) -> R): ArrayListVLong<R> = mapIndexedTo(ArrayListVLong<R>(size), transform)
 context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.mapIndexedGeneric(crossinline transform: (index: Int, T) -> R): List<R> = mapIndexedTo(ArrayList<R>(size), transform)
 context(a: ValueLongAdapter<T>, ra: ValueIntAdapter<R>) inline fun <T, R> CollectionVLong<T>.mapIndexedVIntNotNull(crossinline transform: (index: Int, T) -> R?): ArrayListVInt<R> = mapIndexedNotNullTo(ArrayListVInt<R>(size), transform)
@@ -277,7 +277,7 @@ context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> CollectionVLon
 context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.minOfWith(comparator: Comparator<in R>, crossinline selector: (T) -> R): R = mapReduce(selector) { min, e-> if (comparator.compare(e,min)<0) e else min}
 context(a: ValueLongAdapter<T>) inline fun <T, R> CollectionVLong<T>.minOfWithOrNull(comparator: Comparator<in R>, crossinline selector: (T) -> R): R? = if(isEmpty()) null else minOfWith(comparator, selector)
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.none(): Boolean = size==0
-context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.none(crossinline predicate: (T) -> Boolean): Boolean = any { !predicate(it) }
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.none(crossinline predicate: (T) -> Boolean): Boolean = !any(predicate)
 context(a: ValueLongAdapter<T>) inline fun <T: Comparable<T>> CollectionVLong<T>.sorted(): ArrayListVLong<T> = ArrayListVLong<T>(this).also{it.sort()}
 context(a: ValueLongAdapter<T>) inline fun <T: Comparable<T>> CollectionVLong<T>.sortedArray(): ArrayVLong<T> = toVLongArray().also{it.sort()}
 context(a: ValueLongAdapter<T>) inline fun <T: Comparable<T>> CollectionVLong<T>.sortedArrayDescending(): ArrayVLong<T> = toVLongArray().also{it.sortDescending()}
@@ -345,7 +345,7 @@ context(ta: ValueLongAdapter<T>, ra: ValueLongAdapter<R>, va: ValueLongAdapter<V
     forEachIndexed { i, e -> if (i < other.size) r.add(i, transform(e, other.get(i))) }
     return r
 }
-context(a: ValueLongAdapter<T>) inline fun <T, A : Appendable> CollectionVLong<T>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", crossinline transform: ((T) -> CharSequence) = { it.toString() }): A {
+context(a: ValueLongAdapter<T>) inline fun <T, A : Appendable> CollectionVLong<T>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: ((T) -> CharSequence) = { it.toString() }): A {
     val appender = object: (Int,T)-> Boolean {
         var count=0
         override inline fun invoke(index: Int, e: T): Boolean {
@@ -355,7 +355,7 @@ context(a: ValueLongAdapter<T>) inline fun <T, A : Appendable> CollectionVLong<T
                 if (count < limit)
                     return false
             }
-            if (count >= limit)
+            if (count > limit)
                 buffer.append(truncated)
             return true
         }
@@ -365,7 +365,7 @@ context(a: ValueLongAdapter<T>) inline fun <T, A : Appendable> CollectionVLong<T
     buffer.append(postfix)
     return buffer
 }
-context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", crossinline transform: ((T) -> CharSequence) = { it.toString() }): String
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: ((T) -> CharSequence) = { it.toString() }): String
         = joinTo(StringBuilder(), separator, prefix, postfix, limit, truncated, transform).toString()
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.toStringV() = joinToString(", ","{","}")
 context(a: ValueLongAdapter<T>) inline fun <S, R : S, T> CollectionVLong<T>.mapReduce(crossinline map:(T)->S, crossinline operation: (acc: S, S) -> S): S = mapReduceIndexed(map){ i, acc, e->operation(acc,e)}

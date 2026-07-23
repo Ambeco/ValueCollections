@@ -65,9 +65,9 @@ context(a: ValueIntAdapter<K>) inline fun <K> MapVIntFloat<K>.count(predicate: (
 context(a: ValueIntAdapter<K>) inline fun <K> MapVIntFloat<K>.contains(key: K) = collection.contains(a.toInt(key))
 context(a: ValueIntAdapter<K>) inline fun <K> MapVIntFloat<K>.containsKey(key: K) = collection.containsKey(a.toInt(key))
 inline fun <K> MapVIntFloat<K>.containsValue(value: Float) = collection.containsValue(value)
-context(a: ValueIntAdapter<K>) inline fun <K> MapVIntFloat<K>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...")
+context(a: ValueIntAdapter<K>) inline fun <K> MapVIntFloat<K>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...")
     = collection.joinToString(separator, prefix, postfix, limit, truncated) { k, v -> a.fromInt(k).toString()+"="+v.toString()} 
-context(a: ValueIntAdapter<K>) inline fun <K> MapVIntFloat<K>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", crossinline transform: (key: K, value: Float) -> CharSequence) 
+context(a: ValueIntAdapter<K>) inline fun <K> MapVIntFloat<K>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: (key: K, value: Float) -> CharSequence) 
     = collection.joinToString(separator, prefix, postfix, limit, truncated) { k, v -> transform(a.fromInt(k), v)}
 
 class MutMapVIntFloat<K>(override val collection: MutableIntFloatMap = MutableIntFloatMap()): MapVIntFloat<K> {

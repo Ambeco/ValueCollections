@@ -45,7 +45,7 @@ value class MyLongTestClass(val value: Long): Comparable<MyLongTestClass> {
     }
 }
 
-class ValueCollectionTest {
+class CollectionVIntTest {
     private fun simpleList(): ArrayListVInt<MyTestClass> = with (MyTestClass) {
         val array = ArrayListVInt<MyTestClass>(10)
         for (i in 0..9)

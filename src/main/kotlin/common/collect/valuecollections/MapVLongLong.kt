@@ -75,7 +75,7 @@ inline val <K,V> MapVLongLong<K,V>.isEmpty get() = size == 0
 inline fun <K,V> MapVLongLong<K,V>.isNotEmpty() = size > 0
 context(ka: ValueLongAdapter<K>) inline fun <K,V> MapVLongLong<K,V>.containsKey(k: K) = getBits(ka.toLong(k)) != NULL_VALUE_BITS
 context(va: ValueLongAdapter<V>) inline fun <K,V> MapVLongLong<K,V>.containsValue(findV: V) = anyBits { k, v-> v==findV} != NULL_KEY_BITS
-context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>) inline fun <K,V, A : Appendable> MapVLongLong<K,V>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): A {
+context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>) inline fun <K,V, A : Appendable> MapVLongLong<K,V>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): A {
     val appender = object: (Int,K,V)-> Boolean {
         var count=0
         override inline fun invoke(index: Int, k:K, v:V): Boolean {
@@ -95,7 +95,7 @@ context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>) inline fun <K,V, A : A
     buffer.append(postfix)
     return buffer
 }
-context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>) inline fun <K,V> MapVLongLong<K,V>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): String
+context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>) inline fun <K,V> MapVLongLong<K,V>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): String
         = joinTo(StringBuilder(), separator, prefix, postfix, limit, truncated, transform).toString()
 context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>) inline fun <K,V> MapVLongLong<K,V>.toStringV() = joinToString(", ","{","}")
 

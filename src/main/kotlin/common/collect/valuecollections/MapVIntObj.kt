@@ -76,7 +76,7 @@ inline val <K,V> MapVIntObj<K,V>.isEmpty get() = size == 0
 inline fun <K,V> MapVIntObj<K,V>.isNotEmpty() = size > 0
 context(ka: ValueIntAdapter<K>) inline fun <K,V> MapVIntObj<K,V>.containsKey(k: K) = getBits(ka.toInt(k)) != null
 inline fun <K,V> MapVIntObj<K,V>.containsValue(findV: V) = anyBits { k, v-> v==findV} != NULL_KEY_BITS
-context(ka: ValueIntAdapter<K>) inline fun <K,V, A : Appendable> MapVIntObj<K,V>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): A {
+context(ka: ValueIntAdapter<K>) inline fun <K,V, A : Appendable> MapVIntObj<K,V>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): A {
     val appender = object: (Int,K,V)-> Boolean {
         var count=0
         override inline fun invoke(index: Int, k:K, v:V): Boolean {
@@ -96,7 +96,7 @@ context(ka: ValueIntAdapter<K>) inline fun <K,V, A : Appendable> MapVIntObj<K,V>
     buffer.append(postfix)
     return buffer
 }
-context(ka: ValueIntAdapter<K>) inline fun <K,V> MapVIntObj<K,V>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): String
+context(ka: ValueIntAdapter<K>) inline fun <K,V> MapVIntObj<K,V>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): String
         = joinTo(StringBuilder(), separator, prefix, postfix, limit, truncated, transform).toString()
 context(ka: ValueIntAdapter<K>) inline fun <K,V> MapVIntObj<K,V>.toStringV() = joinToString(", ","{","}")
 

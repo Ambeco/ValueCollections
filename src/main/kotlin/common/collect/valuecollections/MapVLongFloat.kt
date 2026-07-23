@@ -63,9 +63,9 @@ context(a: ValueLongAdapter<K>) inline fun <K> MapVLongFloat<K>.count(predicate:
 context(a: ValueLongAdapter<K>) inline fun <K> MapVLongFloat<K>.contains(key: K) = collection.contains(a.toLong(key))
 context(a: ValueLongAdapter<K>) inline fun <K> MapVLongFloat<K>.containsKey(key: K) = collection.containsKey(a.toLong(key))
 inline fun <K> MapVLongFloat<K>.containsValue(value: Float) = collection.containsValue(value)
-context(a: ValueLongAdapter<K>) inline fun <K> MapVLongFloat<K>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...")
+context(a: ValueLongAdapter<K>) inline fun <K> MapVLongFloat<K>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...")
         = collection.joinToString(separator, prefix, postfix, limit, truncated) { k, v -> a.fromLong(k).toString()+"="+v.toString()} 
-context(a: ValueLongAdapter<K>) inline fun <K> MapVLongFloat<K>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = -1, truncated: CharSequence = "...", crossinline transform: (key: K, value: Float) -> CharSequence, )
+context(a: ValueLongAdapter<K>) inline fun <K> MapVLongFloat<K>.joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: (key: K, value: Float) -> CharSequence, )
         = collection.joinToString(separator, prefix, postfix, limit, truncated) { k, v -> transform(a.fromLong(k), v)}
 
 class MutMapVLongFloat<K>(override val collection: MutableLongFloatMap = MutableLongFloatMap()): MapVLongFloat<K> {

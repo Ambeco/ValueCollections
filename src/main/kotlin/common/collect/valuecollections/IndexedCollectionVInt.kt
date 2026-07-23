@@ -69,16 +69,16 @@ inline fun <T> IndexedCollectionVInt<T>.indexOfFirstBits(crossinline predicate: 
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.indexOfFirst(crossinline predicate: (T) -> Boolean): Int { for(i in 0 ..< size) if (predicate(elementAtIndex(i))) return i; return -1 }
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.indexOfFirstIndexed(crossinline predicate: (index:Int, T) -> Boolean): Int { for(i in 0 ..< size) if (predicate(i, elementAtIndex(i))) return i; return -1 }
 inline fun <T> IndexedCollectionVInt<T>.indexOfFirstIndexedBitsDefault(startIndex:Int=0, crossinline predicate: (index:Int, bits:IntBits) -> Boolean): Int { for(i in startIndex ..< size) if (predicate(i, bitsAtIndex(i))) return i; return -1 }
-context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.indexOfLast(crossinline predicate: (T) -> Boolean): Int { for(i in size-1..0) if (predicate(elementAtIndex(i))) return i; return -1 }
-context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.indexOfLastIndexed(crossinline predicate: (index:Int, T) -> Boolean): Int { for(i in size-1..0) if (predicate(i, elementAtIndex(i))) return i; return -1 }
-inline fun <T> IndexedCollectionVInt<T>.indexOfLastIndexedBitsDefault(startIndex:Int=-1, crossinline predicate: (index:Int, bits:IntBits) -> Boolean): Int {val start=if(startIndex<0||startIndex>size-1)size-1 else startIndex; for(i in start..0) if (predicate(i, bitsAtIndex(i))) return i; return -1 }
+context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.indexOfLast(crossinline predicate: (T) -> Boolean): Int { for(i in size-1 downTo 0) if (predicate(elementAtIndex(i))) return i; return -1 }
+context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.indexOfLastIndexed(crossinline predicate: (index:Int, T) -> Boolean): Int { for(i in size-1 downTo 0) if (predicate(i, elementAtIndex(i))) return i; return -1 }
+inline fun <T> IndexedCollectionVInt<T>.indexOfLastIndexedBitsDefault(startIndex:Int=-1, crossinline predicate: (index:Int, bits:IntBits) -> Boolean): Int {val start=if(startIndex<0||startIndex>size-1)size-1 else startIndex; for(i in start downTo 0) if (predicate(i, bitsAtIndex(i))) return i; return -1 }
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.last(): T = elementAtIndex(size-1)
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.last(crossinline predicate: (T) -> Boolean): T = findLast(predicate) ?: throw NoSuchElementException()
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.lastIndexOf(element: T): Int = indexOfLast {it==element}
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.lastOrNull(): T? = elementAtOrNull(size - 1)
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.lastOrNull(crossinline predicate: (T) -> Boolean): T? = elementAtOrNull(indexOfLast(predicate))
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.drop(n: Int): ArrayListVInt<T> = slice(IntRange(n,size-1))
-context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.dropLast(n: Int): ArrayListVInt<T> = slice(IntRange(0,size-n))
+context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.dropLast(n: Int): ArrayListVInt<T> = slice(IntRange(0,size-n-1))
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.dropWhile(crossinline predicate: (T) -> Boolean): ArrayListVInt<T> {val i=indexOfFirst{!predicate(it)}; return if(i==-1) ArrayListVInt(this) else slice(IntRange(i, size))}
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.dropLastWhile(crossinline predicate: (T) -> Boolean): ArrayListVInt<T> {val i=indexOfLast{!predicate(it)}; return if(i==-1) toMutableList() else slice(IntRange(0, i))}
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.filter(crossinline predicate: (T) -> Boolean): ArrayListVInt<T> = filterFromMask(filterMask(predicate))
@@ -99,15 +99,15 @@ context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.slice(ind
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.slice(indices: Iterable<Int>): ArrayListVInt<T> = ArrayListVInt<T>(if (indices is Collection<Int>) indices.size else size/8, NULL_VALUE).also { for(i in indices) it.addBits(bitsAtIndex(i)) }
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.sliceArray(indices: Collection<Int>): ArrayVInt<T> = ArrayVInt<T>(indices.size, NULL_VALUE).also { c-> indices.forEachIndexed { i, ei-> c.set(i, get(ei))}}
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.sliceArray(indices: IntRange): ArrayVInt<T> = ArrayVInt<T>(indices.last -indices.first +1, NULL_VALUE).also { c-> for (i in indices) c.set(i-indices.first, get(i))}
-context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.take(n: Int): ArrayListVInt<T> = slice(IntRange(0,n))
+context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.take(n: Int): ArrayListVInt<T> = slice(IntRange(0,n-1))
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.takeLast(n: Int): ArrayListVInt<T> = slice(IntRange(size-n,size))
-context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.takeLastWhile(crossinline predicate: (T) -> Boolean): ArrayListVInt<T> {val i=indexOfLast{!predicate(it)}; return if(i==-1) ArrayListVInt<T>(this) else slice(IntRange(0, i))}
+context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.takeLastWhile(crossinline predicate: (T) -> Boolean): ArrayListVInt<T> {val i=indexOfLast{!predicate(it)}; return if(i==-1) ArrayListVInt<T>(this) else slice(IntRange(i+1, size-1))}
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.slice(indices: Collection<Int>): ArrayListVInt<T> = filterIndexed { i, e-> indices.contains(i) }
-context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.takeWhile(crossinline predicate: (T) -> Boolean): ArrayListVInt<T> = ArrayListVInt<T>().also { c-> any { val p=predicate(it); if (p) c.add(it); p } }
-context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.takeWhileIndexed(crossinline predicate: (Int, T) -> Boolean): ArrayListVInt<T> = ArrayListVInt<T>().also { c-> anyIndexed { i, e-> val p=predicate(i,e); if (p) c.add(e); p } }
+context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.takeWhile(crossinline predicate: (T) -> Boolean): ArrayListVInt<T> = ArrayListVInt<T>().also { c-> any { val p=predicate(it); if (p) c.add(it); !p } }
+context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.takeWhileIndexed(crossinline predicate: (Int, T) -> Boolean): ArrayListVInt<T> = ArrayListVInt<T>().also { c-> anyIndexed { i, e-> val p=predicate(i,e); if (p) c.add(e); !p } }
 inline fun <T, C: MutableIndexedCollectionVInt<T>> IndexedCollectionVInt<T>.copyInto(destination: C, destinationOffset: Int = 0, startIndex: Int = 0, endIndex: Int = size): C = destination.also{forEachIndexedBits{ i, e-> if(i in startIndex..endIndex) destination.addBits(i-startIndex+destinationOffset, e)}}
 context(a: ValueIntAdapter<T>) inline fun <T, C: MutableList<T>> IndexedCollectionVInt<T>.copyInto(destination: C, destinationOffset: Int = 0, startIndex: Int = 0, endIndex: Int = size): C = destination.also{forEachIndexed{ i, e-> if(i in startIndex..endIndex) destination.add(i-startIndex+destinationOffset, e)}}
-inline fun <T> IndexedCollectionVInt<T>.reversed(): ArrayListVInt<T> = ArrayListVInt<T>(size, NULL_VALUE).also {forEachIndexedBits{ i, e-> it.setBits(size-i-1, e) }}
+inline fun <T> IndexedCollectionVInt<T>.reversed(): ArrayListVInt<T> = ArrayListVInt<T>(size, NULL_VALUE).also { dest -> for (i in size-1 downTo 0) dest.addBits(bitsAtIndex(i)) }
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.shuffle(): Unit = shuffle(Random.Default)
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.shuffle(random: Random): Unit {
 }
