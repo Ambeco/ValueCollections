@@ -6,6 +6,7 @@
       "Bash(./gradlew.bat *)",
       "PowerShell(.\\gradlew.bat *)",
       "PowerShell(gradlew.bat *)"
-    ]
+    ],
+    "defaultMode": "acceptEdits"
   }
 }
