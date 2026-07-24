@@ -27,8 +27,8 @@ context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.asListGen
     override inline fun get(index: Int): T = this@asListGeneric.get(index)
     override inline fun indexOf(element: T): Int = this@asListGeneric.indexOf(element)
     override inline fun lastIndexOf(element: T): Int = this@asListGeneric.lastIndexOf(element)
-    override inline fun listIterator(): ListIterator<T> = throw NotImplementedError() // this@asListGeneric.listIterator()
-    override inline fun listIterator(index: Int): ListIterator<T> = throw NotImplementedError() // this@asListGeneric.listIterator(index)
+    override fun listIterator(): ListIterator<T> = ListIteratorVInt(this)
+    override fun listIterator(index: Int): ListIterator<T> = ListIteratorVInt(this, index)
     override inline fun subList(fromIndex: Int, toIndex: Int): List<T> = throw NotImplementedError() // this@asListGeneric.subList(fromIndex, toIndex)
 }
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.anyIndexed(crossinline action: (index:Int, T) -> Boolean) = any(
