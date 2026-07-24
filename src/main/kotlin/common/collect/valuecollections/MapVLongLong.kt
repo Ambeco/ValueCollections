@@ -74,7 +74,7 @@ context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>) inline fun <K,V> MapVL
 inline val <K,V> MapVLongLong<K,V>.isEmpty get() = size == 0
 inline fun <K,V> MapVLongLong<K,V>.isNotEmpty() = size > 0
 context(ka: ValueLongAdapter<K>) inline fun <K,V> MapVLongLong<K,V>.containsKey(k: K) = getBits(ka.toLong(k)) != NULL_VALUE_BITS
-context(va: ValueLongAdapter<V>) inline fun <K,V> MapVLongLong<K,V>.containsValue(findV: V) = anyBits { k, v-> v==findV} != NULL_KEY_BITS
+context(va: ValueLongAdapter<V>) inline fun <K,V> MapVLongLong<K,V>.containsValue(findV: V) = anyBits { _, v-> v==va.toLong(findV)} != NULL_KEY_BITS
 context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>) inline fun <K,V, A : Appendable> MapVLongLong<K,V>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): A {
     val appender = object: (Int,K,V)-> Boolean {
         var count=0
@@ -85,7 +85,7 @@ context(ka: ValueLongAdapter<K>, va: ValueLongAdapter<V>) inline fun <K,V, A : A
                 if (count < limit)
                     return false
             }
-            if (count >= limit)
+            if (count > limit)
                 buffer.append(truncated)
             return true
         }
@@ -142,20 +142,11 @@ class HashMapVLongLong<K,V>(val collection: MutableLongLongMap=MutableLongLongMa
     constructor(size: Int, NULL_KEY_BITS: LongKeyBits=Long.MIN_VALUE, NULL_VALUE_BITS: LongValueBits=Long.MIN_VALUE ) : this(MutableLongLongMap(size), NULL_KEY_BITS, NULL_VALUE_BITS)
 
     override val size: Int get() = collection.size
-    override inline fun getBits(k: LongKeyBits): LongValueBits = collection.get(k)
+    override inline fun getBits(k: LongKeyBits): LongValueBits = collection.getOrDefault(k, NULL_VALUE_BITS)
     override inline fun anyBits(predicate: (LongKeyBits, LongValueBits) -> Boolean): LongKeyBits {
-        val searcher = object: (LongKeyBits, LongValueBits) -> Boolean {
-            var result:LongKeyBits = NULL_KEY_BITS
-            override inline fun invoke(k: LongKeyBits, v: LongValueBits): Boolean {
-                if (predicate(k,v)) {
-                    result = k
-                    return true
-                }
-                return false
-            }
-
-        }
-        return searcher.result
+        var result: LongKeyBits = NULL_KEY_BITS
+        collection.forEach { k, v -> if (result == NULL_KEY_BITS && predicate(k, v)) result = k }
+        return result
     }
     override inline fun trim() { collection.trim() }
     override inline fun clear() = collection.clear()

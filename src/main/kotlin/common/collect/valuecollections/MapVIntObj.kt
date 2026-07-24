@@ -86,7 +86,7 @@ context(ka: ValueIntAdapter<K>) inline fun <K,V, A : Appendable> MapVIntObj<K,V>
                 if (count < limit)
                     return false
             }
-            if (count >= limit)
+            if (count > limit)
                 buffer.append(truncated)
             return true
         }
@@ -142,18 +142,9 @@ class HashMapVIntObj<K,V>(val collection: MutableIntObjectMap<V> =MutableIntObje
     override val size: Int get() = collection.size
     override inline fun getBits(k: IntKeyBits): V? = collection.get(k)
     override inline fun anyBits(predicate: (IntKeyBits, V) -> Boolean): IntKeyBits {
-        val searcher = object: (IntKeyBits, V) -> Boolean {
-            var result:IntKeyBits = NULL_KEY_BITS
-            override inline fun invoke(k: IntKeyBits, v: V): Boolean {
-                if (predicate(k,v)) {
-                    result = k
-                    return true
-                }
-                return false
-            }
-
-        }
-        return searcher.result
+        var result: IntKeyBits = NULL_KEY_BITS
+        collection.forEach { k, v -> if (result == NULL_KEY_BITS && predicate(k, v)) result = k }
+        return result
     }
     override inline fun trim() { collection.trim() }
     override inline fun clear() = collection.clear()

@@ -74,7 +74,7 @@ context(va: ValueIntAdapter<V>) inline fun <K,V> MapVObjInt<K,V>.forEachIndexed(
 inline val <K,V> MapVObjInt<K,V>.isEmpty get() = size == 0
 inline fun <K,V> MapVObjInt<K,V>.isNotEmpty() = size > 0
 inline fun <K,V> MapVObjInt<K,V>.containsKey(k: K) = getBits(k) != NULL_VALUE_BITS
-context(va: ValueIntAdapter<V>) inline fun <K,V> MapVObjInt<K,V>.containsValue(findV: V) = anyBits { k, v-> v==findV} != null
+context(va: ValueIntAdapter<V>) inline fun <K,V> MapVObjInt<K,V>.containsValue(findV: V) = anyBits { _, v-> v==va.toInt(findV)} != null
 context(va: ValueIntAdapter<V>) inline fun <K,V, A : Appendable> MapVObjInt<K,V>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): A {
     val appender = object: (Int,K,V)-> Boolean {
         var count=0
@@ -85,7 +85,7 @@ context(va: ValueIntAdapter<V>) inline fun <K,V, A : Appendable> MapVObjInt<K,V>
                 if (count < limit)
                     return false
             }
-            if (count >= limit)
+            if (count > limit)
                 buffer.append(truncated)
             return true
         }
@@ -145,20 +145,12 @@ class HashMapVObjInt<K,V>(val collection: MutableObjectIntMap<K> =MutableObjectI
     constructor(size: Int, NO_VALUE: IntValueBits=Int.MIN_VALUE) : this(MutableObjectIntMap(size), NO_VALUE)
 
     override val size: Int get() = collection.size
-    override inline fun getBits(k: K): IntValueBits = collection.get(k)
+    override inline fun getBits(k: K): IntValueBits = collection.getOrDefault(k, NULL_VALUE_BITS)
     override inline fun anyBits(predicate: (K, IntValueBits) -> Boolean): K? {
-        val searcher = object: (K, IntValueBits) -> Boolean {
-            var result:K? = null
-            override inline fun invoke(k: K, v: IntValueBits): Boolean {
-                if (predicate(k,v)) {
-                    result = k
-                    return true
-                }
-                return false
-            }
-
-        }
-        return searcher.result
+        var result: K? = null
+        var found = false
+        collection.forEach { k, v -> if (!found && predicate(k, v)) { result = k; found = true } }
+        return result
     }
     override inline fun trim() { collection.trim() }
     override inline fun clear() = collection.clear()

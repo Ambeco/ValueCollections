@@ -88,7 +88,7 @@ context(ka: ValueLongAdapter<K>) inline fun <K,V, A : Appendable> MapVLongObj<K,
                 if (count < limit)
                     return false
             }
-            if (count >= limit)
+            if (count > limit)
                 buffer.append(truncated)
             return true
         }
@@ -146,18 +146,9 @@ class HashMapVLongObj<K,V>(val collection: MutableLongObjectMap<V> =MutableLongO
     override val size: Int get() = collection.size
     override inline fun getBits(k: LongKeyBits): V? = collection.get(k)
     override inline fun anyBits(predicate: (LongKeyBits, V) -> Boolean): LongKeyBits {
-        val searcher = object: (LongKeyBits, V) -> Boolean {
-            var result:LongKeyBits = NULL_KEY_BITS
-            override inline fun invoke(k: LongKeyBits, v: V): Boolean {
-                if (predicate(k,v)) {
-                    result = k
-                    return true
-                }
-                return false
-            }
-
-        }
-        return searcher.result
+        var result: LongKeyBits = NULL_KEY_BITS
+        collection.forEach { k, v -> if (result == NULL_KEY_BITS && predicate(k, v)) result = k }
+        return result
     }
     override inline fun trim() { collection.trim() }
     override inline fun clear() = collection.clear()

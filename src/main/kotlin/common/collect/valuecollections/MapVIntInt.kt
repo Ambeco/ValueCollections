@@ -75,7 +75,7 @@ context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVInt
 inline val <K,V> MapVIntInt<K,V>.isEmpty get() = size == 0
 inline fun <K,V> MapVIntInt<K,V>.isNotEmpty() = size > 0
 context(ka: ValueIntAdapter<K>) inline fun <K,V> MapVIntInt<K,V>.containsKey(k: K) = getBits(ka.toInt(k)) != NULL_VALUE_BITS
-context(va: ValueIntAdapter<V>) inline fun <K,V> MapVIntInt<K,V>.containsValue(findV: V) = anyBits { k, v-> v==findV} != NULL_KEY_BITS
+context(va: ValueIntAdapter<V>) inline fun <K,V> MapVIntInt<K,V>.containsValue(findV: V) = anyBits { _, v-> v==va.toInt(findV)} != NULL_KEY_BITS
 context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V, A : Appendable> MapVIntInt<K,V>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): A {
     val appender = object: (Int,K,V)-> Boolean {
         var count=0
@@ -86,7 +86,7 @@ context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V, A : App
                 if (count < limit)
                     return false
             }
-            if (count >= limit)
+            if (count > limit)
                 buffer.append(truncated)
             return true
         }
@@ -146,20 +146,11 @@ class HashMapVIntInt<K,V>(val collection: MutableIntIntMap=MutableIntIntMap(), o
     constructor(size: Int, NULL_KEY_BITS: IntKeyBits=Int.MIN_VALUE, NULL_VALUE_BITS: IntValueBits=Int.MIN_VALUE) : this(MutableIntIntMap(size), NULL_KEY_BITS, NULL_VALUE_BITS)
 
     override val size: Int get() = collection.size
-    override inline fun getBits(k: IntKeyBits): IntValueBits = collection.get(k)
+    override inline fun getBits(k: IntKeyBits): IntValueBits = collection.getOrDefault(k, NULL_VALUE_BITS)
     override inline fun anyBits(predicate: (IntKeyBits, IntValueBits) -> Boolean): IntKeyBits {
-        val searcher = object: (IntKeyBits, IntValueBits) -> Boolean {
-            var result:IntKeyBits = NULL_KEY_BITS
-            override inline fun invoke(k: IntKeyBits, v: IntValueBits): Boolean {
-                if (predicate(k,v)) {
-                    result = k
-                    return true
-                }
-                return false
-            }
-
-        }
-        return searcher.result
+        var result: IntKeyBits = NULL_KEY_BITS
+        collection.forEach { k, v -> if (result == NULL_KEY_BITS && predicate(k, v)) result = k }
+        return result
     }
     override inline fun trim() { collection.trim() }
     override inline fun clear() = collection.clear()
