@@ -78,3 +78,18 @@ class VIteratorIndexedValueLong<T>(val delegate:Iterator<IndexedValue<Long>>, va
     override inline fun hasNext(): Boolean = delegate.hasNext()
     override inline fun next(): IndexedValue<T> {val iv=delegate.next(); return IndexedValue(iv.index, a.fromLong(iv.value)) }
 }
+
+open class ListIteratorVLong<T>(protected val list: List<T>, startIndex: Int = 0) : ListIterator<T> {
+    protected var idx = startIndex
+    override fun hasNext(): Boolean = idx < list.size
+    override fun next(): T = list[idx++]
+    override fun hasPrevious(): Boolean = idx > 0
+    override fun previous(): T = list[--idx]
+    override fun nextIndex(): Int = idx
+    override fun previousIndex(): Int = idx - 1
+}
+class MutableListIteratorVLong<T>(private val mutableList: MutableList<T>, startIndex: Int = 0) : ListIteratorVLong<T>(mutableList, startIndex), MutableListIterator<T> {
+    override fun set(element: T) { mutableList[idx - 1] = element }
+    override fun add(element: T) { mutableList.add(idx, element); idx++ }
+    override fun remove() { mutableList.removeAt(--idx) }
+}
