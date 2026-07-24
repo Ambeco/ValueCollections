@@ -37,7 +37,7 @@ context(a: ValueLongAdapter<T>) inline fun <T> ModifiableIndexedCollectionVLong<
     override fun listIterator(index: Int): MutableListIterator<T> = MutableListIteratorVLong(this, index)
     override inline fun subList(fromIndex: Int, toIndex: Int): MutableList<T> = throw NotImplementedError() //  this@asListGeneric.subList(fromIndex, toIndex)
 }
-context(a: ValueLongAdapter<T>) inline fun <T> ModifiableIndexedCollectionVLong<T>.set(index: Int, value: T): T {setBits(index, a.toLong(value)); return value}
+context(a: ValueLongAdapter<T>) inline fun <T> ModifiableIndexedCollectionVLong<T>.set(index: Int, value: T): T {val old = a.fromLong(bitsAtIndex(index)); setBits(index, a.toLong(value)); return old}
 context(a: ValueLongAdapter<T>) inline fun <T : Comparable<T>> ModifiableIndexedCollectionVLong<T>.sort(): Unit = asListGeneric().sort()
 context(a: ValueLongAdapter<T>) inline fun <T : Comparable<T>> ModifiableIndexedCollectionVLong<T>.sort(fromIndex: Int, toIndex: Int): Unit = asListGeneric().subList(fromIndex, toIndex).sort()
 context(a: ValueLongAdapter<T>) inline fun <T : Comparable<T>> ModifiableIndexedCollectionVLong<T>.sortDescending(): Unit = asListGeneric().sortDescending()
