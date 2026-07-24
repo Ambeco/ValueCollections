@@ -103,7 +103,7 @@ class PriorityBlockingArrayQueueLong(
             bubbleUp(i)
         }
         ++mutCounter
-        return false
+        return c.isNotEmpty()
     }
 
     fun addAll(c: LongArray) : Boolean {
@@ -119,7 +119,7 @@ class PriorityBlockingArrayQueueLong(
             bubbleUp(i)
         }
         ++mutCounter
-        return false
+        return c.isNotEmpty()
     }
 
     fun peek() : Long? = if (size > 0) queue[0] else null
@@ -135,10 +135,14 @@ class PriorityBlockingArrayQueueLong(
     operator fun minus(value: Long) = remove(value)
 
     fun remove(value: Long) : Boolean {
-        if (size == 0) return false
-        fillHole(0)
-        ++mutCounter
-        return true
+        for (i in 0..<size) {
+            if (queue[i] == value) {
+                fillHole(i)
+                ++mutCounter
+                return true
+            }
+        }
+        return false
     }
 
     fun removeAll(c: Collection<Long>) : Boolean {
@@ -257,7 +261,7 @@ class PriorityBlockingArrayQueueLong(
 
     fun clone() : PriorityBlockingArrayQueueLong {
         val c = PriorityBlockingArrayQueueLong(size, comparator)
-        queue.copyInto(c.queue, 0, size)
+        queue.copyInto(c.queue, 0, 0, size)
         c.size = size
         return c
     }
