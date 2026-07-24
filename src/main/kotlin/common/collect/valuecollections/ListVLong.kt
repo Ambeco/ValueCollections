@@ -17,7 +17,7 @@ interface MutableListVLong<T>: ModifiableListVLong<T>, MutableIndexedCollectionV
 class ArrayListVLong<T>(val collection: MutableLongList = MutableLongList(), override val NULL_VALUE: LongBits=Long.MIN_VALUE): MutableListVLong<T> {
     constructor(capacity: Int,  NO_VALUE: LongBits=Long.MIN_VALUE) : this(MutableLongList(capacity), NO_VALUE)
     constructor(other: CollectionVLong<T>, NO_VALUE: LongBits=Long.MIN_VALUE) : this(MutableLongList(other.size), NO_VALUE) { other.forEachBits { collection.add(it) } }
-    constructor(other: ListVLong<T>, NO_VALUE: LongBits) : this(MutableLongList(other.size), NO_VALUE) {other.copyInto(this,0,0,size)}
+    constructor(other: ListVLong<T>, NO_VALUE: LongBits) : this(MutableLongList(other.size), NO_VALUE) {other.copyInto(this,0,0,other.size)}
 
     override val size inline get() = collection.size
     override inline fun anyBits(predicate: (bits: LongBits) -> Boolean): LongBits = getBits(collection.indexOfFirst { predicate(it) })

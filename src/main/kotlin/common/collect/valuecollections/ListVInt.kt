@@ -20,7 +20,7 @@ interface MutableListVInt<T>: ModifiableListVInt<T>, MutableIndexedCollectionVIn
 class ArrayListVInt<T>(val collection: MutableIntList = MutableIntList(), override val NULL_VALUE: IntBits=Int.MIN_VALUE): MutableListVInt<T> {
     constructor(capacity: Int, NO_VALUE:IntBits=Int.MIN_VALUE) : this(MutableIntList(capacity), NO_VALUE)
     constructor(other: CollectionVInt<T>, NO_VALUE:IntBits=Int.MIN_VALUE) : this(MutableIntList(other.size), NO_VALUE) { other.forEachBits { collection.add(it) } }
-    constructor(other: ListVInt<T>, NO_VALUE:IntBits=Int.MIN_VALUE) : this(MutableIntList(other.size), NO_VALUE) {other.copyInto(this,0,0,size)}
+    constructor(other: ListVInt<T>, NO_VALUE:IntBits=Int.MIN_VALUE) : this(MutableIntList(other.size), NO_VALUE) {other.copyInto(this,0,0,other.size)}
 
     override val size inline get() = collection.size
     override inline fun anyBits(predicate: (bits: IntBits) -> Boolean): IntBits = getBits(collection.indexOfFirst { predicate(it) })
