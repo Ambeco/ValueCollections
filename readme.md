@@ -36,8 +36,8 @@ overhead should be one additional allocation per collection.
 - Queues  (TODO)
   - `ArrayDequeInt` (actual `int` implementation, not a wrapper)
   - `ArrayDequeLong` (actual `int` implementation, not a wrapper)
-  - `ArrayDequeVInt<T>`
-  - `ArrayDequeVInt<T>`
+  - `ArrayDequeVInt<T>` (thin wrapper around `androidx.collection.CircularIntArray`)
+  - `ArrayDequeVLong<T>` (TODO)
   - `PriorityBlockingArrayQueueInt` (actual `int` implementation, not a wrapper)
   - `PriorityBlockingArrayQueueLong` (actual `int` implementation, not a wrapper)
   - `PriorityBlockingArrayQueueVInt<T>` 

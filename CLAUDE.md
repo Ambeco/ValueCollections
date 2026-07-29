@@ -16,6 +16,8 @@ primitives, without boxing. See `readme.md` for the full inventory of implemente
 - Run a single test class: `./gradlew test --tests "mpd.common.collect.valuecollections.ValueCollectionTest"`
 - Run a single test method: `./gradlew test --tests "mpd.common.collect.valuecollections.ValueCollectionTest.any"`
 
+Comamnds should assume the working directory is the project root, and should not change the working directory.
+
 Tests use JUnit 5 (`useJUnitPlatform()`) plus `kotlin.test`. Kotlin toolchain is JVM 21, Kotlin
 `2.4.20-Beta1` (pinned for specific compiler bugfixes — see comment in `build.gradle.kts`).
 
@@ -79,14 +81,6 @@ valid element value.
 
 ## Known quirks (don't "fix" without checking first)
 
-- Source files declare `package mpd.com.common.collect.valuecollections` (main) vs
-  `package mpd.common.collect.valuecollections` (test, no `com`) — neither matches the actual
-  directory layout (`src/main/kotlin/common/collect/valuecollections`, no `mpd`/`com` directories).
-  This mismatch is pre-existing; match whichever package a file already declares rather than the
-  directory path when adding new files nearby.
-- `PriorityBlockingArrayQueueInt.kt` / `PriorityBlockingArrayQueueLong.kt` still carry
-  `package com.unciv.utils` — leftover from wherever they were ported from. They're unfinished stubs
-  (Queues are marked TODO in `readme.md`), not yet adapted to this project's conventions.
 - `IntArray`/`LongArray` extension methods that would normally return a boxed `List<T>` (`filter`,
   `take`, `drop`, `slice`, `sorted`, `distinct`, `intersect`, `subtract`, `union`) are reimplemented
   here to return `VIntList`/`ListVLong` instead, to avoid the allocation — don't "simplify" these back

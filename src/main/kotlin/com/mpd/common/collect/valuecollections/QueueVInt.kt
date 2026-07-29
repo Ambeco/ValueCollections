@@ -21,6 +21,40 @@ context(a: ValueIntAdapter<T>) inline fun <T> QueueVInt<T>.element(): T = fromIn
 
 
 
+// java.util.Deque<T> -> DequeVInt<T>
+// Like java.util.Deque, offerFirst/offerLast/pollFirst/pollLast/peekFirst/peekLast never throw on
+// failure/empty (poll/peek use NULL_VALUE under the hood, exposed as T? via the typed layer);
+// addFirst/addLast/removeFirst/removeLast/push/pop throw instead.
+interface DequeVInt<T>: QueueVInt<T> {
+    fun addFirstBits(bits: IntBits)
+    fun addLastBits(bits: IntBits)
+    fun offerFirstBits(bits: IntBits): Boolean
+    fun offerLastBits(bits: IntBits): Boolean
+    fun removeFirstBits(): IntBits
+    fun removeLastBits(): IntBits
+    fun pollFirstBits(): IntBits
+    fun pollLastBits(): IntBits
+    fun peekFirstBits(): IntBits
+    fun peekLastBits(): IntBits
+    fun pushBits(bits: IntBits)
+    fun popBits(): IntBits
+}
+
+context(a: ValueIntAdapter<T>) inline fun <T> DequeVInt<T>.addFirst(value: T): Unit = addFirstBits(a.toInt(value))
+context(a: ValueIntAdapter<T>) inline fun <T> DequeVInt<T>.addLast(value: T): Unit = addLastBits(a.toInt(value))
+context(a: ValueIntAdapter<T>) inline fun <T> DequeVInt<T>.offerFirst(value: T): Boolean = offerFirstBits(a.toInt(value))
+context(a: ValueIntAdapter<T>) inline fun <T> DequeVInt<T>.offerLast(value: T): Boolean = offerLastBits(a.toInt(value))
+context(a: ValueIntAdapter<T>) inline fun <T> DequeVInt<T>.removeFirst(): T = fromInt(removeFirstBits())
+context(a: ValueIntAdapter<T>) inline fun <T> DequeVInt<T>.removeLast(): T = fromInt(removeLastBits())
+context(a: ValueIntAdapter<T>) inline fun <T> DequeVInt<T>.pollFirst(): T? = fromIntOrNull(pollFirstBits())
+context(a: ValueIntAdapter<T>) inline fun <T> DequeVInt<T>.pollLast(): T? = fromIntOrNull(pollLastBits())
+context(a: ValueIntAdapter<T>) inline fun <T> DequeVInt<T>.peekFirst(): T? = fromIntOrNull(peekFirstBits())
+context(a: ValueIntAdapter<T>) inline fun <T> DequeVInt<T>.peekLast(): T? = fromIntOrNull(peekLastBits())
+context(a: ValueIntAdapter<T>) inline fun <T> DequeVInt<T>.push(value: T): Unit = pushBits(a.toInt(value))
+context(a: ValueIntAdapter<T>) inline fun <T> DequeVInt<T>.pop(): T = fromInt(popBits())
+
+
+
 
 // java.util.concurrent.BlockingQueue<T> -> BlockingQueueVInt<T>
 interface BlockingQueueVInt<T>: QueueVInt<T> {
