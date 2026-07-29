@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package com.unciv.utils
+package mpd.com.common.collect
 
 import java.util.Objects
 import java.util.Spliterator.CONCURRENT
@@ -16,16 +16,12 @@ import java.util.stream.StreamSupport
 //
 // This does NOT extend any interfaces to avoid boxing Long to Long Objects.
 //
-// Thread safety: every method synchronizes on `queue`. Note that `queue` is reassigned whenever
-// the backing array grows (see resize()); the thread doing the resize keeps holding the monitor of
-// the array it originally locked on for the rest of its own call, but a *different* thread that
-// enters a synchronized block after the swap will lock on the *new* array instead. During that
-// (rare, brief) window two threads can technically be inside "synchronized" sections at once. This
-// is a known, accepted limitation of locking on a mutable field rather than a dedicated lock object.
+// Thread safety: every method synchronizes on the dedicated `lock` object.
 class ArrayPriorityBlockingQueueLong(
     initialCapacity: Int = 100,
     val comparator : Comparator = DefaultComparator
 ) {
+    private val lock = Any()
     private var queue: LongArray = LongArray(initialCapacity)
     private var size : Int = 0
     private var mutCounter: Int = 0
@@ -39,42 +35,42 @@ class ArrayPriorityBlockingQueueLong(
         addAll(c)
     }
 
-    fun clear(): Unit = synchronized(queue) {
+    fun clear(): Unit = synchronized(lock) {
         size = 0
         ++mutCounter
     }
 
-    fun size() : Int = synchronized(queue) { size }
+    fun size() : Int = synchronized(lock) { size }
 
-    fun isEmpty() : Boolean = synchronized(queue) { size == 0 }
+    fun isEmpty() : Boolean = synchronized(lock) { size == 0 }
 
-    fun isNotEmpty() = synchronized(queue) { size != 0 }
+    fun isNotEmpty() = synchronized(lock) { size != 0 }
 
-    fun element() : Long = synchronized(queue) {
+    fun element() : Long = synchronized(lock) {
         if (size == 0) throw NoSuchElementException("Priority queue is empty.")
         queue[0]
     }
 
-    operator fun get(index: Int) : Long = synchronized(queue) {
+    operator fun get(index: Int) : Long = synchronized(lock) {
         if (index !in 0..<size) throw IndexOutOfBoundsException("Index $index out of bounds for priority queue of size $size.")
         queue[index]
     }
 
-    fun contains(value: Long): Boolean = synchronized(queue) {
+    fun contains(value: Long): Boolean = synchronized(lock) {
         for (i in 0..<size) {
             if (queue[i] == value) return@synchronized true
         }
         false
     }
 
-    fun containsAll(c: Collection<Long>): Boolean = synchronized(queue) {
+    fun containsAll(c: Collection<Long>): Boolean = synchronized(lock) {
         for (item in c) {
             if (!contains(item)) return@synchronized false
         }
         true
     }
 
-    fun containsAll(c: LongArray): Boolean = synchronized(queue) {
+    fun containsAll(c: LongArray): Boolean = synchronized(lock) {
         for (item in c) {
             if (!contains(item)) return@synchronized false
         }
@@ -83,28 +79,26 @@ class ArrayPriorityBlockingQueueLong(
 
     operator fun plus(value: Long) = add(value)
 
-    fun add(value: Long): Unit = synchronized(queue) {
-        if (size == queue.size) {
-            resizeUp()
-        }
-        queue[size] = value
+    fun add(value: Long): Unit = synchronized(lock) {
+        val newQueue = prepare_resize_if_needed()
+        newQueue[size] = value
         ++size
+        commit(newQueue)
         bubbleUp(size-1)
         ++mutCounter
     }
 
-    fun offer(value: Long): Boolean = synchronized(queue) {
+    fun offer(value: Long): Boolean = synchronized(lock) {
         add(value)
         true
     }
 
-    fun addAll(c: Collection<Long>) : Boolean = synchronized(queue) {
+    fun addAll(c: Collection<Long>) : Boolean = synchronized(lock) {
         ++mutCounter
         val oldSize = size
-        if (size + c.size > queue.size) {
-            resize(size + c.size)
-        }
-        c.forEach { queue[size++] = it }
+        val newQueue = prepare_resize_if_needed(size + c.size)
+        c.forEach { newQueue[size++] = it }
+        commit(newQueue)
         // looks inefficient, but 50% do not bubble at all, 25% bubble once, etc.
         for (i in size-1 downTo  oldSize-1) {
             bubbleUp(i)
@@ -113,14 +107,13 @@ class ArrayPriorityBlockingQueueLong(
         c.isNotEmpty()
     }
 
-    fun addAll(c: LongArray) : Boolean = synchronized(queue) {
+    fun addAll(c: LongArray) : Boolean = synchronized(lock) {
         ++mutCounter
         val oldSize = size
-        if (size + c.size > queue.size) {
-            resize(size + c.size)
-        }
-        c.copyInto(queue, size)
+        val newQueue = prepare_resize_if_needed(size + c.size)
+        c.copyInto(newQueue, size)
         size = size + c.size
+        commit(newQueue)
         // looks inefficient, but 50% do not bubble at all, 25% bubble once, etc.
         for (i in oldSize until size) {
             bubbleUp(i)
@@ -129,9 +122,9 @@ class ArrayPriorityBlockingQueueLong(
         c.isNotEmpty()
     }
 
-    fun peek() : Long? = synchronized(queue) { if (size > 0) queue[0] else null }
+    fun peek() : Long? = synchronized(lock) { if (size > 0) queue[0] else null }
 
-    fun poll() : Long = synchronized(queue) {
+    fun poll() : Long = synchronized(lock) {
         if (size == 0) throw NoSuchElementException("Priority queue is empty.")
         val top = queue[0]
         fillHole(0)
@@ -141,7 +134,7 @@ class ArrayPriorityBlockingQueueLong(
 
     operator fun minus(value: Long) = remove(value)
 
-    fun remove(value: Long) : Boolean = synchronized(queue) {
+    fun remove(value: Long) : Boolean = synchronized(lock) {
         for (i in 0..<size) {
             if (queue[i] == value) {
                 fillHole(i)
@@ -152,7 +145,7 @@ class ArrayPriorityBlockingQueueLong(
         false
     }
 
-    fun removeAll(c: Collection<Long>) : Boolean = synchronized(queue) {
+    fun removeAll(c: Collection<Long>) : Boolean = synchronized(lock) {
         ++mutCounter
         if (c.size > size) {
             return@synchronized removeIf { c.contains(it) }
@@ -164,7 +157,7 @@ class ArrayPriorityBlockingQueueLong(
         true
     }
 
-    fun removeAll(c: LongArray) : Boolean = synchronized(queue) {
+    fun removeAll(c: LongArray) : Boolean = synchronized(lock) {
         ++mutCounter
         if (c.size > size) {
             return@synchronized removeIf { c.contains(it) }
@@ -176,7 +169,7 @@ class ArrayPriorityBlockingQueueLong(
         true
     }
 
-    fun removeIf(predicate: (Long)->Boolean) : Boolean = synchronized(queue) {
+    fun removeIf(predicate: (Long)->Boolean) : Boolean = synchronized(lock) {
         ++mutCounter
         var i = 0
         while (i < size) {
@@ -195,11 +188,17 @@ class ArrayPriorityBlockingQueueLong(
 
     fun retainAll(c: LongArray) : Boolean = removeIf { !c.contains(it) }
 
-    private fun resizeUp() = resize(queue.size * 3 / 2 + 1)
+    private inline fun prepare_resize_if_needed(): LongArray = if (size + 1 >= queue.size) prepare_resize_exact(queue.size * 3 / 2 + 1) else queue
 
-    private fun resize(newSize: Int) {
+    private inline fun prepare_resize_if_needed(newSize: Int): LongArray = if (newSize > queue.size) prepare_resize_exact(newSize) else queue
+
+    private inline fun prepare_resize_exact(newSize: Int): LongArray {
         val newQueue = LongArray(newSize)
         queue.copyInto(newQueue)
+        return newQueue
+    }
+
+    private inline fun commit(newQueue: LongArray) {
         queue = newQueue
     }
 
@@ -256,7 +255,7 @@ class ArrayPriorityBlockingQueueLong(
         queue[j] = temp
     }
 
-    fun toArray(array: LongArray) : LongArray = synchronized(queue) {
+    fun toArray(array: LongArray) : LongArray = synchronized(lock) {
         if (array.size >= size) {
             queue.copyInto(array, 0, 0, size)
             return@synchronized array
@@ -266,7 +265,7 @@ class ArrayPriorityBlockingQueueLong(
         newArray
     }
 
-    fun clone() : ArrayPriorityBlockingQueueLong = synchronized(queue) {
+    fun clone() : ArrayPriorityBlockingQueueLong = synchronized(lock) {
         val c = ArrayPriorityBlockingQueueLong(size, comparator)
         queue.copyInto(c.queue, 0, 0, size)
         c.size = size
@@ -275,7 +274,7 @@ class ArrayPriorityBlockingQueueLong(
 
     override fun equals(other: Any?) : Boolean {
         if (other !is ArrayPriorityBlockingQueueLong) return false
-        return synchronized(queue) {
+        return synchronized(lock) {
             if (comparator != other.comparator) return@synchronized false
             if (size != other.size) return@synchronized false
             for (i in 0..<size) {
@@ -285,7 +284,7 @@ class ArrayPriorityBlockingQueueLong(
         }
     }
 
-    override fun hashCode() : Int = synchronized(queue) {
+    override fun hashCode() : Int = synchronized(lock) {
         var hash = Objects.hash(comparator)
         for (i in 0..<size) {
             hash = Objects.hash(hash, queue[i])
@@ -293,30 +292,30 @@ class ArrayPriorityBlockingQueueLong(
         hash
     }
 
-    override fun toString() : String = synchronized(queue) {
+    override fun toString() : String = synchronized(lock) {
         "LongPriorityBlockingArrayQueue[size=$size top=${if(size>0)queue[0] else "null"}]"
     }
 
-    fun forEach(action: (Long) -> Unit): Unit = synchronized(queue) {
+    fun forEach(action: (Long) -> Unit): Unit = synchronized(lock) {
         for (i in 0 until size) {
             action(queue[i])
         }
     }
 
-    fun iterator() : Iterator = synchronized(queue) { Iterator(mutCounter) }
+    fun iterator() : Iterator = synchronized(lock) { Iterator(mutCounter) }
 
     inner class Iterator(private var mutSnapshot: Int) : MutableIterator<Long> {
         private var index: Int = -1
         private var canRemove: Boolean = true
 
-        override fun hasNext(): Boolean = synchronized(queue) {
+        override fun hasNext(): Boolean = synchronized(lock) {
             if (mutSnapshot != mutCounter) {
                 throw ConcurrentModificationException("Priority queue modified during iteration.")
             }
             index < size - 1
         }
 
-        override fun next(): Long = synchronized(queue) {
+        override fun next(): Long = synchronized(lock) {
             if (mutSnapshot != mutCounter) {
                 throw ConcurrentModificationException("Priority queue modified during iteration.")
             }
@@ -328,7 +327,7 @@ class ArrayPriorityBlockingQueueLong(
             queue[index]
         }
 
-        override fun remove(): Unit = synchronized(queue) {
+        override fun remove(): Unit = synchronized(lock) {
             if (mutSnapshot != mutCounter) {
                 throw ConcurrentModificationException("Priority queue modified during iteration.")
             }
@@ -342,11 +341,11 @@ class ArrayPriorityBlockingQueueLong(
         }
     }
 
-    fun spliterator() : Spliterator = synchronized(queue) { Spliterator(-1, size-1, mutCounter) }
+    fun spliterator() : Spliterator = synchronized(lock) { Spliterator(-1, size-1, mutCounter) }
 
     inner class Spliterator(var index: Int, var endIndex: Int, val mutSnapshot: Int) : java.util.Spliterator.OfLong {
 
-        override fun tryAdvance(action: LongConsumer?): Boolean = synchronized(queue) {
+        override fun tryAdvance(action: LongConsumer?): Boolean = synchronized(lock) {
             if (mutSnapshot != mutCounter) {
                 throw ConcurrentModificationException("Priority queue modified during iteration.")
             }
@@ -358,7 +357,7 @@ class ArrayPriorityBlockingQueueLong(
             true
         }
 
-        override fun trySplit(): Spliterator? = synchronized(queue) {
+        override fun trySplit(): Spliterator? = synchronized(lock) {
             if (mutSnapshot != mutCounter) {
                 throw ConcurrentModificationException("Priority queue modified during iteration.")
             }
@@ -371,7 +370,7 @@ class ArrayPriorityBlockingQueueLong(
             split
         }
 
-        override fun estimateSize(): Long = synchronized(queue) {
+        override fun estimateSize(): Long = synchronized(lock) {
             endIndex - index.toLong()
         }
 

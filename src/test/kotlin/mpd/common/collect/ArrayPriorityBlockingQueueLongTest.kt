@@ -1,5 +1,6 @@
-package com.unciv.utils
+package mpd.com.common.collect.valuecollections
 
+import mpd.com.common.collect.ArrayPriorityBlockingQueueLong
 import org.junit.jupiter.api.Assertions.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -192,7 +193,8 @@ class ArrayPriorityBlockingQueueLongTest {
         assertEquals(true, a == b)
         assertEquals(a.hashCode(), b.hashCode())
 
-        val differentComparator = ArrayPriorityBlockingQueueLong(listOf(1L, 2L, 3L), reverseComparator)
+        val differentComparator =
+            ArrayPriorityBlockingQueueLong(listOf(1L, 2L, 3L), reverseComparator)
         assertEquals(false, a == differentComparator)
 
         val differentContent = ArrayPriorityBlockingQueueLong(listOf(1L, 2L, 99L))

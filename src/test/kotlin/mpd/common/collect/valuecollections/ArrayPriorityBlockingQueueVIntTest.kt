@@ -1,6 +1,6 @@
 package mpd.common.collect.valuecollections
 
-import com.unciv.utils.ArrayPriorityBlockingQueueInt
+import mpd.com.common.collect.ArrayPriorityBlockingQueueInt
 import mpd.com.common.collect.valuecollections.*
 import org.junit.jupiter.api.Assertions.assertThrows
 import java.util.concurrent.TimeUnit
@@ -40,7 +40,11 @@ class ArrayPriorityBlockingQueueVIntTest {
         val byCapacity = ArrayPriorityBlockingQueueVInt<QVIntTestClass>(10)
         assertEquals(0, byCapacity.size)
 
-        val wrapped = ArrayPriorityBlockingQueueVInt<QVIntTestClass>(ArrayPriorityBlockingQueueInt(listOf(3, 1, 2)))
+        val wrapped = ArrayPriorityBlockingQueueVInt<QVIntTestClass>(
+            ArrayPriorityBlockingQueueInt(
+                listOf(3, 1, 2)
+            )
+        )
         assertEquals(3, wrapped.size)
     }
 
@@ -187,7 +191,11 @@ class ArrayPriorityBlockingQueueVIntTest {
 
     @Test
     fun priorityOrderingWithCustomComparator() = with (QVIntTestClass) {
-        val maxHeap = ArrayPriorityBlockingQueueVInt<QVIntTestClass>(ArrayPriorityBlockingQueueInt(comparator = reverseComparator))
+        val maxHeap = ArrayPriorityBlockingQueueVInt<QVIntTestClass>(
+            ArrayPriorityBlockingQueueInt(
+                comparator = reverseComparator
+            )
+        )
         maxHeap.offer(QVIntTestClass(1))
         maxHeap.offer(QVIntTestClass(3))
         maxHeap.offer(QVIntTestClass(2))

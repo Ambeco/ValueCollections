@@ -2,7 +2,7 @@
 
 package mpd.com.common.collect.valuecollections
 
-import com.unciv.utils.ArrayPriorityBlockingQueueInt
+import mpd.com.common.collect.ArrayPriorityBlockingQueueInt
 import java.util.concurrent.TimeUnit
 
 // Wraps com.unciv.utils.ArrayPriorityBlockingQueueInt, which is itself thread-safe (it synchronizes
