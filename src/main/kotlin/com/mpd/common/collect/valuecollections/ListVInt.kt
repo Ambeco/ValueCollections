@@ -25,12 +25,12 @@ class ArrayListVInt<T>(val collection: MutableIntList = MutableIntList(), overri
     override val size inline get() = collection.size
     override inline fun anyBits(predicate: (bits: IntBits) -> Boolean): IntBits = getBits(collection.indexOfFirst { predicate(it) })
     override inline fun containsBits(bits: IntBits): Boolean = collection.contains(bits)
-    context(a: ValueIntAdapter<T>) override fun asIterable(): MutableIterable<T> = object : MutableIterable<T> {
-        override fun iterator(): MutableIterator<T> = object : MutableIterator<T> {
+    context(a: ValueIntAdapter<T>) override inline fun asIterable(): MutableIterable<T> = object : MutableIterable<T> {
+        override inline fun iterator(): MutableIterator<T> = object : MutableIterator<T> {
             var idx = 0
-            override fun hasNext(): Boolean = idx < size
-            override fun next(): T = a.fromInt(collection[idx++])
-            override fun remove() { collection.removeAt(--idx) }
+            override inline fun hasNext(): Boolean = idx < size
+            override inline fun next(): T = a.fromInt(collection[idx++])
+            override inline fun remove() { collection.removeAt(--idx) }
         }
     }
     context(a: ValueIntAdapter<T>) override inline fun toString(): String = toStringV()
@@ -63,9 +63,9 @@ class ArrayListVInt<T>(val collection: MutableIntList = MutableIntList(), overri
 
     override inline fun removeAllIndexedBits(crossinline predicate: (index: Int, bits: IntBits) -> Boolean): Boolean = throw NotImplementedError()
     
-    override fun hashCode() = contentHashCode()
+    override inline fun hashCode() = contentHashCode()
     @Suppress("UNCHECKED_CAST")
-    override fun equals(other: Any?) = other is IndexedCollectionVInt<*> && contentEquals(other as IndexedCollectionVInt<T>)
+    override inline fun equals(other: Any?) = other is IndexedCollectionVInt<*> && contentEquals(other as IndexedCollectionVInt<T>)
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toStringV() to print K.toString", ReplaceWith("toStringV()"))
     override inline fun toString() = collection.toString() // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!

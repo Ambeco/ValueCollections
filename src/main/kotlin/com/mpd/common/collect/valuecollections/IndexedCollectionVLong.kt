@@ -27,8 +27,8 @@ context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.asListG
     override inline fun get(index: Int): T = this@asListGeneric.get(index)
     override inline fun indexOf(element: T): Int = this@asListGeneric.indexOf(element)
     override inline fun lastIndexOf(element: T): Int = this@asListGeneric.lastIndexOf(element)
-    override fun listIterator(): ListIterator<T> = ListIteratorVLong(this)
-    override fun listIterator(index: Int): ListIterator<T> = ListIteratorVLong(this, index)
+    override inline fun listIterator(): ListIterator<T> = ListIteratorVLong(this)
+    override inline fun listIterator(index: Int): ListIterator<T> = ListIteratorVLong(this, index)
     override inline fun subList(fromIndex: Int, toIndex: Int): List<T> = throw NotImplementedError() // this@asListGeneric.subList(fromIndex, toIndex)
 }
 context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.anyIndexed(crossinline action: (index:Int, T) -> Boolean) = any(
@@ -64,7 +64,7 @@ context(a: ValueLongAdapter<T>) inline fun <T, R> IndexedCollectionVLong<T>.firs
 context(a: ValueLongAdapter<T>) inline fun <T, R> IndexedCollectionVLong<T>.firstNotNullOfOrNull(crossinline transform: (T) -> R?): R? { for(i in 0 ..< size) return transform(elementAtIndex(i)) ?: continue; return null }
 context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.firstOrNull(): T? = elementAtOrNull(0)
 context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.firstOrNull(crossinline predicate: (T) -> Boolean): T? = elementAtOrNull(indexOfFirst(predicate))
-context(a: ValueLongAdapter<T>)fun <T> IndexedCollectionVLong<T>.indexOf(element: T): Int = indexOfFirst {it==element}
+context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.indexOf(element: T): Int = indexOfFirst {it==element}
 inline fun <T> IndexedCollectionVLong<T>.indexOfFirstBits(crossinline predicate: (LongBits) -> Boolean): Int { for(i in 0 ..< size) if (predicate(bitsAtIndex(i))) return i; return -1 }
 context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.indexOfFirst(crossinline predicate: (T) -> Boolean): Int { for(i in 0 ..< size) if (predicate(elementAtIndex(i))) return i; return -1 }
 context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.indexOfFirstIndexed(crossinline predicate: (index:Int, T) -> Boolean): Int { for(i in 0 ..< size) if (predicate(i, elementAtIndex(i))) return i; return -1 }

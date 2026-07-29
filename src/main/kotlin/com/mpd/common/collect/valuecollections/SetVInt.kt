@@ -26,7 +26,7 @@ class ArraySetVInt<T>(val collection: MutableIntSet, override val NULL_VALUE: In
     override inline fun trim(minCapacity: Int) {}
     override inline fun addBits(bits: IntBits): Boolean = collection.add(bits)
     override inline fun removeBits(bits: IntBits): Boolean = collection.remove(bits)
-    context(a: ValueIntAdapter<T>) override fun removeAll(predicate: (T) -> Boolean): Boolean {
+    context(a: ValueIntAdapter<T>) override inline fun removeAll(crossinline predicate: (T) -> Boolean): Boolean {
         val removeList = MutableIntSet(size)
         collection.forEach { if (predicate(a.fromInt(it))) removeList.add(it) }
         collection.removeAll(removeList)
@@ -35,9 +35,9 @@ class ArraySetVInt<T>(val collection: MutableIntSet, override val NULL_VALUE: In
 
     override inline fun clear()  = collection.clear()
 
-    override fun hashCode() = contentHashCode()
+    override inline fun hashCode() = contentHashCode()
     @Suppress("UNCHECKED_CAST")
-    override fun equals(other: Any?) = other is CollectionVInt<*> && contentEquals(other as CollectionVInt<T>)
+    override inline fun equals(other: Any?) = other is CollectionVInt<*> && contentEquals(other as CollectionVInt<T>)
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toStringV() to print K.toString", ReplaceWith("toStringV()"))
     override inline fun toString(): String = collection.toString()

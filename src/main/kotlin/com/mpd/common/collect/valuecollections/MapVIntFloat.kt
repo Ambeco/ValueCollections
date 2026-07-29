@@ -30,7 +30,7 @@ context(a: ValueIntAdapter<K>) inline fun <K> vIntFloatMapOf(key1:K,value1:Float
 context(a: ValueIntAdapter<K>) inline fun <K> vIntFloatMapOf(key1:K,value1:Float, key2:K,value2:Float, key3:K,value3:Float, key4:K,value4:Float, key5:K,value5:Float): MapVIntFloat<K> =
     MutMapVIntFloat(mutableIntFloatMapOf(a.toInt(key1), value1, a.toInt(key2), value2, a.toInt(key3), value3, a.toInt(key4), value4, a.toInt(key5), value5))
 
-fun <K> mutVIntFloatMapOf() = MutMapVIntFloat<K>()
+inline fun <K> mutVIntFloatMapOf() = MutMapVIntFloat<K>()
 context(a: ValueIntAdapter<K>) inline fun <K> mutVIntFloatMapOf(key1:K,value1:Float) =
     MutMapVIntFloat<K>(mutableIntFloatMapOf(a.toInt(key1), value1))
 context(a: ValueIntAdapter<K>) inline fun <K> mutVIntFloatMapOf(key1:K,value1:Float, key2:K,value2:Float) =

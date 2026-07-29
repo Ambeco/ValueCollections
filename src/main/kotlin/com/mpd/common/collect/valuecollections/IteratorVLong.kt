@@ -53,22 +53,22 @@ class MutableIteratorVLongGeneric<T>(val delegate:MutableIterator<Long>, val a: 
     inline fun nextInt(): T = a.fromLong(delegate.next())
     override inline fun forEachRemaining(op: Consumer<in T>) { while (delegate.hasNext()) op.accept(nextInt()) }
 }
-context(a: ValueLongAdapter<T>) fun <T> vIteratorFrom(delegate:Iterator<Long>): PrimitiveIterator<T, Consumer<in T>> = when(delegate) {
+context(a: ValueLongAdapter<T>) inline fun <T> vIteratorFrom(delegate:Iterator<Long>): PrimitiveIterator<T, Consumer<in T>> = when(delegate) {
     is PrimitiveIterator.OfLong -> IteratorVLongJava(delegate, a)
     is LongIterator -> IteratorVLongKotlin(delegate, a)
     else -> IteratorVLongGeneric(delegate, a)
 }
-context(a: ValueLongAdapter<T>) fun <T> vIteratorFrom(delegate:MutableIterator<Long>): MutableIterator<T> = when(delegate) {
+context(a: ValueLongAdapter<T>) inline fun <T> vIteratorFrom(delegate:MutableIterator<Long>): MutableIterator<T> = when(delegate) {
     is PrimitiveIterator.OfLong -> MutableIteratorVLongJava(delegate, a)
     is LongIterator -> MutableIteratorVLongKotlin(delegate, a)
     else -> MutableIteratorVLongGeneric(delegate, a)
 }
-context(a: ValueLongAdapter<T>) fun <T> mutableVIteratableFrom(delegate:Iterator<Long>): Iterable<T> = when(delegate) {
+context(a: ValueLongAdapter<T>) inline fun <T> mutableVIteratableFrom(delegate:Iterator<Long>): Iterable<T> = when(delegate) {
     is PrimitiveIterator.OfLong -> IteratorVLongJava(delegate, a)
     is LongIterator -> IteratorVLongKotlin(delegate, a)
     else -> IteratorVLongGeneric(delegate, a)
 }
-context(a: ValueLongAdapter<T>) fun <T> vIteratableFrom(delegate:MutableIterator<Long>): MutableIterable<T> = when(delegate) {
+context(a: ValueLongAdapter<T>) inline fun <T> vIteratableFrom(delegate:MutableIterator<Long>): MutableIterable<T> = when(delegate) {
     is PrimitiveIterator.OfLong -> MutableIteratorVLongJava(delegate, a)
     is LongIterator -> MutableIteratorVLongKotlin(delegate, a)
     else -> MutableIteratorVLongGeneric(delegate, a)

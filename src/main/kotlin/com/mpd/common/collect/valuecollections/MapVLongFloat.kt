@@ -28,7 +28,7 @@ context(a: ValueLongAdapter<K>) inline fun <K> vLongFloatMapOf(key1:K,value1:Flo
 context(a: ValueLongAdapter<K>) inline fun <K> vLongFloatMapOf(key1:K,value1:Float, key2:K,value2:Float, key3:K,value3:Float, key4:K,value4:Float, key5:K,value5:Float): MapVLongFloat<K> =
     MutMapVLongFloat(mutableLongFloatMapOf(a.toLong(key1), value1, a.toLong(key2), value2, a.toLong(key3), value3, a.toLong(key4), value4, a.toLong(key5), value5))
 
-fun <K> mutVLongFloatMapOf() = MutMapVLongFloat<K>()
+inline fun <K> mutVLongFloatMapOf() = MutMapVLongFloat<K>()
 context(a: ValueLongAdapter<K>) inline fun <K> mutVLongFloatMapOf(key1:K,value1:Float) =
     MutMapVLongFloat<K>(mutableLongFloatMapOf(a.toLong(key1), value1))
 context(a: ValueLongAdapter<K>) inline fun <K> mutVLongFloatMapOf(key1:K,value1:Float, key2:K,value2:Float) =
@@ -77,14 +77,14 @@ class MutMapVLongFloat<K>(override val collection: MutableLongFloatMap = Mutable
     context(a: ValueLongAdapter<K>) inline fun put(key: K, value:Float, default:Float) = collection.put(a.toLong(key),value, default)
     inline fun putAll(from: MapVLongFloat<K>) = collection.putAll(from.collection)
     inline operator fun plusAssign(from: MapVLongFloat<K>) = collection.putAll(from.collection)
-    context(a: ValueLongAdapter<K>) fun remove(key: K, value: Float) = collection.remove(a.toLong(key),value)
+    context(a: ValueLongAdapter<K>) inline fun remove(key: K, value: Float) = collection.remove(a.toLong(key),value)
     context(a: ValueLongAdapter<K>) inline fun removeIf(predicate: (K, Float) -> Boolean) = collection.removeIf{k,v->predicate(a.fromLong(k),v)}
     context(a: ValueLongAdapter<K>) inline infix operator fun minusAssign(key: K):Unit = collection.minusAssign(a.toLong(key))
     inline infix operator fun minusAssign(keys: LongArray):Unit = collection.minusAssign(keys) // TODO: Add VIntArray/VIntCollection
     inline infix operator fun minusAssign(keys: LongSet):Unit = collection.minusAssign(keys)
     inline infix operator fun minusAssign(keys: LongList):Unit = collection.minusAssign(keys)
-    fun clear() = collection.clear()
-    fun trim() = collection.trim()
+    inline fun clear() = collection.clear()
+    inline fun trim() = collection.trim()
     override inline fun hashCode() = collection.hashCode()
     override inline fun equals(other: Any?) = other is MutMapVLongFloat<*> && collection == other.collection
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")

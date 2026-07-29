@@ -28,8 +28,8 @@ class ArrayVLong<T>(val collection:LongArray, override val NULL_VALUE: LongBits=
     override inline fun indexOfBits(bits: LongBits) = collection.indexOf(bits)
     
     @Suppress("UNCHECKED_CAST")
-    override fun equals(other: Any?): Boolean = other is IndexedCollectionVLong<*> && contentEquals(other as IndexedCollectionVLong<T>)
-    override fun hashCode(): Int = contentHashCode()
+    override inline fun equals(other: Any?): Boolean = other is IndexedCollectionVLong<*> && contentEquals(other as IndexedCollectionVLong<T>)
+    override inline fun hashCode(): Int = contentHashCode()
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Longs. Use toStringV() to print K.toString", ReplaceWith("toStringV()"))
     override inline fun toString(): String = collection.toString()

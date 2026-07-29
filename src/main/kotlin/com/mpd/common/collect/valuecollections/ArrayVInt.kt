@@ -28,8 +28,8 @@ class ArrayVInt<T>(val collection:IntArray, override val NULL_VALUE: IntBits=Int
     override inline fun indexOfBits(bits: IntBits) = collection.indexOf(bits)
     
     @Suppress("UNCHECKED_CAST")
-    override fun equals(other: Any?): Boolean = other is IndexedCollectionVInt<*> && contentEquals(other as IndexedCollectionVInt<T>)
-    override fun hashCode(): Int = contentHashCode()
+    override inline fun equals(other: Any?): Boolean = other is IndexedCollectionVInt<*> && contentEquals(other as IndexedCollectionVInt<T>)
+    override inline fun hashCode(): Int = contentHashCode()
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toStringV() to print K.toString", ReplaceWith("toStringV()"))
     override inline fun toString(): String = collection.toString()

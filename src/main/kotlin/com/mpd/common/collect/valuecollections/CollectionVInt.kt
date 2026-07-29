@@ -333,13 +333,13 @@ context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.partition(crossi
     return trueList to falseList
 }
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.random(): T = random(Random.Default)
-context(a: ValueIntAdapter<T>) fun <T> CollectionVInt<T>.random(random: Random): T {
+context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.random(random: Random): T {
     if (size==0) throw NoSuchElementException()
     val findIdx = random.nextInt(size)
     return fromInt(findIndexedBits {i,e->i==findIdx})
 }
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.randomOrNull(): T? = randomOrNull(Random.Default)
-context(a: ValueIntAdapter<T>) fun <T> CollectionVInt<T>.randomOrNull(random: Random): T? = if (size==0) null else random(random)
+context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.randomOrNull(random: Random): T? = if (size==0) null else random(random)
 context(a: ValueIntAdapter<T>) inline infix fun <T, R> CollectionVInt<T>.zip(other: Array<out R>): MutableList<Pair<T, R>> = zip(other, { a, b->a to b})
 context(a: ValueIntAdapter<T>) inline fun <T, R, V> CollectionVInt<T>.zip(other: Array<out R>, crossinline transform: (a: T, b: R) -> V): MutableList<V> {
     val r = mutableListOf<V>()

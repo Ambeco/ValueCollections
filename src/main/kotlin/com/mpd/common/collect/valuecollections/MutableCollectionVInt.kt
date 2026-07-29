@@ -60,8 +60,8 @@ context(a: ValueIntAdapter<T>) inline infix operator fun <T> MutableCollectionVI
 context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.removeAll(elements: ListVInt<T>): Boolean = elements.all { remove(it)}
 context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.removeAll(elements: Array<T>): Boolean= elements.all { remove(it)}
 context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.removeAll(elements: Iterable<T>): Boolean= elements.all { remove(it)}
-context(a: ValueIntAdapter<T>) fun <T> MutableCollectionVInt<T>.removeAll(elements:Collection<T>): Boolean = elements.all { remove(it)}
-fun <T> MutableCollectionVInt<T>.removeAll(elements: CollectionVInt<T>): Boolean = elements.allBits { removeBits(it) }
+context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.removeAll(elements:Collection<T>): Boolean = elements.all { remove(it)}
+inline fun <T> MutableCollectionVInt<T>.removeAll(elements: CollectionVInt<T>): Boolean = elements.allBits { removeBits(it) }
 context(a: ValueIntAdapter<T>) inline infix operator fun <T> MutableCollectionVInt<T>.minusAssign(elements: ListVInt<T>): Unit = check(removeAll(elements))
 context(a: ValueIntAdapter<T>) inline infix operator fun <T> MutableCollectionVInt<T>.minusAssign(elements: Array<T>): Unit = check(removeAll(elements))
 context(a: ValueIntAdapter<T>) inline infix operator fun <T> MutableCollectionVInt<T>.minusAssign(elements: Collection<T>): Unit = check(removeAll(elements))

@@ -34,8 +34,8 @@ context(a: ValueLongAdapter<T>) inline fun <T> ModifiableIndexedCollectionVLong<
     override inline fun set(index: Int, element: T): T = this@asListGeneric.set(index, element)
     override inline fun add(index: Int, element: T) = throw NotImplementedError("Collection elements are modifiable, but the collection itself is not mutable")
     override inline fun removeAt(index: Int): T = throw NotImplementedError("Collection elements are modifiable, but the collection itself is not mutable")
-    override fun listIterator(): MutableListIterator<T> = MutableListIteratorVLong(this)
-    override fun listIterator(index: Int): MutableListIterator<T> = MutableListIteratorVLong(this, index)
+    override inline fun listIterator(): MutableListIterator<T> = MutableListIteratorVLong(this)
+    override inline fun listIterator(index: Int): MutableListIterator<T> = MutableListIteratorVLong(this, index)
     override inline fun subList(fromIndex: Int, toIndex: Int): MutableList<T> = throw NotImplementedError() //  this@asListGeneric.subList(fromIndex, toIndex)
 }
 context(a: ValueLongAdapter<T>) inline fun <T> ModifiableIndexedCollectionVLong<T>.set(index: Int, value: T): T {val old = a.fromLong(bitsAtIndex(index)); setBits(index, a.toLong(value)); return old}
@@ -77,8 +77,8 @@ context(a: ValueLongAdapter<T>) inline fun <T> MutableIndexedCollectionVLong<T>.
     override inline fun set(index: Int, element: T): T = this@asListGeneric.set(index, element)
     override inline fun add(index: Int, element: T) = this@asListGeneric.add(index, element)
     override inline fun removeAt(index: Int): T = this@asListGeneric.removeAt(index)
-    override fun listIterator(): MutableListIterator<T> = MutableListIteratorVLong(this)
-    override fun listIterator(index: Int): MutableListIterator<T> = MutableListIteratorVLong(this, index)
+    override inline fun listIterator(): MutableListIterator<T> = MutableListIteratorVLong(this)
+    override inline fun listIterator(index: Int): MutableListIterator<T> = MutableListIteratorVLong(this, index)
     override inline fun subList(fromIndex: Int, toIndex: Int): MutableList<T> = throw NotImplementedError() // this@asListGeneric.subList(fromIndex, toIndex)
 }
 

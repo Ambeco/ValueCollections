@@ -22,17 +22,17 @@ class ArraySetVLong<T>(val collection: MutableLongSet, override val NULL_VALUE: 
     override inline fun trim(minCapacity: Int) { }
     override inline fun addBits(bits: LongBits): Boolean = collection.add(bits)
     override inline fun removeBits(bits: LongBits): Boolean = collection.remove(bits)
-    context(a: ValueLongAdapter<T>) override inline fun removeAll(predicate: (T) -> Boolean): Boolean {
+    context(a: ValueLongAdapter<T>) override inline fun removeAll(crossinline predicate: (T) -> Boolean): Boolean {
         val removeList = MutableLongSet(size)
         collection.forEach { if (predicate(a.fromLong(it))) removeList.add(it) }
         collection.removeAll(removeList)
         return true
     }
-    
+
     override inline fun clear()  = collection.clear()
-    override fun hashCode() = contentHashCode()
+    override inline fun hashCode() = contentHashCode()
     @Suppress("UNCHECKED_CAST")
-    override fun equals(other: Any?) = other is CollectionVLong<*> && contentEquals(other as CollectionVLong<T>)
+    override inline fun equals(other: Any?) = other is CollectionVLong<*> && contentEquals(other as CollectionVLong<T>)
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toStringV() to print K.toString", ReplaceWith("toStringV()"))
     override inline fun toString(): String = collection.toString()
