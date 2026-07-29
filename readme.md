@@ -33,13 +33,15 @@ overhead should be one additional allocation per collection.
     - `interface ModifiableCollectionVLong<T>`
     - `interface MutableCollectionVInt<T>` 
     - `interface MutableCollectionVLong<T>`
-- Queues  (TODO)
-  - `ArrayDequeInt` (actual `int` implementation, not a wrapper)
-  - `ArrayDequeLong` (actual `int` implementation, not a wrapper)
+- Queues
   - `ArrayDequeVInt<T>` (thin wrapper around `androidx.collection.CircularIntArray`)
-  - `ArrayDequeVLong<T>` (TODO)
-  - `PriorityBlockingArrayQueueInt` (actual `int` implementation, not a wrapper)
-  - `PriorityBlockingArrayQueueLong` (actual `int` implementation, not a wrapper)
+  - `ArrayDequeVLong<T>` (TODO? Or maybe not since there's no androidx.collection impl to wrap?)
+  - `PriorityArrayQueueInt` (*actual `int` implementation, not a wrapper)
+  - `PriorityArrayQueueLong` (*actual `Long` implementation, not a wrapper)
+  - `PriorityArrayQueueVInt<T>`
+  - `PriorityArrayQueueVLong<T>`
+  - `PriorityBlockingArrayQueueInt` (*actual `int` implementation, not a wrapper)
+  - `PriorityBlockingArrayQueueLong` (*actual `Long` implementation, not a wrapper)
   - `PriorityBlockingArrayQueueVInt<T>` 
   - `PriorityBlockingArrayQueueVLong<T>`
 
