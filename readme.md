@@ -77,14 +77,14 @@ https://github.com/androidx/androidx/tree/0a6843ad7cd148b7128d4db9e3c9299c5e58fa
   - `MapVDoubleInt<V>` (TODO)
   - `MapVDoubleLong<V>` (TODO)
   - `MapVIntDouble<K>` (TODO)
-  - `MapVIntFloat<K>` (TODO)
+  - `MapVIntFloat<K>`
   - `MapVIntInt<K,V>`
   - `MapVIntLong<K,V>`
   - `MapVIntObject<K,V>`
-  - `MapVFloatInt<V>` (TODO)
-  - `MapVFloatLong<V>` (TODO)
+  - `MapVFloatInt<V>`
+  - `MapVFloatLong<V>`
   - `MapVLongDouble<K>` (TODO)
-  - `MapVLongFloat<K>` (TODO)
+  - `MapVLongFloat<K>`
   - `MapVLongInt<K,V>`
   - `MapVLongLong<K,V>`
   - `MapVLongObject<K,V>`
