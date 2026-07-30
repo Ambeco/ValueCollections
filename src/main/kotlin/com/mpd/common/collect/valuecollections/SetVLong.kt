@@ -2,6 +2,7 @@
 
 package com.mpd.common.collect.valuecollections
 
+import androidx.collection.LongSet
 import androidx.collection.MutableLongSet
 
 interface SetVLong<T>: CollectionVLong<T>
@@ -30,6 +31,50 @@ class ArraySetVLong<T>(val collection: MutableLongSet, override val NULL_VALUE: 
     }
 
     override inline fun clear()  = collection.clear()
+
+    // Thin wrappers for every public method of MutableLongSet.
+    // Named with a "Bits" suffix (rather than matching MutableLongSet's names exactly) to avoid
+    // shadowing the generic, adapter-based extension functions of the same name (any, forEach,
+    // contains, add, remove, etc.) declared for CollectionVLong<T>/MutableCollectionVLong<T> - a
+    // member function always wins overload resolution over an extension of the same name, which
+    // would silently break every caller of those typed extensions.
+    inline fun capacity(): Int = collection.capacity
+    inline fun anyBits(): Boolean = collection.any()
+    inline fun noneBits(): Boolean = collection.none()
+    inline fun isEmpty(): Boolean = collection.isEmpty()
+    inline fun isNotEmptyBits(): Boolean = collection.isNotEmpty()
+    inline fun first(): LongBits = collection.first()
+    inline fun first(predicate: (element: LongBits) -> Boolean): LongBits = collection.first(predicate)
+    inline fun forEachBits(block: (element: LongBits) -> Unit) = collection.forEach(block)
+    inline fun allBits(predicate: (element: LongBits) -> Boolean): Boolean = collection.all(predicate)
+    inline fun countBits(): Int = collection.count()
+    inline fun countBits(predicate: (element: LongBits) -> Boolean): Int = collection.count(predicate)
+    inline fun joinToStringBits(
+        separator: CharSequence = ", ",
+        prefix: CharSequence = "",
+        postfix: CharSequence = "",
+        limit: Int = -1,
+        truncated: CharSequence = "...",
+    ): String = collection.joinToString(separator, prefix, postfix, limit, truncated)
+    inline fun joinToStringBits(
+        separator: CharSequence = ", ",
+        prefix: CharSequence = "",
+        postfix: CharSequence = "",
+        limit: Int = -1,
+        truncated: CharSequence = "...",
+        crossinline transform: (LongBits) -> CharSequence,
+    ): String = collection.joinToString(separator, prefix, postfix, limit, truncated, transform)
+    inline fun plusAssignBits(element: LongBits) = collection.plusAssign(element)
+    inline fun addAllBits(elements: LongArray): Boolean = collection.addAll(elements)
+    inline fun plusAssignBits(elements: LongArray) = collection.plusAssign(elements)
+    inline fun addAllBits(elements: LongSet): Boolean = collection.addAll(elements)
+    inline fun plusAssignBits(elements: LongSet) = collection.plusAssign(elements)
+    inline fun minusAssignBits(element: LongBits) = collection.minusAssign(element)
+    inline fun removeAllBits(elements: LongArray): Boolean = collection.removeAll(elements)
+    inline fun minusAssignBits(elements: LongArray) = collection.minusAssign(elements)
+    inline fun removeAllBits(elements: LongSet): Boolean = collection.removeAll(elements)
+    inline fun minusAssignBits(elements: LongSet) = collection.minusAssign(elements)
+
     override inline fun hashCode() = contentHashCode()
     @Suppress("UNCHECKED_CAST")
     override inline fun equals(other: Any?) = other is CollectionVLong<*> && contentEquals(other as CollectionVLong<T>)

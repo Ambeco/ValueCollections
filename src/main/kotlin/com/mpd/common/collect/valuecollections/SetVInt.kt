@@ -2,6 +2,7 @@
 
 package com.mpd.common.collect.valuecollections
 
+import androidx.collection.IntSet
 import androidx.collection.MutableIntSet
 
 interface SetVInt<T>: CollectionVInt<T>
@@ -34,6 +35,49 @@ class ArraySetVInt<T>(val collection: MutableIntSet, override val NULL_VALUE: In
     }
 
     override inline fun clear()  = collection.clear()
+
+    // Thin wrappers for every public method of MutableIntSet.
+    // Named with a "Bits" suffix (rather than matching MutableIntSet's names exactly) to avoid
+    // shadowing the generic, adapter-based extension functions of the same name (any, forEach,
+    // contains, add, remove, etc.) declared for CollectionVInt<T>/MutableCollectionVInt<T> - a
+    // member function always wins overload resolution over an extension of the same name, which
+    // would silently break every caller of those typed extensions.
+    inline fun capacity(): Int = collection.capacity
+    inline fun anyBits(): Boolean = collection.any()
+    inline fun noneBits(): Boolean = collection.none()
+    inline fun isEmpty(): Boolean = collection.isEmpty()
+    inline fun isNotEmptyBits(): Boolean = collection.isNotEmpty()
+    inline fun firstBits(): IntBits = collection.first()
+    inline fun firstBits(predicate: (element: IntBits) -> Boolean): IntBits = collection.first(predicate)
+    inline fun forEachBits(block: (element: IntBits) -> Unit) = collection.forEach(block)
+    inline fun allBits(predicate: (element: IntBits) -> Boolean): Boolean = collection.all(predicate)
+    inline fun count(): Int = collection.count()
+    inline fun countBits(predicate: (element: IntBits) -> Boolean): Int = collection.count(predicate)
+    inline fun joinToStringBits(
+        separator: CharSequence = ", ",
+        prefix: CharSequence = "",
+        postfix: CharSequence = "",
+        limit: Int = -1,
+        truncated: CharSequence = "...",
+    ): String = collection.joinToString(separator, prefix, postfix, limit, truncated)
+    inline fun joinToStringBits(
+        separator: CharSequence = ", ",
+        prefix: CharSequence = "",
+        postfix: CharSequence = "",
+        limit: Int = -1,
+        truncated: CharSequence = "...",
+        crossinline transform: (IntBits) -> CharSequence,
+    ): String = collection.joinToString(separator, prefix, postfix, limit, truncated, transform)
+    inline fun plusAssignBits(element: IntBits) = collection.plusAssign(element)
+    inline fun addAllBits(elements: IntArray): Boolean = collection.addAll(elements)
+    inline fun plusAssignBits(elements: IntArray) = collection.plusAssign(elements)
+    inline fun addAllBits(elements: IntSet): Boolean = collection.addAll(elements)
+    inline fun plusAssignBits(elements: IntSet) = collection.plusAssign(elements)
+    inline fun minusAssignBits(element: IntBits) = collection.minusAssign(element)
+    inline fun removeAllBits(elements: IntArray): Boolean = collection.removeAll(elements)
+    inline fun minusAssignBits(elements: IntArray) = collection.minusAssign(elements)
+    inline fun removeAllBits(elements: IntSet): Boolean = collection.removeAll(elements)
+    inline fun minusAssignBits(elements: IntSet) = collection.minusAssign(elements)
 
     override inline fun hashCode() = contentHashCode()
     @Suppress("UNCHECKED_CAST")

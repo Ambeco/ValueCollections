@@ -2,6 +2,9 @@
 
 package com.mpd.common.collect.valuecollections
 
+import androidx.collection.LongList
+import androidx.collection.LongObjectMap
+import androidx.collection.LongSet
 import androidx.collection.MutableLongObjectMap
 
 interface MapVLongObj<K,V> {
@@ -155,6 +158,47 @@ class HashMapVLongObj<K,V>(val collection: MutableLongObjectMap<V> =MutableLongO
     override inline fun removeBits(k: LongKeyBits): V? = collection.remove(k)
     override inline fun removeBits(k: LongKeyBits, v:V): Boolean = collection.remove(k,v)
     override inline fun removeIfBits(predicate: (LongKeyBits, V) -> Boolean) = collection.removeIf(predicate)
+
+    // Thin wrappers for every public method of MutableLongObjectMap.
+    inline fun capacity(): Int = collection.capacity
+    inline fun anyBits(): Boolean = collection.any()
+    inline fun none(): Boolean = collection.none()
+    inline fun isEmpty(): Boolean = collection.isEmpty()
+    inline fun isNotEmptyBits(): Boolean = collection.isNotEmpty()
+    inline fun getOrDefault(key: LongKeyBits, defaultValue: V): V = collection.getOrDefault(key, defaultValue)
+    inline fun getOrElse(key: LongKeyBits, defaultValue: () -> V): V = collection.getOrElse(key, defaultValue)
+    inline fun forEachBits(block: (key: LongKeyBits, value: V) -> Unit) = collection.forEach(block)
+    inline fun forEachKey(block: (key: LongKeyBits) -> Unit) = collection.forEachKey(block)
+    inline fun forEachValue(block: (value: V) -> Unit) = collection.forEachValue(block)
+    inline fun all(predicate: (LongKeyBits, V) -> Boolean): Boolean = collection.all(predicate)
+    inline fun count(): Int = collection.count()
+    inline fun count(predicate: (LongKeyBits, V) -> Boolean): Int = collection.count(predicate)
+    inline operator fun contains(key: LongKeyBits): Boolean = collection.contains(key)
+    inline fun containsKeyBits(key: LongKeyBits): Boolean = collection.containsKey(key)
+    inline fun containsValueBits(value: V): Boolean = collection.containsValue(value)
+    inline fun joinToStringBits(
+        separator: CharSequence = ", ",
+        prefix: CharSequence = "",
+        postfix: CharSequence = "",
+        limit: Int = -1,
+        truncated: CharSequence = "...",
+    ): String = collection.joinToString(separator, prefix, postfix, limit, truncated)
+    inline fun joinToStringBits(
+        separator: CharSequence = ", ",
+        prefix: CharSequence = "",
+        postfix: CharSequence = "",
+        limit: Int = -1,
+        truncated: CharSequence = "...",
+        crossinline transform: (key: LongKeyBits, value: V) -> CharSequence,
+    ): String = collection.joinToString(separator, prefix, postfix, limit, truncated, transform)
+    inline fun put(key: LongKeyBits, value: V): V? = collection.put(key, value)
+    inline fun putAllBits(from: LongObjectMap<V>) = collection.putAll(from)
+    inline fun plusAssignBits(from: LongObjectMap<V>) = collection.plusAssign(from)
+    inline fun minusAssignBits(key: LongKeyBits) = collection.minusAssign(key)
+    inline fun minusAssignBits(keys: LongArray) = collection.minusAssign(keys)
+    inline fun minusAssignBits(keys: LongSet) = collection.minusAssign(keys)
+    inline fun minusAssignBits(keys: LongList) = collection.minusAssign(keys)
+
     context(ka: ValueLongAdapter<K>) override inline fun asIterable(): MutableIterable<PairVLongObj<K,V>> = throw NotImplementedError()
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")

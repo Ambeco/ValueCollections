@@ -2,6 +2,9 @@
 
 package com.mpd.common.collect.valuecollections
 
+import androidx.collection.IntIntMap
+import androidx.collection.IntList
+import androidx.collection.IntSet
 import androidx.collection.MutableIntIntMap
 
 
@@ -159,6 +162,49 @@ class HashMapVIntInt<K,V>(val collection: MutableIntIntMap=MutableIntIntMap(), o
     override inline fun removeBits(k: IntKeyBits) = collection.remove(k)
     override inline fun removeBits(k: IntKeyBits, v:IntValueBits): Boolean = collection.remove(k,v)
     override inline fun removeIfBits(predicate: (IntKeyBits, IntValueBits) -> Boolean) = collection.removeIf(predicate)
+
+    // Thin wrappers for every public method of MutableIntIntMap.
+    inline fun capacity(): Int = collection.capacity
+    inline fun anyBits(): Boolean = collection.any()
+    inline fun none(): Boolean = collection.none()
+    inline fun isEmpty(): Boolean = collection.isEmpty()
+    inline fun isNotEmptyBits(): Boolean = collection.isNotEmpty()
+    inline fun getOrDefault(key: IntKeyBits, defaultValue: IntValueBits): IntValueBits = collection.getOrDefault(key, defaultValue)
+    inline fun getOrElse(key: IntKeyBits, defaultValue: () -> IntValueBits): IntValueBits = collection.getOrElse(key, defaultValue)
+    inline fun forEachBits(block: (key: IntKeyBits, value: IntValueBits) -> Unit) = collection.forEach(block)
+    inline fun forEachKey(block: (key: IntKeyBits) -> Unit) = collection.forEachKey(block)
+    inline fun forEachValue(block: (value: IntValueBits) -> Unit) = collection.forEachValue(block)
+    inline fun all(predicate: (IntKeyBits, IntValueBits) -> Boolean): Boolean = collection.all(predicate)
+    inline fun count(): Int = collection.count()
+    inline fun count(predicate: (IntKeyBits, IntValueBits) -> Boolean): Int = collection.count(predicate)
+    inline operator fun contains(key: IntKeyBits): Boolean = collection.contains(key)
+    inline fun containsKeyBits(key: IntKeyBits): Boolean = collection.containsKey(key)
+    inline fun containsValueBits(value: IntValueBits): Boolean = collection.containsValue(value)
+    inline fun joinToStringBits(
+        separator: CharSequence = ", ",
+        prefix: CharSequence = "",
+        postfix: CharSequence = "",
+        limit: Int = -1,
+        truncated: CharSequence = "...",
+    ): String = collection.joinToString(separator, prefix, postfix, limit, truncated)
+    inline fun joinToStringBits(
+        separator: CharSequence = ", ",
+        prefix: CharSequence = "",
+        postfix: CharSequence = "",
+        limit: Int = -1,
+        truncated: CharSequence = "...",
+        crossinline transform: (key: IntKeyBits, value: IntValueBits) -> CharSequence,
+    ): String = collection.joinToString(separator, prefix, postfix, limit, truncated, transform)
+    inline fun setBits(key: IntKeyBits, value: IntValueBits) = collection.set(key, value)
+    inline fun put(key: IntKeyBits, value: IntValueBits) = collection.put(key, value)
+    inline fun put(key: IntKeyBits, value: IntValueBits, default: IntValueBits): IntValueBits = collection.put(key, value, default)
+    inline fun putAllBits(from: IntIntMap) = collection.putAll(from)
+    inline fun plusAssignBits(from: IntIntMap) = collection.plusAssign(from)
+    inline fun minusAssignBits(key: IntKeyBits) = collection.minusAssign(key)
+    inline fun minusAssignBits(keys: IntArray) = collection.minusAssign(keys)
+    inline fun minusAssignBits(keys: IntSet) = collection.minusAssign(keys)
+    inline fun minusAssignBits(keys: IntList) = collection.minusAssign(keys)
+
     context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) override inline fun asIterable(): MutableIterable<PairVIntInt<K,V>> = throw NotImplementedError()
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")

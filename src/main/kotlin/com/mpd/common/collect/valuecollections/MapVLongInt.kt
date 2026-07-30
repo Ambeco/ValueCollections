@@ -2,6 +2,9 @@
 
 package com.mpd.common.collect.valuecollections
 
+import androidx.collection.LongIntMap
+import androidx.collection.LongList
+import androidx.collection.LongSet
 import androidx.collection.MutableLongIntMap
 
 interface MapVLongInt<K,V> {
@@ -157,6 +160,49 @@ class HashMapVLongInt<K,V>(val collection: MutableLongIntMap=MutableLongIntMap()
     override inline fun removeBits(k: LongKeyBits) = collection.remove(k)
     override inline fun removeBits(k: LongKeyBits, v:IntValueBits): Boolean = collection.remove(k,v)
     override inline fun removeIfBits(predicate: (LongKeyBits, IntValueBits) -> Boolean) = collection.removeIf(predicate)
+
+    // Thin wrappers for every public method of MutableLongIntMap.
+    inline fun capacity(): Int = collection.capacity
+    inline fun anyBits(): Boolean = collection.any()
+    inline fun none(): Boolean = collection.none()
+    inline fun isEmpty(): Boolean = collection.isEmpty()
+    inline fun isNotEmptyBits(): Boolean = collection.isNotEmpty()
+    inline fun getOrDefault(key: LongKeyBits, defaultValue: IntValueBits): IntValueBits = collection.getOrDefault(key, defaultValue)
+    inline fun getOrElse(key: LongKeyBits, defaultValue: () -> IntValueBits): IntValueBits = collection.getOrElse(key, defaultValue)
+    inline fun forEachBits(block: (key: LongKeyBits, value: IntValueBits) -> Unit) = collection.forEach(block)
+    inline fun forEachKey(block: (key: LongKeyBits) -> Unit) = collection.forEachKey(block)
+    inline fun forEachValue(block: (value: IntValueBits) -> Unit) = collection.forEachValue(block)
+    inline fun all(predicate: (LongKeyBits, IntValueBits) -> Boolean): Boolean = collection.all(predicate)
+    inline fun count(): Int = collection.count()
+    inline fun count(predicate: (LongKeyBits, IntValueBits) -> Boolean): Int = collection.count(predicate)
+    inline operator fun contains(key: LongKeyBits): Boolean = collection.contains(key)
+    inline fun containsKeyBits(key: LongKeyBits): Boolean = collection.containsKey(key)
+    inline fun containsValueBits(value: IntValueBits): Boolean = collection.containsValue(value)
+    inline fun joinToStringBits(
+        separator: CharSequence = ", ",
+        prefix: CharSequence = "",
+        postfix: CharSequence = "",
+        limit: Int = -1,
+        truncated: CharSequence = "...",
+    ): String = collection.joinToString(separator, prefix, postfix, limit, truncated)
+    inline fun joinToStringBits(
+        separator: CharSequence = ", ",
+        prefix: CharSequence = "",
+        postfix: CharSequence = "",
+        limit: Int = -1,
+        truncated: CharSequence = "...",
+        crossinline transform: (key: LongKeyBits, value: IntValueBits) -> CharSequence,
+    ): String = collection.joinToString(separator, prefix, postfix, limit, truncated, transform)
+    inline fun setBits(key: LongKeyBits, value: IntValueBits) = collection.set(key, value)
+    inline fun put(key: LongKeyBits, value: IntValueBits) = collection.put(key, value)
+    inline fun put(key: LongKeyBits, value: IntValueBits, default: IntValueBits): IntValueBits = collection.put(key, value, default)
+    inline fun putAllBits(from: LongIntMap) = collection.putAll(from)
+    inline fun plusAssignBits(from: LongIntMap) = collection.plusAssign(from)
+    inline fun minusAssignBits(key: LongKeyBits) = collection.minusAssign(key)
+    inline fun minusAssignBits(keys: LongArray) = collection.minusAssign(keys)
+    inline fun minusAssignBits(keys: LongSet) = collection.minusAssign(keys)
+    inline fun minusAssignBits(keys: LongList) = collection.minusAssign(keys)
+
     context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) override inline fun asIterable(): MutableIterable<PairVLongInt<K,V>> = throw NotImplementedError()
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")

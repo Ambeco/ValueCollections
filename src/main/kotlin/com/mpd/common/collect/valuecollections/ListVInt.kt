@@ -69,6 +69,62 @@ class ArrayListVInt<T>(val collection: MutableIntList = MutableIntList(), overri
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toStringV() to print K.toString", ReplaceWith("toStringV()"))
     override inline fun toString() = collection.toString() // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
+
+    // Fast-path members mirroring androidx.collection.IntList/MutableIntList, delegating directly
+    // to `collection` instead of going through the generic bits-based CollectionVInt/
+    // IndexedCollectionVInt extension functions. Kotlin prefers a member over an extension
+    // function of the same name/signature, so these transparently speed up calls made directly on
+    // an ArrayListVInt without requiring any call-site changes.
+    inline fun none(): Boolean = collection.none()
+    inline fun any(): Boolean = collection.any()
+    context(a: ValueIntAdapter<T>) inline fun any(crossinline predicate: (T) -> Boolean): Boolean = collection.any { predicate(a.fromInt(it)) }
+    context(a: ValueIntAdapter<T>) inline fun reversedAny(crossinline predicate: (T) -> Boolean): Boolean = collection.reversedAny { predicate(a.fromInt(it)) }
+    inline fun containsAll(elements: ArrayListVInt<T>): Boolean = collection.containsAll(elements.collection)
+    inline fun count(): Int = collection.count()
+    context(a: ValueIntAdapter<T>) inline fun count(crossinline predicate: (T) -> Boolean): Int = collection.count { predicate(a.fromInt(it)) }
+    context(a: ValueIntAdapter<T>) inline fun first(): T = a.fromInt(collection.first())
+    context(a: ValueIntAdapter<T>) inline fun first(crossinline predicate: (T) -> Boolean): T = a.fromInt(collection.first { predicate(a.fromInt(it)) })
+    context(a: ValueIntAdapter<T>) inline fun <R> fold(initial: R, crossinline operation: (acc: R, T) -> R): R = collection.fold(initial) { acc, e -> operation(acc, a.fromInt(e)) }
+    context(a: ValueIntAdapter<T>) inline fun <R> foldIndexed(initial: R, crossinline operation: (index: Int, acc: R, T) -> R): R = collection.foldIndexed(initial) { i, acc, e -> operation(i, acc, a.fromInt(e)) }
+    context(a: ValueIntAdapter<T>) inline fun <R> foldRight(initial: R, crossinline operation: (T, acc: R) -> R): R = collection.foldRight(initial) { e, acc -> operation(a.fromInt(e), acc) }
+    context(a: ValueIntAdapter<T>) inline fun <R> foldRightIndexed(initial: R, crossinline operation: (index: Int, T, acc: R) -> R): R = collection.foldRightIndexed(initial) { i, e, acc -> operation(i, a.fromInt(e), acc) }
+    context(a: ValueIntAdapter<T>) inline fun forEach(crossinline block: (T) -> Unit) = collection.forEach { block(a.fromInt(it)) }
+    context(a: ValueIntAdapter<T>) inline fun forEachIndexed(crossinline block: (index: Int, T) -> Unit) = collection.forEachIndexed { i, e -> block(i, a.fromInt(e)) }
+    context(a: ValueIntAdapter<T>) inline fun forEachReversed(crossinline block: (T) -> Unit) = collection.forEachReversed { block(a.fromInt(it)) }
+    context(a: ValueIntAdapter<T>) inline fun forEachReversedIndexed(crossinline block: (index: Int, T) -> Unit) = collection.forEachReversedIndexed { i, e -> block(i, a.fromInt(e)) }
+    context(a: ValueIntAdapter<T>) inline fun elementAt(index: Int): T = a.fromInt(collection.elementAt(index))
+    context(a: ValueIntAdapter<T>) inline fun elementAtOrElse(index: Int, crossinline defaultValue: (index: Int) -> T): T = a.fromInt(collection.elementAtOrElse(index) { a.toInt(defaultValue(it)) })
+    context(a: ValueIntAdapter<T>) inline fun indexOfFirst(crossinline predicate: (T) -> Boolean): Int = collection.indexOfFirst { predicate(a.fromInt(it)) }
+    context(a: ValueIntAdapter<T>) inline fun indexOfLast(crossinline predicate: (T) -> Boolean): Int = collection.indexOfLast { predicate(a.fromInt(it)) }
+    inline fun isEmpty(): Boolean = collection.isEmpty()
+    inline fun isNotEmpty(): Boolean = collection.isNotEmpty()
+    context(a: ValueIntAdapter<T>) inline fun last(): T = a.fromInt(collection.last())
+    context(a: ValueIntAdapter<T>) inline fun last(crossinline predicate: (T) -> Boolean): T = a.fromInt(collection.last { predicate(a.fromInt(it)) })
+    context(a: ValueIntAdapter<T>) inline fun lastIndexOf(element: T): Int = collection.lastIndexOf(a.toInt(element))
+    context(a: ValueIntAdapter<T>) inline fun binarySearch(element: T, fromIndex: Int = 0, toIndex: Int = size): Int = collection.binarySearch(a.toInt(element), fromIndex, toIndex)
+    context(a: ValueIntAdapter<T>) inline fun joinToString(separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: (T) -> CharSequence = { it.toString() }): String =
+        collection.joinToString(separator, prefix, postfix, limit, truncated) { transform(a.fromInt(it)) }
+
+    // MutableIntList members: bulk operations get a raw-IntArray overload and a fast-path overload
+    // for when the other collection also happens to be backed by MutableIntList.
+    inline fun addAllBits(index: Int, elements: IntArray): Boolean = collection.addAll(index, elements)
+    inline fun addAllBits(elements: IntArray): Boolean = collection.addAll(elements)
+    inline fun addAll(index: Int, elements: ArrayListVInt<T>): Boolean = collection.addAll(index, elements.collection)
+    inline fun addAll(elements: ArrayListVInt<T>): Boolean = collection.addAll(elements.collection)
+    inline operator fun plusAssign(elements: IntArray): Unit = collection.plusAssign(elements)
+    inline operator fun plusAssign(elements: ArrayListVInt<T>): Unit = collection.plusAssign(elements.collection)
+    inline fun removeAllBits(elements: IntArray): Boolean = collection.removeAll(elements)
+    inline fun removeAll(elements: ArrayListVInt<T>): Boolean = collection.removeAll(elements.collection)
+    inline operator fun minusAssign(elements: IntArray): Unit { collection.minusAssign(elements) }
+    inline operator fun minusAssign(elements: ArrayListVInt<T>): Unit { collection.minusAssign(elements.collection) }
+    inline fun retainAllBits(elements: IntArray): Boolean = collection.retainAll(elements)
+    inline fun retainAll(elements: ArrayListVInt<T>): Boolean = collection.retainAll(elements.collection)
+    context(a: ValueIntAdapter<T>) inline fun set(index: Int, element: T): T = a.fromInt(collection.set(index, a.toInt(element)))
+    // Sorts by the raw underlying Int representation, NOT by T's logical Comparable order (those
+    // may differ) - use the generic Comparable-constrained `sort()`/`sortDescending()` extensions
+    // from MutableIndexedCollectionVInt.kt if T's natural order must be respected.
+    inline fun sortByBits() = collection.sort()
+    inline fun sortByBitsDescending() = collection.sortDescending()
 }
 
 val <T> ArrayListVInt<T>.lastIndex inline get() = collection.lastIndex
