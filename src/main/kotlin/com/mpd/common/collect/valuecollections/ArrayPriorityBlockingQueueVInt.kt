@@ -48,7 +48,7 @@ class ArrayPriorityBlockingQueueVInt<T>(
         return result
     }
     override fun removeBits(bits: IntBits): Boolean = queue.remove(bits)
-    context(a: ValueIntAdapter<T>) override fun removeAll(predicate: (T) -> Boolean): Boolean = queue.removeIf { predicate(a.fromInt(it)) }
+    override inline fun removeAllBits(crossinline predicate: (IntBits) -> Boolean): Boolean = queue.removeIf { predicate(it) }
     override fun clear() = queue.clear()
 
     override fun offerBits(bits: IntBits): Boolean = addBits(bits)

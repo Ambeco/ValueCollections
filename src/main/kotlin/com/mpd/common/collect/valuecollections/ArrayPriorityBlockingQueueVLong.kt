@@ -48,7 +48,7 @@ class ArrayPriorityBlockingQueueVLong<T>(
         return result
     }
     override fun removeBits(bits: LongBits): Boolean = queue.remove(bits)
-    context(a: ValueLongAdapter<T>) override fun removeAll(predicate: (T) -> Boolean): Boolean = queue.removeIf { predicate(a.fromLong(it)) }
+    override inline fun removeAllBits(crossinline predicate: (LongBits) -> Boolean): Boolean = queue.removeIf { predicate(it) }
     override fun clear() = queue.clear()
 
     override fun offerBits(bits: LongBits): Boolean = addBits(bits)

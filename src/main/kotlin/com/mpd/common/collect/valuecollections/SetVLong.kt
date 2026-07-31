@@ -23,9 +23,9 @@ class ArraySetVLong<T>(val collection: MutableLongSet, override val NULL_VALUE: 
     override inline fun trim(minCapacity: Int) { }
     override inline fun addBits(bits: LongBits): Boolean = collection.add(bits)
     override inline fun removeBits(bits: LongBits): Boolean = collection.remove(bits)
-    context(a: ValueLongAdapter<T>) override inline fun removeAll(crossinline predicate: (T) -> Boolean): Boolean {
+    override inline fun removeAllBits(predicate: (LongBits) -> Boolean): Boolean {
         val removeList = MutableLongSet(size)
-        collection.forEach { if (predicate(a.fromLong(it))) removeList.add(it) }
+        collection.forEach { if (predicate(it)) removeList.add(it) }
         collection.removeAll(removeList)
         return true
     }

@@ -1,5 +1,5 @@
 @file:Suppress("NOTHING_TO_INLINE","OVERRIDE_BY_INLINE", "unused", "RedundantNullableReturnType",
-    "KotlinConstantConditions", "KotlinConstantConditions"
+    "KotlinConstantConditions", "KotlinConstantConditions", "CONTEXTUAL_OVERLOAD_SHADOWED"
 )
 
 package com.mpd.common.collect.valuecollections

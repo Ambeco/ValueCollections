@@ -33,7 +33,7 @@ class ArrayPriorityQueueVLong<T>(
     override inline fun trim(minCapacity: Int) { /* not supported: the wrapped queue does not expose a way to shrink its backing array */ }
     override inline fun addBits(bits: LongBits): Boolean = queue.offer(bits)
     override inline fun removeBits(bits: LongBits): Boolean = queue.remove(bits)
-    context(a: ValueLongAdapter<T>) override inline fun removeAll(crossinline predicate: (T) -> Boolean): Boolean = queue.removeIf { predicate(a.fromLong(it)) }
+    override inline fun removeAllBits(crossinline predicate: (LongBits) -> Boolean): Boolean = queue.removeIf { predicate(it) }
     override inline fun clear() = queue.clear()
 
     override inline fun offerBits(bits: LongBits): Boolean = addBits(bits)

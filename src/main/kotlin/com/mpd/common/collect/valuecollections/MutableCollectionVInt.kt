@@ -18,7 +18,7 @@ interface MutableCollectionVInt<T>: ModifiableCollectionVInt<T> {
     fun trim(minCapacity: Int)
     fun addBits(bits: IntBits): Boolean
     fun removeBits(bits: IntBits): Boolean
-    context(a: ValueIntAdapter<T>) fun removeAll(predicate: (T) -> Boolean): Boolean
+    fun removeAllBits(predicate: (IntBits) -> Boolean): Boolean
     fun clear()
     context(a: ValueIntAdapter<T>) override fun asModifiableIterable(): MutableIterable<T> = asIterable()
     context(a: ValueIntAdapter<T>) override fun asIterable(): MutableIterable<T>
@@ -62,6 +62,7 @@ context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.removeAll
 context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.removeAll(elements: Iterable<T>): Boolean= elements.all { remove(it)}
 context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.removeAll(elements:Collection<T>): Boolean = elements.all { remove(it)}
 inline fun <T> MutableCollectionVInt<T>.removeAll(elements: CollectionVInt<T>): Boolean = elements.allBits { removeBits(it) }
+context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.removeAll(crossinline predicate: (T) -> Boolean): Boolean = removeAllBits { predicate(a.fromInt(it)) }
 context(a: ValueIntAdapter<T>) inline infix operator fun <T> MutableCollectionVInt<T>.minusAssign(elements: ListVInt<T>): Unit = check(removeAll(elements))
 context(a: ValueIntAdapter<T>) inline infix operator fun <T> MutableCollectionVInt<T>.minusAssign(elements: Array<T>): Unit = check(removeAll(elements))
 context(a: ValueIntAdapter<T>) inline infix operator fun <T> MutableCollectionVInt<T>.minusAssign(elements: Collection<T>): Unit = check(removeAll(elements))

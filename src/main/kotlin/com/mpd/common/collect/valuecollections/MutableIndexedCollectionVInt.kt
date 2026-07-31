@@ -47,7 +47,7 @@ interface MutableIndexedCollectionVInt<T>: ModifiableIndexedCollectionVInt<T>, M
     fun addAll(index: Int, elements: CollectionVInt<T>): Boolean
     context(a: ValueIntAdapter<T>) fun addAll(index: Int, elements: Collection<T>): Boolean
 
-    context(a: ValueIntAdapter<T>) fun removeAt(index: Int): T
+    fun removeAtBits(index: Int): IntBits
     fun removeRange(start: Int, end: Int)
     fun removeAllIndexedBits(predicate: (index: Int, bits: IntBits) -> Boolean): Boolean
 }
@@ -76,6 +76,7 @@ context(a: ValueIntAdapter<T>) inline fun <T> MutableIndexedCollectionVInt<T>.as
 }
 
 context(a: ValueIntAdapter<T>) inline fun <T> MutableIndexedCollectionVInt<T>.add(index: Int, element: T): Unit = addBits(index, a.toInt(element))
+context(a: ValueIntAdapter<T>) inline fun <T> MutableIndexedCollectionVInt<T>.removeAt(index: Int): T = a.fromInt(removeAtBits(index))
 context(a: ValueIntAdapter<T>) inline fun <T> MutableIndexedCollectionVInt<T>.retainAll(elements: ListVInt<T>): Boolean = removeAllIndexedBits { i, b -> !elements.containsBits(b) }
 
 

@@ -40,9 +40,9 @@ class ArrayListVLong<T>(val collection: MutableLongList = MutableLongList(), ove
     override inline fun addBits(bits: LongBits): Boolean = collection.add(bits)
     override inline fun removeBits(bits: LongBits): Boolean = collection.remove(bits)
 
-    context(a: ValueLongAdapter<T>) override inline fun removeAll(predicate: (T) -> Boolean): Boolean {
+    override inline fun removeAllBits(predicate: (LongBits) -> Boolean): Boolean {
         val removeList = MutableLongList(size)
-        collection.forEach { if (predicate(a.fromLong(it))) removeList.add(it) }
+        collection.forEach { if (predicate(it)) removeList.add(it) }
         collection.removeAll(removeList)
         return true
     }
@@ -54,7 +54,7 @@ class ArrayListVLong<T>(val collection: MutableLongList = MutableLongList(), ove
     override inline fun addBits(index: Int, bits: LongBits) = collection.add(index, bits)
     override inline fun addAll(index: Int, elements: CollectionVLong<T>): Boolean = throw NotImplementedError()
     context(a: ValueLongAdapter<T>) override inline fun addAll(index: Int, elements: Collection<T>): Boolean = throw NotImplementedError()
-    context(a: ValueLongAdapter<T>)  override inline fun removeAt(index: Int): T = a.fromLong(collection.removeAt(index))
+    override inline fun removeAtBits(index: Int): LongBits = collection.removeAt(index)
     override inline fun removeRange(start: Int, end: Int) = collection.removeRange(start, end)
     override inline fun removeAllIndexedBits(crossinline predicate: (index: Int, bits: LongBits) -> Boolean): Boolean = throw NotImplementedError()
 

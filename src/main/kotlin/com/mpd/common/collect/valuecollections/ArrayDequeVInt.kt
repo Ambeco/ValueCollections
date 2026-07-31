@@ -44,11 +44,11 @@ class ArrayDequeVInt<T>(
         }
         return removed
     }
-    context(a: ValueIntAdapter<T>) override inline fun removeAll(predicate: (T) -> Boolean): Boolean {
+    override inline fun removeAllBits(predicate: (IntBits) -> Boolean): Boolean {
         var removed = false
         for (i in 0 until deque.size()) {
             val v = deque.popFirst()
-            if (predicate(a.fromInt(v))) removed = true else deque.addLast(v)
+            if (predicate(v)) removed = true else deque.addLast(v)
         }
         return removed
     }

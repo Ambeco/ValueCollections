@@ -27,9 +27,9 @@ class ArraySetVInt<T>(val collection: MutableIntSet, override val NULL_VALUE: In
     override inline fun trim(minCapacity: Int) {}
     override inline fun addBits(bits: IntBits): Boolean = collection.add(bits)
     override inline fun removeBits(bits: IntBits): Boolean = collection.remove(bits)
-    context(a: ValueIntAdapter<T>) override inline fun removeAll(crossinline predicate: (T) -> Boolean): Boolean {
+    override inline fun removeAllBits(predicate: (IntBits) -> Boolean): Boolean {
         val removeList = MutableIntSet(size)
-        collection.forEach { if (predicate(a.fromInt(it))) removeList.add(it) }
+        collection.forEach { if (predicate(it)) removeList.add(it) }
         collection.removeAll(removeList)
         return true
     }

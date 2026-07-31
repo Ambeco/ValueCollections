@@ -41,9 +41,9 @@ class ArrayListVInt<T>(val collection: MutableIntList = MutableIntList(), overri
     override inline fun addBits(bits: IntBits): Boolean = collection.add(bits)
     override inline fun removeBits(bits: IntBits): Boolean = collection.remove(bits)
 
-    context(a: ValueIntAdapter<T>) override inline fun removeAll(predicate: (T) -> Boolean): Boolean  {
+    override inline fun removeAllBits(predicate: (IntBits) -> Boolean): Boolean  {
         val removeList = MutableIntList(size)
-        collection.forEach { if (predicate(a.fromInt(it))) removeList.add(it) }
+        collection.forEach { if (predicate(it)) removeList.add(it) }
         collection.removeAll(removeList)
         return true
     }
@@ -58,7 +58,7 @@ class ArrayListVInt<T>(val collection: MutableIntList = MutableIntList(), overri
     override inline fun addBits(index: Int, bits: IntBits) = collection.add(index, bits)
     override inline fun addAll(index: Int, elements: CollectionVInt<T>): Boolean = throw NotImplementedError()
     context(a: ValueIntAdapter<T>) override inline fun addAll(index: Int, elements: Collection<T>): Boolean = throw NotImplementedError()
-    context(a: ValueIntAdapter<T>) override inline fun removeAt(index: Int): T = a.fromInt(collection.removeAt(index))
+    override inline fun removeAtBits(index: Int): IntBits = collection.removeAt(index)
     override inline fun removeRange(start: Int, end: Int) = collection.removeRange(start, end)
 
     override inline fun removeAllIndexedBits(crossinline predicate: (index: Int, bits: IntBits) -> Boolean): Boolean = throw NotImplementedError()
