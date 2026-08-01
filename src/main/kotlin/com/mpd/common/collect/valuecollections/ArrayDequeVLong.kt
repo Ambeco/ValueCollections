@@ -78,7 +78,7 @@ class ArrayDequeVLong<T>(
     override inline fun hashCode(): Int = contentHashCode()
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toStringV() to print T.toString", ReplaceWith("toStringV()"))
-    override fun toString(): String {
+    override inline fun toString(): String {
         val sb = StringBuilder("ArrayDequeVLong[")
         for (i in 0 until deque.size()) { if (i > 0) sb.append(", "); sb.append(deque[i]) }
         return sb.append(']').toString()
