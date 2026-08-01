@@ -25,12 +25,9 @@ interface MapVObjLong<K,V> {
 }
 context(va: ValueLongAdapter<V>)  inline fun <K,V> MapVObjLong<K,V>.asMapGeneric(): Map<K,V> = object: Map<K,V> {
     override inline val size: Int get() = this@asMapGeneric.size
-    override inline val keys: Set<K> get() = asIterable().mapTo(HashSet()) {e->e.key}
-    override inline val values: Collection<V> get() = asIterable().mapTo(HashSet()) {e->e.value}
-    override inline val entries: Set<Map.Entry<K, V>> get() = asIterable().mapTo(HashSet()) {e->object:Map.Entry<K,V>{
-        override val key: K get() = e.key
-        override val value: V get() = e.value}
-    }
+    override inline val keys: Set<K> get() = HashSet<K>(size).also { s -> forEach { k, _ -> s.add(k) } }
+    override inline val values: Collection<V> get() = ArrayList<V>(size).also { l -> forEach { _, v -> l.add(v) } }
+    override inline val entries: Set<Map.Entry<K, V>> get() = HashSet<Map.Entry<K,V>>(size).also { s -> forEach { k, v -> s.add(java.util.AbstractMap.SimpleImmutableEntry(k, v)) } }
     override inline fun isEmpty(): Boolean = this@asMapGeneric.isEmpty
     override inline fun containsKey(key: K): Boolean = this@asMapGeneric.containsKey(key)
     override inline fun containsValue(value: V): Boolean = this@asMapGeneric.containsValue(value)
@@ -201,7 +198,11 @@ class HashMapVObjLong<K,V>(val collection: MutableObjectLongMap<K> =MutableObjec
     inline fun minusAssignBits(keys: Sequence<K>) = collection.minusAssign(keys)
     inline fun minusAssignBits(keys: ScatterSet<K>) = collection.minusAssign(keys)
 
-    context(va: ValueLongAdapter<V>) override inline fun asIterable(): MutableIterable<PairVObjLong<K,V>> = throw NotImplementedError()
+    context(va: ValueLongAdapter<V>) override inline fun asIterable(): MutableIterable<PairVObjLong<K,V>> {
+        val list = ArrayList<PairVObjLong<K,V>>(size)
+        collection.forEach { k, v -> list.add(PairVObjLong(k, v)) }
+        return list
+    }
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toStringV()"))

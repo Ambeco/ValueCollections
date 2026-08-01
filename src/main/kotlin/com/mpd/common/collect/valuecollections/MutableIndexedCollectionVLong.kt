@@ -9,6 +9,7 @@ import kotlin.collections.sortBy
 import kotlin.collections.sortByDescending
 import kotlin.collections.sortDescending
 import kotlin.collections.sortWith
+import kotlin.random.Random
 
 
 // can modify elements, but not add or remove
@@ -36,7 +37,11 @@ context(a: ValueLongAdapter<T>) inline fun <T> ModifiableIndexedCollectionVLong<
     override inline fun removeAt(index: Int): T = throw NotImplementedError("Collection elements are modifiable, but the collection itself is not mutable")
     override inline fun listIterator(): MutableListIterator<T> = MutableListIteratorVLong(this)
     override inline fun listIterator(index: Int): MutableListIterator<T> = MutableListIteratorVLong(this, index)
-    override inline fun subList(fromIndex: Int, toIndex: Int): MutableList<T> = throw NotImplementedError() //  this@asListGeneric.subList(fromIndex, toIndex)
+    override inline fun subList(fromIndex: Int, toIndex: Int): MutableList<T> {
+        val result = ArrayList<T>(toIndex-fromIndex)
+        for (i in fromIndex ..< toIndex) result.add(this@asListGeneric.get(i))
+        return result
+    }
 }
 context(a: ValueLongAdapter<T>) inline fun <T> ModifiableIndexedCollectionVLong<T>.set(index: Int, value: T): T {val old = a.fromLong(bitsAtIndex(index)); setBits(index, a.toLong(value)); return old}
 context(a: ValueLongAdapter<T>) inline fun <T : Comparable<T>> ModifiableIndexedCollectionVLong<T>.sort(): Unit = asListGeneric().sort()
@@ -46,6 +51,15 @@ context(a: ValueLongAdapter<T>) inline fun <T : Comparable<T>> ModifiableIndexed
 context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> ModifiableIndexedCollectionVLong<T>.sortBy(crossinline selector: (T) -> R?): Unit = asListGeneric().sortBy(selector)
 context(a: ValueLongAdapter<T>) inline fun <T, R : Comparable<R>> ModifiableIndexedCollectionVLong<T>.sortByDescending(crossinline selector: (T) -> R?): Unit = asListGeneric().sortByDescending(selector)
 context(a: ValueLongAdapter<T>) inline fun <T> ModifiableIndexedCollectionVLong<T>.sortWith(comparator: Comparator<in T>): Unit = asListGeneric().sortWith(comparator)
+inline fun <T> ModifiableIndexedCollectionVLong<T>.shuffle(): Unit = shuffle(Random.Default)
+inline fun <T> ModifiableIndexedCollectionVLong<T>.shuffle(random: Random) {
+    for (i in size-1 downTo 1) {
+        val j = random.nextInt(i+1)
+        val bitsI = bitsAtIndex(i)
+        setBits(i, bitsAtIndex(j))
+        setBits(j, bitsI)
+    }
+}
 
 
 // can modify, add, and remove elements
@@ -79,7 +93,11 @@ context(a: ValueLongAdapter<T>) inline fun <T> MutableIndexedCollectionVLong<T>.
     override inline fun removeAt(index: Int): T = this@asListGeneric.removeAt(index)
     override inline fun listIterator(): MutableListIterator<T> = MutableListIteratorVLong(this)
     override inline fun listIterator(index: Int): MutableListIterator<T> = MutableListIteratorVLong(this, index)
-    override inline fun subList(fromIndex: Int, toIndex: Int): MutableList<T> = throw NotImplementedError() // this@asListGeneric.subList(fromIndex, toIndex)
+    override inline fun subList(fromIndex: Int, toIndex: Int): MutableList<T> {
+        val result = ArrayList<T>(toIndex-fromIndex)
+        for (i in fromIndex ..< toIndex) result.add(this@asListGeneric.get(i))
+        return result
+    }
 }
 
 context(a: ValueLongAdapter<T>) inline fun <T> MutableIndexedCollectionVLong<T>.add(index: Int, element: T): Unit = addBits(index, a.toLong(element))

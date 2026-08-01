@@ -17,7 +17,11 @@ class ArraySetVLong<T>(val collection: MutableLongSet, override val NULL_VALUE: 
     override val size: Int get() = collection.size
     override inline fun anyBits(predicate: (bits: LongBits) -> Boolean): LongBits = try { collection.first { predicate(it) } } catch (e: NoSuchElementException) { NULL_VALUE }
     override inline fun containsBits(bits: LongBits): Boolean = collection.contains(bits)
-    context(a: ValueLongAdapter<T>) override inline fun asIterable(): MutableIterable<T> = throw NotImplementedError()
+    context(a: ValueLongAdapter<T>) override inline fun asIterable(): MutableIterable<T> {
+        val list = ArrayList<T>(size)
+        collection.forEach { list.add(a.fromLong(it)) }
+        return list
+    }
 
     override inline fun ensureCapacity(newCapacity: Int): Boolean = false
     override inline fun trim(minCapacity: Int) { }

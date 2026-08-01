@@ -56,12 +56,28 @@ class ArrayListVInt<T>(val collection: MutableIntList = MutableIntList(), overri
     override inline fun setBits(index: Int, bits: IntBits) { collection[index] = bits }
 
     override inline fun addBits(index: Int, bits: IntBits) = collection.add(index, bits)
-    override inline fun addAll(index: Int, elements: CollectionVInt<T>): Boolean = throw NotImplementedError()
-    context(a: ValueIntAdapter<T>) override inline fun addAll(index: Int, elements: Collection<T>): Boolean = throw NotImplementedError()
+    override inline fun addAll(index: Int, elements: CollectionVInt<T>): Boolean = collection.addAll(index, elements.toIntArray())
+    context(a: ValueIntAdapter<T>) override inline fun addAll(index: Int, elements: Collection<T>): Boolean {
+        val array = IntArray(elements.size)
+        var i = 0
+        for (e in elements) array[i++] = a.toInt(e)
+        return collection.addAll(index, array)
+    }
     override inline fun removeAtBits(index: Int): IntBits = collection.removeAt(index)
     override inline fun removeRange(start: Int, end: Int) = collection.removeRange(start, end)
 
-    override inline fun removeAllIndexedBits(crossinline predicate: (index: Int, bits: IntBits) -> Boolean): Boolean = throw NotImplementedError()
+    override inline fun removeAllIndexedBits(crossinline predicate: (index: Int, bits: IntBits) -> Boolean): Boolean {
+        var removedAny = false
+        var i = size - 1
+        while (i >= 0) {
+            if (predicate(i, collection[i])) {
+                collection.removeAt(i)
+                removedAny = true
+            }
+            i--
+        }
+        return removedAny
+    }
     
     override inline fun hashCode() = contentHashCode()
     @Suppress("UNCHECKED_CAST")

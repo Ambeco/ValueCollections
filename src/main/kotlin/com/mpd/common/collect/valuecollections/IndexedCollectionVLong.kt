@@ -5,7 +5,6 @@
 package com.mpd.common.collect.valuecollections
 
 import java.util.BitSet
-import kotlin.random.Random
 
 interface IndexedCollectionVLong<T> : CollectionVLong<T> {
     fun bitsAtIndex(index: Int): LongBits
@@ -24,12 +23,16 @@ context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.asListG
     override inline fun contains(element: T): Boolean = this@asListGeneric.contains(element)
     override inline fun iterator(): Iterator<T> = this@asListGeneric.asIterable().iterator()
     override inline fun containsAll(elements: Collection<T>): Boolean = this@asListGeneric.containsAll(elements)
-    override inline fun get(index: Int): T = this@asListGeneric.get(index)
+    override inline fun get(index: Int): T = this@asListGeneric[index]
     override inline fun indexOf(element: T): Int = this@asListGeneric.indexOf(element)
     override inline fun lastIndexOf(element: T): Int = this@asListGeneric.lastIndexOf(element)
     override inline fun listIterator(): ListIterator<T> = ListIteratorVLong(this)
     override inline fun listIterator(index: Int): ListIterator<T> = ListIteratorVLong(this, index)
-    override inline fun subList(fromIndex: Int, toIndex: Int): List<T> = throw NotImplementedError() // this@asListGeneric.subList(fromIndex, toIndex)
+    override inline fun subList(fromIndex: Int, toIndex: Int): List<T> {
+        val result = ArrayList<T>(toIndex-fromIndex)
+        for (i in fromIndex ..< toIndex) result.add(this@asListGeneric[i])
+        return result
+    }
 }
 context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.anyIndexed(crossinline action: (index:Int, T) -> Boolean) = any(
     object: (T) -> Boolean {
@@ -95,26 +98,33 @@ context(a: ValueLongAdapter<T>) inline fun <T, C : MutableIndexedCollectionVLong
 context(a: ValueLongAdapter<T>) inline fun <T, C : MutableCollection<T>> IndexedCollectionVLong<T>.filterNotTo(destination: C, crossinline predicate: (T) -> Boolean): C = filterTo(destination) {!predicate(it)}
 context(a: ValueLongAdapter<T>) inline fun <T, C : MutableIndexedCollectionVLong<T>> IndexedCollectionVLong<T>.filterTo(destination: C, crossinline predicate: (T) -> Boolean): C = destination.also { forEach { if (predicate(it)) destination.add(it) } }
 context(a: ValueLongAdapter<T>) inline fun <T, C : MutableCollection<T>> IndexedCollectionVLong<T>.filterTo(destination: C, crossinline predicate: (T) -> Boolean): C = destination.also { forEach { if (predicate(it)) destination.add(it) } }
-context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.slice(indices: IntRange): ArrayListVLong<T> = copyInto(ArrayListVLong<T>(indices.last-indices.first, NULL_VALUE), 0, indices.first, indices.last)
+context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.slice(indices: IntRange): ArrayListVLong<T> = copyInto(ArrayListVLong(indices.last-indices.first, NULL_VALUE), 0, indices.first, indices.last)
 context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.slice(indices: Iterable<Int>): ArrayListVLong<T> = ArrayListVLong<T>(if (indices is Collection<Int>) indices.size else size/8).also { for(i in indices) it.addBits(bitsAtIndex(i)) }
-context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.sliceArray(indices: Collection<Int>): ArrayVLong<T> = ArrayVLong<T>(indices.size, NULL_VALUE).also { c-> indices.forEachIndexed { i, ei-> c.set(i, get(ei))}}
-context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.sliceArray(indices: IntRange): ArrayVLong<T> = ArrayVLong<T>(indices.last -indices.first +1, NULL_VALUE).also { c-> for (i in indices) c.set(i-indices.first, get(i))}
+context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.sliceArray(indices: Collection<Int>): ArrayVLong<T> = ArrayVLong<T>(indices.size, NULL_VALUE).also { c-> indices.forEachIndexed { i, ei-> c[i] = get(ei)}}
+context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.sliceArray(indices: IntRange): ArrayVLong<T> = ArrayVLong<T>(indices.last -indices.first +1, NULL_VALUE).also { c-> for (i in indices) c[i-indices.first] = get(i)}
 context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.take(n: Int): ArrayListVLong<T> = slice(IntRange(0,n-1))
 context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.takeLast(n: Int): ArrayListVLong<T> = slice(IntRange(size-n,size))
-context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.takeLastWhile(crossinline predicate: (T) -> Boolean): ArrayListVLong<T> {val i=indexOfLast{!predicate(it)}; return if(i==-1) ArrayListVLong<T>(this) else slice(IntRange(i+1, size-1))}
+context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.takeLastWhile(crossinline predicate: (T) -> Boolean): ArrayListVLong<T> {val i=indexOfLast{!predicate(it)}; return if(i==-1) ArrayListVLong(this) else slice(IntRange(i+1, size-1))}
 context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.slice(indices: Collection<Int>): ArrayListVLong<T> = filterIndexed { i, e-> indices.contains(i) }
 context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.takeWhile(crossinline predicate: (T) -> Boolean): ArrayListVLong<T> = ArrayListVLong<T>().also { c-> any { val p=predicate(it); if (p) c.add(it); !p } }
 context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.takeWhileIndexed(crossinline predicate: (Int, T) -> Boolean): ArrayListVLong<T> = ArrayListVLong<T>().also { c-> anyIndexed { i, e-> val p=predicate(i,e); if (p) c.add(e); !p } }
 inline fun <T, C: MutableIndexedCollectionVLong<T>> IndexedCollectionVLong<T>.copyInto(destination: C, destinationOffset: Int = 0, startIndex: Int = 0, endIndex: Int = size): C = destination.also{forEachIndexedBits{ i, e-> if(i in startIndex..endIndex) destination.addBits(i-startIndex+destinationOffset, e)}}
 context(a: ValueLongAdapter<T>) inline fun <T, C: MutableList<T>> IndexedCollectionVLong<T>.copyInto(destination: C, destinationOffset: Int = 0, startIndex: Int = 0, endIndex: Int = size): C = destination.also{forEachIndexed{ i, e-> if(i in startIndex..endIndex) destination.add(i-startIndex+destinationOffset, e)}}
 inline fun <T> IndexedCollectionVLong<T>.reversed(): ArrayListVLong<T> = ArrayListVLong<T>(size).also { dest -> for (i in size-1 downTo 0) dest.addBits(bitsAtIndex(i)) }
-context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.shuffle(): Unit = shuffle(Random.Default)
-context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.shuffle(random: Random): Unit {
-}
 context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.zipWithNext(): List<Pair<T, T>> = zipWithNext { l, r -> l to r}
-context(a: ValueLongAdapter<T>) inline fun <T, R> IndexedCollectionVLong<T>.zipWithNext(crossinline transform: (a: T, b: T) -> R): List<R> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R> IndexedCollectionVLong<T>.zipWithNext(crossinline transform: (a: T, b: T) -> R): List<R> {
+    if (size<=1) return emptyList()
+    val result = ArrayList<R>(size-1)
+    for (i in 0 ..< size-1) result.add(transform(elementAtIndex(i), elementAtIndex(i+1)))
+    return result
+}
 context(a: ValueLongAdapter<T>) inline fun <S, T : S> IndexedCollectionVLong<T>.reduceRight(crossinline operation: (T, acc: T) -> T): T = reduceRightIndexed { i, e, acc -> operation(e,acc)}
-context(a: ValueLongAdapter<T>) inline fun <S, T : S> IndexedCollectionVLong<T>.reduceRightIndexed(crossinline operation: (index: Int, T, acc: T) -> T): T = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <S, T : S> IndexedCollectionVLong<T>.reduceRightIndexed(crossinline operation: (index: Int, T, acc: T) -> T): T {
+    if (size==0) throw NoSuchElementException()
+    var acc: T = elementAtIndex(size-1)
+    for (i in size-2 downTo 0) acc = operation(i, elementAtIndex(i), acc)
+    return acc
+}
 context(a: ValueLongAdapter<T>) inline fun <S, T : S> IndexedCollectionVLong<T>.reduceRightIndexedOrNull(crossinline operation: (index: Int, T, acc: T) -> T): T? = if (size<2) null else reduceRightIndexed(operation)
 context(a: ValueLongAdapter<T>) inline fun <S, T : S> IndexedCollectionVLong<T>.reduceRightOrNull(crossinline operation: (T, acc: T) -> T): T? = if (size<2) null else reduceRight(operation)
 context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.windowed(windowSize: Int, step: Int = 1, partialWindows: Boolean = false): MutableList<MutableList<T>> {
@@ -125,4 +135,25 @@ context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.windowe
     }
     return list
 }
-context(a: ValueLongAdapter<T>) inline fun <T, R> IndexedCollectionVLong<T>.windowed(windowSize: Int, step: Int = 1, partialWindows: Boolean = false, crossinline transform: (List<T>) -> R): List<R> = throw NotImplementedError()
+context(a: ValueLongAdapter<T>) inline fun <T, R> IndexedCollectionVLong<T>.windowed(windowSize: Int, step: Int = 1, partialWindows: Boolean = false, crossinline transform: (List<T>) -> R): List<R> {
+    require(windowSize > 0) { "windowSize must be greater than zero, was $windowSize" }
+    require(step > 0) { "step must be greater than zero, was $step" }
+    val result = ArrayList<R>()
+    var i = 0
+    while (i < size) {
+        val windowEnd = i + windowSize
+        if (windowEnd > size) {
+            if (partialWindows && i < size) {
+                val window = ArrayList<T>(size - i)
+                for (j in i ..< size) window.add(elementAtIndex(j))
+                result.add(transform(window))
+            }
+            break
+        }
+        val window = ArrayList<T>(windowSize)
+        for (j in i ..< windowEnd) window.add(elementAtIndex(j))
+        result.add(transform(window))
+        i += step
+    }
+    return result
+}

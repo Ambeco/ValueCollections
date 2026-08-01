@@ -27,12 +27,9 @@ interface MapVLongFloat<K> {
 }
 context(ka: ValueLongAdapter<K>)  inline fun <K> MapVLongFloat<K>.asMapGeneric(): Map<K,Float> = object: Map<K,Float> {
     override inline val size: Int get() = this@asMapGeneric.size
-    override inline val keys: Set<K> get() = asIterable().mapTo(HashSet()) {e->e.key}
-    override inline val values: Collection<Float> get() = asIterable().mapTo(HashSet()) {e->e.value}
-    override inline val entries: Set<Map.Entry<K, Float>> get() = asIterable().mapTo(HashSet()) {e->object:Map.Entry<K,Float>{
-        override val key: K get() = e.key
-        override val value: Float get() = e.value}
-    }
+    override inline val keys: Set<K> get() = HashSet<K>(size).also { s -> forEach { k, _ -> s.add(k) } }
+    override inline val values: Collection<Float> get() = ArrayList<Float>(size).also { l -> forEach { _, v -> l.add(v) } }
+    override inline val entries: Set<Map.Entry<K, Float>> get() = HashSet<Map.Entry<K,Float>>(size).also { s -> forEach { k, v -> s.add(java.util.AbstractMap.SimpleImmutableEntry(k, v)) } }
     override inline fun isEmpty(): Boolean = this@asMapGeneric.isEmpty
     override inline fun containsKey(key: K): Boolean = this@asMapGeneric.containsKey(key)
     override inline fun containsValue(value: Float): Boolean = this@asMapGeneric.containsValue(value)
@@ -203,7 +200,11 @@ class HashMapVLongFloat<K>(val collection: MutableLongFloatMap=MutableLongFloatM
     inline fun minusAssignBits(keys: LongSet) = collection.minusAssign(keys)
     inline fun minusAssignBits(keys: LongList) = collection.minusAssign(keys)
 
-    context(ka: ValueLongAdapter<K>) override inline fun asIterable(): MutableIterable<PairVLongObj<K,Float>> = throw NotImplementedError()
+    context(ka: ValueLongAdapter<K>) override inline fun asIterable(): MutableIterable<PairVLongObj<K,Float>> {
+        val list = ArrayList<PairVLongObj<K,Float>>(size)
+        collection.forEach { k, v -> list.add(PairVLongObj(k, v)) }
+        return list
+    }
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toString(ValueLongAdapter) to print K.toString", ReplaceWith("toStringV()"))

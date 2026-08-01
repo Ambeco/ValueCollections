@@ -72,19 +72,16 @@ class MutableIndexedCollectionVIntTest {
         assertEquals(4, list.bitsAtIndex(1))
     }
 
-    // removeAllIndexedBits is declared but not yet implemented, so retainAll(ListVInt<T>) - which
-    // is built on top of it - is not yet functional either.
     @Test
-    fun removeAllIndexedBitsAndRetainAllNotYetImplemented() = with (MutIdxColTestClass) {
+    fun removeAllIndexedBitsAndRetainAll() = with (MutIdxColTestClass) {
         val list = ArrayListVInt<MutIdxColTestClass>().also { it += MutIdxColTestClass(1); it += MutIdxColTestClass(2) }
-        assertThrows(NotImplementedError::class.java, { list.removeAllIndexedBits { _, b -> b == 1 } })
-        assertThrows(NotImplementedError::class.java, { list.retainAll(
-            vIntListOf(
-                MutIdxColTestClass(
-                    1
-                )
-            )
-        ) })
+        assertEquals(true, list.removeAllIndexedBits { _, b -> b == 1 })
+        assertEquals(1, list.size)
+        assertEquals(MutIdxColTestClass(2), list.bitsAtIndex(0).let { MutIdxColTestClass.fromInt(it) })
+
+        val list2 = ArrayListVInt<MutIdxColTestClass>().also { it += MutIdxColTestClass(1); it += MutIdxColTestClass(2); it += MutIdxColTestClass(3) }
+        assertEquals(true, list2.retainAll(vIntListOf(MutIdxColTestClass(1))))
+        assertEquals(1, list2.size)
     }
 
     @Test
@@ -125,9 +122,12 @@ class MutableIndexedCollectionVIntTest {
         val iterFromIndex = list.listIterator(1)
         assertEquals(MutIdxColTestClass(20), iterFromIndex.next())
 
-        // this delegates straight to the not-yet-implemented interface member
-        assertThrows(NotImplementedError::class.java, { list.addAll(0, listOf(MutIdxColTestClass(99))) })
-        assertThrows(NotImplementedError::class.java, { list.subList(0, 1) })
+        assertEquals(true, list.addAll(0, listOf(MutIdxColTestClass(99))))
+        assertEquals(4, backing.size)
+        assertEquals(MutIdxColTestClass(99), backing[0])
+        assertEquals(MutIdxColTestClass(99), list.removeAt(0))
+        assertEquals(3, backing.size)
+        assertEquals(listOf(MutIdxColTestClass(1), MutIdxColTestClass(20)), list.subList(0, 2))
 
         list.clear()
         assertEquals(0, backing.size)

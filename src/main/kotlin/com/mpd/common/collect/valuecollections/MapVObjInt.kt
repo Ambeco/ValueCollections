@@ -14,7 +14,7 @@ interface MapVObjInt<K,V> {
     fun getBits(k: K): IntValueBits
     fun anyBits(predicate: (K, IntValueBits) -> Boolean): K?
 
-    context(va: ValueIntAdapter<V>) fun asIterable(): Iterable<PairVIntInt<K,V>>
+    context(va: ValueIntAdapter<V>) fun asIterable(): Iterable<PairVObjInt<K,V>>
 
     @JvmName("toStringV") @Suppress("INAPPLICABLE_JVM_NAME")
     context(va: ValueIntAdapter<V>) fun toString(): String = toStringV()
@@ -25,12 +25,9 @@ interface MapVObjInt<K,V> {
 }
 context(va: ValueIntAdapter<V>)  inline fun <K,V> MapVObjInt<K,V>.asMapGeneric(): Map<K,V> = object: Map<K,V> {
     override inline val size: Int get() = this@asMapGeneric.size
-    override inline val keys: Set<K> get() = asIterable().mapTo(HashSet()) {e->e.key}
-    override inline val values: Collection<V> get() = asIterable().mapTo(HashSet()) {e->e.value}
-    override inline val entries: Set<Map.Entry<K, V>> get() = asIterable().mapTo(HashSet()) {e->object:Map.Entry<K,V>{
-        override val key: K get() = e.key
-        override val value: V get() = e.value}
-    }
+    override inline val keys: Set<K> get() = HashSet<K>(size).also { s -> forEach { k, _ -> s.add(k) } }
+    override inline val values: Collection<V> get() = ArrayList<V>(size).also { l -> forEach { _, v -> l.add(v) } }
+    override inline val entries: Set<Map.Entry<K, V>> get() = HashSet<Map.Entry<K,V>>(size).also { s -> forEach { k, v -> s.add(java.util.AbstractMap.SimpleImmutableEntry(k, v)) } }
     override inline fun isEmpty(): Boolean = this@asMapGeneric.isEmpty
     override inline fun containsKey(key: K): Boolean = this@asMapGeneric.containsKey(key)
     override inline fun containsValue(value: V): Boolean = this@asMapGeneric.containsValue(value)
@@ -112,7 +109,7 @@ interface MutableMapVObjInt<K,V>: MapVObjInt<K,V> {
     fun removeBits(k: K)
     fun removeBits(k: K, v: IntValueBits):Boolean
     fun removeIfBits(predicate:(K,IntValueBits)->Boolean)
-    context(va: ValueIntAdapter<V>) override fun asIterable(): MutableIterable<PairVIntInt<K,V>>
+    context(va: ValueIntAdapter<V>) override fun asIterable(): MutableIterable<PairVObjInt<K,V>>
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toStringV()"))
@@ -204,7 +201,11 @@ class HashMapVObjInt<K,V>(val collection: MutableObjectIntMap<K> =MutableObjectI
     inline fun minusAssignBits(keys: Sequence<K>) = collection.minusAssign(keys)
     inline fun minusAssignBits(keys: ScatterSet<K>) = collection.minusAssign(keys)
 
-    context(va: ValueIntAdapter<V>) override inline fun asIterable(): MutableIterable<PairVIntInt<K,V>> = throw NotImplementedError()
+    context(va: ValueIntAdapter<V>) override inline fun asIterable(): MutableIterable<PairVObjInt<K,V>> {
+        val list = ArrayList<PairVObjInt<K,V>>(size)
+        collection.forEach { k, v -> list.add(PairVObjInt(k, v)) }
+        return list
+    }
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toStringV()"))

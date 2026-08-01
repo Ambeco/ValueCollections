@@ -45,14 +45,14 @@ class MutableIndexedCollectionVLongTest {
             ), list)
     }
 
-    // ArrayListVLong.addAll(index, ...) is declared but not yet implemented for either overload.
     @Test
-    fun addAllAtIndexNotYetImplemented() = with (MutIdxColLongTestClass) {
+    fun addAllAtIndex() = with (MutIdxColLongTestClass) {
         val list = ArrayListVLong<MutIdxColLongTestClass>().also { it plusAssign MutIdxColLongTestClass(1) }
-        assertThrows(NotImplementedError::class.java, { list.addAll(0,
-            vLongListOf(MutIdxColLongTestClass(2))
-        ) })
-        assertThrows(NotImplementedError::class.java, { list.addAll(0, listOf(MutIdxColLongTestClass(2))) })
+        assertEquals(true, list.addAll(0, vLongListOf(MutIdxColLongTestClass(2))))
+        assertEquals(MutIdxColLongTestClass(2), list.bitsAtIndex(0).let { MutIdxColLongTestClass.fromLong(it) })
+        assertEquals(true, list.addAll(0, listOf(MutIdxColLongTestClass(3))))
+        assertEquals(MutIdxColLongTestClass(3), list.bitsAtIndex(0).let { MutIdxColLongTestClass.fromLong(it) })
+        assertEquals(3, list.size)
     }
 
     @Test
@@ -72,17 +72,16 @@ class MutableIndexedCollectionVLongTest {
         assertEquals(4L, list.bitsAtIndex(1))
     }
 
-    // removeAllIndexedBits is declared but not yet implemented, so retainAll(ListVLong<T>) - which
-    // is built on top of it - is not yet functional either.
     @Test
-    fun removeAllIndexedBitsAndRetainAllNotYetImplemented() = with (MutIdxColLongTestClass) {
+    fun removeAllIndexedBitsAndRetainAll() = with (MutIdxColLongTestClass) {
         val list = ArrayListVLong<MutIdxColLongTestClass>().also { it plusAssign MutIdxColLongTestClass(1); it plusAssign MutIdxColLongTestClass(2) }
-        assertThrows(NotImplementedError::class.java, { list.removeAllIndexedBits { _, b -> b == 1L } })
-        assertThrows(NotImplementedError::class.java, { list.retainAll(
-            vLongListOf(
-                MutIdxColLongTestClass(1)
-            )
-        ) })
+        assertEquals(true, list.removeAllIndexedBits { _, b -> b == 1L })
+        assertEquals(1, list.size)
+        assertEquals(MutIdxColLongTestClass(2), list.bitsAtIndex(0).let { MutIdxColLongTestClass.fromLong(it) })
+
+        val list2 = ArrayListVLong<MutIdxColLongTestClass>().also { it plusAssign MutIdxColLongTestClass(1); it plusAssign MutIdxColLongTestClass(2); it plusAssign MutIdxColLongTestClass(3) }
+        assertEquals(true, list2.retainAll(vLongListOf(MutIdxColLongTestClass(1))))
+        assertEquals(1, list2.size)
     }
 
     @Test
@@ -123,9 +122,12 @@ class MutableIndexedCollectionVLongTest {
         val iterFromIndex = list.listIterator(1)
         assertEquals(MutIdxColLongTestClass(20), iterFromIndex.next())
 
-        // this delegates straight to the not-yet-implemented interface member
-        assertThrows(NotImplementedError::class.java, { list.addAll(0, listOf(MutIdxColLongTestClass(99))) })
-        assertThrows(NotImplementedError::class.java, { list.subList(0, 1) })
+        assertEquals(true, list.addAll(0, listOf(MutIdxColLongTestClass(99))))
+        assertEquals(4, backing.size)
+        assertEquals(MutIdxColLongTestClass(99), backing[0])
+        assertEquals(MutIdxColLongTestClass(99), list.removeAt(0))
+        assertEquals(3, backing.size)
+        assertEquals(listOf(MutIdxColLongTestClass(1), MutIdxColLongTestClass(20)), list.subList(0, 2))
 
         list.clear()
         assertEquals(0, backing.size)

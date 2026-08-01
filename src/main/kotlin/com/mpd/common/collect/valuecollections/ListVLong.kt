@@ -52,11 +52,27 @@ class ArrayListVLong<T>(val collection: MutableLongList = MutableLongList(), ove
     override inline fun indexOfBits(bits: LongBits): Int = collection.indexOf(bits)
 
     override inline fun addBits(index: Int, bits: LongBits) = collection.add(index, bits)
-    override inline fun addAll(index: Int, elements: CollectionVLong<T>): Boolean = throw NotImplementedError()
-    context(a: ValueLongAdapter<T>) override inline fun addAll(index: Int, elements: Collection<T>): Boolean = throw NotImplementedError()
+    override inline fun addAll(index: Int, elements: CollectionVLong<T>): Boolean = collection.addAll(index, elements.toLongArray())
+    context(a: ValueLongAdapter<T>) override inline fun addAll(index: Int, elements: Collection<T>): Boolean {
+        val array = LongArray(elements.size)
+        var i = 0
+        for (e in elements) array[i++] = a.toLong(e)
+        return collection.addAll(index, array)
+    }
     override inline fun removeAtBits(index: Int): LongBits = collection.removeAt(index)
     override inline fun removeRange(start: Int, end: Int) = collection.removeRange(start, end)
-    override inline fun removeAllIndexedBits(crossinline predicate: (index: Int, bits: LongBits) -> Boolean): Boolean = throw NotImplementedError()
+    override inline fun removeAllIndexedBits(crossinline predicate: (index: Int, bits: LongBits) -> Boolean): Boolean {
+        var removedAny = false
+        var i = size - 1
+        while (i >= 0) {
+            if (predicate(i, collection[i])) {
+                collection.removeAt(i)
+                removedAny = true
+            }
+            i--
+        }
+        return removedAny
+    }
 
     override inline fun hashCode() = contentHashCode()
     @Suppress("UNCHECKED_CAST")

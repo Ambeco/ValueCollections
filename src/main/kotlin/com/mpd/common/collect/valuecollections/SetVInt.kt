@@ -21,7 +21,11 @@ class ArraySetVInt<T>(val collection: MutableIntSet, override val NULL_VALUE: In
         return found
     }
     override inline fun containsBits(bits: IntBits): Boolean = collection.contains(bits)
-    context(a: ValueIntAdapter<T>) override inline fun asIterable(): MutableIterable<T> = throw NotImplementedError()
+    context(a: ValueIntAdapter<T>) override inline fun asIterable(): MutableIterable<T> {
+        val list = ArrayList<T>(size)
+        collection.forEach { list.add(a.fromInt(it)) }
+        return list
+    }
 
     override inline fun ensureCapacity(newCapacity: Int): Boolean = false
     override inline fun trim(minCapacity: Int) {}
