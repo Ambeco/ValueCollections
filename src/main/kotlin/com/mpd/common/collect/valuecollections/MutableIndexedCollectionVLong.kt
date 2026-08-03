@@ -115,3 +115,4 @@ context(a: ValueLongAdapter<T>) inline fun <T> MutableIndexedCollectionVLong<T>.
 context(a: ValueLongAdapter<T>) inline fun <T> MutableIndexedCollectionVLong<T>.add(index: Int, element: T): Unit = addBits(index, a.toLong(element))
 context(a: ValueLongAdapter<T>) inline fun <T> MutableIndexedCollectionVLong<T>.removeAt(index: Int): T = a.fromLong(removeAtBits(index))
 context(a: ValueLongAdapter<T>) inline fun <T> MutableIndexedCollectionVLong<T>.retainAll(elements: ListVLong<T>): Boolean = removeAllIndexedBits{ i, b-> !elements.containsBits(b)}
+context(a: ValueLongAdapter<T>) inline fun <T> MutableIndexedCollectionVLong<T>.removeAllIndexed(crossinline predicate: (index: Int, T) -> Boolean): Boolean = removeAllIndexedBits { i, b -> predicate(i, a.fromLong(b)) }

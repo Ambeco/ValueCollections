@@ -111,6 +111,7 @@ context(a: ValueIntAdapter<T>) inline fun <T> MutableIndexedCollectionVInt<T>.as
 context(a: ValueIntAdapter<T>) inline fun <T> MutableIndexedCollectionVInt<T>.add(index: Int, element: T): Unit = addBits(index, a.toInt(element))
 context(a: ValueIntAdapter<T>) inline fun <T> MutableIndexedCollectionVInt<T>.removeAt(index: Int): T = a.fromInt(removeAtBits(index))
 context(a: ValueIntAdapter<T>) inline fun <T> MutableIndexedCollectionVInt<T>.retainAll(elements: ListVInt<T>): Boolean = removeAllIndexedBits { i, b -> !elements.containsBits(b) }
+context(a: ValueIntAdapter<T>) inline fun <T> MutableIndexedCollectionVInt<T>.removeAllIndexed(crossinline predicate: (index: Int, T) -> Boolean): Boolean = removeAllIndexedBits { i, b -> predicate(i, a.fromInt(b)) }
 
 
 

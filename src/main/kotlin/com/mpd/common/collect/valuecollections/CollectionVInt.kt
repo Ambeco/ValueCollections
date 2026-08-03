@@ -91,8 +91,8 @@ context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.forEach(crossinl
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.single(crossinline predicate: (T) -> Boolean): T = fromInt(singleBits {predicate(a.fromInt(it))})
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.contains(element: T) = containsBits(a.toInt(element))
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.forEachIndexed(crossinline action: (index:Int, T) -> Unit) = forEachIndexedBits { i, e-> action(i,a.fromInt(e)) }
-context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.anyIndexed(crossinline predicate: (index:Int, T) -> Boolean): Boolean = anyIndexedBits { i, e-> predicate(i,a.fromInt(e)) } != NULL_VALUE
-context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.allIndexed(crossinline predicate: (index:Int, T) -> Boolean): Boolean = allIndexedBits { i, e-> predicate(i,a.fromInt(e)) }
+context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.anyIndexed(crossinline predicate: (index:Int, T) -> Boolean): Boolean = anyIndexedBits { i, bits -> predicate(i, a.fromInt(bits)) } != NULL_VALUE
+context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.allIndexed(crossinline predicate: (index:Int, T) -> Boolean): Boolean = allIndexedBits { i, bits -> predicate(i, a.fromInt(bits)) }
 
  inline fun <T> CollectionVInt<T>.isEmpty() = size == 0
  inline fun <T> CollectionVInt<T>.isNotEmpty() = size > 0

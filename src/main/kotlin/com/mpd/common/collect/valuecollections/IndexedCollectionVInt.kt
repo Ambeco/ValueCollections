@@ -101,9 +101,9 @@ context(a: ValueIntAdapter<T>) inline fun <T, R> IndexedCollectionVInt<T>.firstN
 context(a: ValueIntAdapter<T>) inline fun <T, R> IndexedCollectionVInt<T>.firstNotNullOfOrNull(crossinline transform: (T) -> R?): R? { for(i in 0 ..< size) return transform(elementAtIndex(i)) ?: continue; return null }
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.firstOrNull(): T? = elementAtOrNull(0)
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.firstOrNull(crossinline predicate: (T) -> Boolean): T? = elementAtOrNull(indexOfFirst(predicate))
-context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.indexOf(element: T): Int = indexOfFirst {it==element}
+context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.indexOf(element: T): Int = indexOfBits(a.toInt(element))
 inline fun <T> IndexedCollectionVInt<T>.indexOfFirstBits(crossinline predicate: (IntBits) -> Boolean): Int { for(i in 0 ..< size) if (predicate(bitsAtIndex(i))) return i; return -1 }
-context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.indexOfFirst(crossinline predicate: (T) -> Boolean): Int { for(i in 0 ..< size) if (predicate(elementAtIndex(i))) return i; return -1 }
+context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.indexOfFirst(crossinline predicate: (T) -> Boolean): Int = indexOfFirstBits { predicate(a.fromInt(it)) }
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.indexOfFirstIndexed(crossinline predicate: (index:Int, T) -> Boolean): Int { for(i in 0 ..< size) if (predicate(i, elementAtIndex(i))) return i; return -1 }
 inline fun <T> IndexedCollectionVInt<T>.indexOfFirstIndexedBitsDefault(startIndex:Int=0, crossinline predicate: (index:Int, bits:IntBits) -> Boolean): Int { for(i in startIndex ..< size) if (predicate(i, bitsAtIndex(i))) return i; return -1 }
 context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.indexOfLast(crossinline predicate: (T) -> Boolean): Int { for(i in size-1 downTo 0) if (predicate(elementAtIndex(i))) return i; return -1 }
