@@ -143,10 +143,13 @@ class HashMapVFloatLong<V>(val collection: MutableFloatLongMap =MutableFloatLong
     override val size: Int get() = collection.size
     override inline fun getBits(k: Float): LongValueBits = collection.getOrDefault(k, NULL_VALUE_BITS)
     override inline fun anyBits(predicate: (Float, LongValueBits) -> Boolean): Float? {
-        var result: Float? = null
-        var found = false
-        collection.forEach { k, v -> if (!found && predicate(k, v)) { result = k; found = true } }
-        return result
+        val finder = object : (Float, LongValueBits) -> Unit {
+            var result: Float? = null
+            var found = false
+            override inline fun invoke(k: Float, v: LongValueBits) { if (!found && predicate(k, v)) { result = k; found = true } }
+        }
+        collection.forEach(finder)
+        return finder.result
     }
     override inline fun trim() { collection.trim() }
     override inline fun clear() = collection.clear()
@@ -201,7 +204,16 @@ class HashMapVFloatLong<V>(val collection: MutableFloatLongMap =MutableFloatLong
     context(va: ValueLongAdapter<V>) override inline fun asIterable(): MutableIterable<PairVObjLong<Float,V>> {
         val list = ArrayList<PairVObjLong<Float,V>>(size)
         collection.forEach { k, v -> list.add(PairVObjLong(k, v)) }
-        return list
+        return object : MutableIterable<PairVObjLong<Float,V>> {
+            override inline fun iterator(): MutableIterator<PairVObjLong<Float,V>> = object : MutableIterator<PairVObjLong<Float,V>> {
+                var idx = 0
+                var lastKey: Float = 0f
+                var hasLast = false
+                override inline fun hasNext(): Boolean = idx < list.size
+                override inline fun next(): PairVObjLong<Float,V> { val p = list[idx++]; lastKey = p.first; hasLast = true; return p }
+                override inline fun remove() { check(hasLast); collection.remove(lastKey); hasLast = false }
+            }
+        }
     }
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")

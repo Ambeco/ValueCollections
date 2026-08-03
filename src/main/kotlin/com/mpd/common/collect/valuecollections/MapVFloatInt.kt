@@ -143,10 +143,13 @@ class HashMapVFloatInt<V>(val collection: MutableFloatIntMap =MutableFloatIntMap
     override val size: Int get() = collection.size
     override inline fun getBits(k: Float): IntValueBits = collection.getOrDefault(k, NULL_VALUE_BITS)
     override inline fun anyBits(predicate: (Float, IntValueBits) -> Boolean): Float? {
-        var result: Float? = null
-        var found = false
-        collection.forEach { k, v -> if (!found && predicate(k, v)) { result = k; found = true } }
-        return result
+        val finder = object : (Float, IntValueBits) -> Unit {
+            var result: Float? = null
+            var found = false
+            override inline fun invoke(k: Float, v: IntValueBits) { if (!found && predicate(k, v)) { result = k; found = true } }
+        }
+        collection.forEach(finder)
+        return finder.result
     }
     override inline fun trim() { collection.trim() }
     override inline fun clear() = collection.clear()
@@ -201,7 +204,16 @@ class HashMapVFloatInt<V>(val collection: MutableFloatIntMap =MutableFloatIntMap
     context(va: ValueIntAdapter<V>) override inline fun asIterable(): MutableIterable<PairVObjInt<Float,V>> {
         val list = ArrayList<PairVObjInt<Float,V>>(size)
         collection.forEach { k, v -> list.add(PairVObjInt(k, v)) }
-        return list
+        return object : MutableIterable<PairVObjInt<Float,V>> {
+            override inline fun iterator(): MutableIterator<PairVObjInt<Float,V>> = object : MutableIterator<PairVObjInt<Float,V>> {
+                var idx = 0
+                var lastKey: Float = 0f
+                var hasLast = false
+                override inline fun hasNext(): Boolean = idx < list.size
+                override inline fun next(): PairVObjInt<Float,V> { val p = list[idx++]; lastKey = p.first; hasLast = true; return p }
+                override inline fun remove() { check(hasLast); collection.remove(lastKey); hasLast = false }
+            }
+        }
     }
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")

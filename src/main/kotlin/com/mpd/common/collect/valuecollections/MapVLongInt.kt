@@ -146,9 +146,12 @@ class HashMapVLongInt<K,V>(val collection: MutableLongIntMap=MutableLongIntMap()
     override val size: Int get() = collection.size
     override inline fun getBits(k: LongKeyBits): IntValueBits = collection.getOrDefault(k, NULL_VALUE_BITS)
     override inline fun anyBits(predicate: (LongKeyBits, IntValueBits) -> Boolean): LongKeyBits {
-        var result: LongKeyBits = NULL_KEY_BITS
-        collection.forEach { k, v -> if (result == NULL_KEY_BITS && predicate(k, v)) result = k }
-        return result
+        val finder = object : (LongKeyBits, IntValueBits) -> Unit {
+            var result: LongKeyBits = NULL_KEY_BITS
+            override inline fun invoke(k: LongKeyBits, v: IntValueBits) { if (result == NULL_KEY_BITS && predicate(k, v)) result = k }
+        }
+        collection.forEach(finder)
+        return finder.result
     }
     override inline fun trim() { collection.trim() }
     override inline fun clear() = collection.clear()
@@ -203,7 +206,16 @@ class HashMapVLongInt<K,V>(val collection: MutableLongIntMap=MutableLongIntMap()
     context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) override inline fun asIterable(): MutableIterable<PairVLongInt<K,V>> {
         val list = ArrayList<PairVLongInt<K,V>>(size)
         collection.forEach { k, v -> list.add(PairVLongInt(k, v)) }
-        return list
+        return object : MutableIterable<PairVLongInt<K,V>> {
+            override inline fun iterator(): MutableIterator<PairVLongInt<K,V>> = object : MutableIterator<PairVLongInt<K,V>> {
+                var idx = 0
+                var lastKeyBits: LongKeyBits = NULL_KEY_BITS
+                var hasLast = false
+                override inline fun hasNext(): Boolean = idx < list.size
+                override inline fun next(): PairVLongInt<K,V> { val p = list[idx++]; lastKeyBits = p.firstBits; hasLast = true; return p }
+                override inline fun remove() { check(hasLast); collection.remove(lastKeyBits); hasLast = false }
+            }
+        }
     }
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")

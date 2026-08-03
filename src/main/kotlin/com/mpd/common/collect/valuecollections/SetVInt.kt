@@ -16,15 +16,29 @@ class ArraySetVInt<T>(val collection: MutableIntSet, override val NULL_VALUE: In
 
     override val size: Int get() = collection.size
     override inline fun anyBits(predicate: (bits: IntBits) -> Boolean): IntBits {
-        var found = NULL_VALUE
-        collection.forEach { if (found == NULL_VALUE && predicate(it)) found = it }
-        return found
+        val finder = object : (IntBits) -> Unit {
+            var found = NULL_VALUE
+            override inline fun invoke(v: IntBits) { if (found == NULL_VALUE && predicate(v)) found = v }
+        }
+        collection.forEach(finder)
+        return finder.found
     }
     override inline fun containsBits(bits: IntBits): Boolean = collection.contains(bits)
     context(a: ValueIntAdapter<T>) override inline fun asIterable(): MutableIterable<T> {
-        val list = ArrayList<T>(size)
-        collection.forEach { list.add(a.fromInt(it)) }
-        return list
+        val bits = IntArray(size)
+        val filler = object : (IntBits) -> Unit {
+            var i = 0
+            override inline fun invoke(v: IntBits) { bits[i++] = v }
+        }
+        collection.forEach(filler)
+        return MutableIteratorVIntGeneric(object : MutableIterator<Int> {
+            var idx = 0
+            var lastBits = NULL_VALUE
+            var hasLast = false
+            override inline fun hasNext(): Boolean = idx < bits.size
+            override inline fun next(): Int { val v = bits[idx++]; lastBits = v; hasLast = true; return v }
+            override inline fun remove() { check(hasLast); collection.remove(lastBits); hasLast = false }
+        }, a)
     }
 
     override inline fun ensureCapacity(newCapacity: Int): Boolean = false

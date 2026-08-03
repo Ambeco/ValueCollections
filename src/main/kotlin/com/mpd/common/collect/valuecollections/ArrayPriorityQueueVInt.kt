@@ -20,10 +20,13 @@ class ArrayPriorityQueueVInt<T>(
     override val size: Int get() = queue.size()
 
     override inline fun anyBits(crossinline predicate: (IntBits) -> Boolean): IntBits {
-        var result = NULL_VALUE
-        var found = false
-        queue.forEach { if (!found && predicate(it)) { result = it; found = true } }
-        return result
+        val finder = object : (IntBits) -> Unit {
+            var result = NULL_VALUE
+            var found = false
+            override inline fun invoke(v: IntBits) { if (!found && predicate(v)) { result = v; found = true } }
+        }
+        queue.forEach(finder)
+        return finder.result
     }
     override inline fun containsBits(bits: IntBits): Boolean = queue.contains(bits)
 

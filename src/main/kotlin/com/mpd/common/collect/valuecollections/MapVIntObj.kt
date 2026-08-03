@@ -142,9 +142,12 @@ class HashMapVIntObj<K,V>(val collection: MutableIntObjectMap<V> =MutableIntObje
     override val size: Int get() = collection.size
     override inline fun getBits(k: IntKeyBits): V? = collection.get(k)
     override inline fun anyBits(predicate: (IntKeyBits, V) -> Boolean): IntKeyBits {
-        var result: IntKeyBits = NULL_KEY_BITS
-        collection.forEach { k, v -> if (result == NULL_KEY_BITS && predicate(k, v)) result = k }
-        return result
+        val finder = object : (IntKeyBits, V) -> Unit {
+            var result: IntKeyBits = NULL_KEY_BITS
+            override inline fun invoke(k: IntKeyBits, v: V) { if (result == NULL_KEY_BITS && predicate(k, v)) result = k }
+        }
+        collection.forEach(finder)
+        return finder.result
     }
     override inline fun trim() { collection.trim() }
     override inline fun clear() = collection.clear()
@@ -198,7 +201,16 @@ class HashMapVIntObj<K,V>(val collection: MutableIntObjectMap<V> =MutableIntObje
     context(ka: ValueIntAdapter<K>) override inline fun asIterable(): MutableIterable<PairVIntObj<K,V>> {
         val list = ArrayList<PairVIntObj<K,V>>(size)
         collection.forEach { k, v -> list.add(PairVIntObj(k, v)) }
-        return list
+        return object : MutableIterable<PairVIntObj<K,V>> {
+            override inline fun iterator(): MutableIterator<PairVIntObj<K,V>> = object : MutableIterator<PairVIntObj<K,V>> {
+                var idx = 0
+                var lastKeyBits: IntKeyBits = NULL_KEY_BITS
+                var hasLast = false
+                override inline fun hasNext(): Boolean = idx < list.size
+                override inline fun next(): PairVIntObj<K,V> { val p = list[idx++]; lastKeyBits = p.firstBits; hasLast = true; return p }
+                override inline fun remove() { check(hasLast); collection.remove(lastKeyBits); hasLast = false }
+            }
+        }
     }
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")

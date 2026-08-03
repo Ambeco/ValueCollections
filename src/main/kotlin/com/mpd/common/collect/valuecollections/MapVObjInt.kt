@@ -145,10 +145,13 @@ class HashMapVObjInt<K,V>(val collection: MutableObjectIntMap<K> =MutableObjectI
     override val size: Int get() = collection.size
     override inline fun getBits(k: K): IntValueBits = collection.getOrDefault(k, NULL_VALUE_BITS)
     override inline fun anyBits(predicate: (K, IntValueBits) -> Boolean): K? {
-        var result: K? = null
-        var found = false
-        collection.forEach { k, v -> if (!found && predicate(k, v)) { result = k; found = true } }
-        return result
+        val finder = object : (K, IntValueBits) -> Unit {
+            var result: K? = null
+            var found = false
+            override inline fun invoke(k: K, v: IntValueBits) { if (!found && predicate(k, v)) { result = k; found = true } }
+        }
+        collection.forEach(finder)
+        return finder.result
     }
     override inline fun trim() { collection.trim() }
     override inline fun clear() = collection.clear()
@@ -204,7 +207,17 @@ class HashMapVObjInt<K,V>(val collection: MutableObjectIntMap<K> =MutableObjectI
     context(va: ValueIntAdapter<V>) override inline fun asIterable(): MutableIterable<PairVObjInt<K,V>> {
         val list = ArrayList<PairVObjInt<K,V>>(size)
         collection.forEach { k, v -> list.add(PairVObjInt(k, v)) }
-        return list
+        return object : MutableIterable<PairVObjInt<K,V>> {
+            override inline fun iterator(): MutableIterator<PairVObjInt<K,V>> = object : MutableIterator<PairVObjInt<K,V>> {
+                var idx = 0
+                var lastKey: K? = null
+                var hasLast = false
+                override inline fun hasNext(): Boolean = idx < list.size
+                override inline fun next(): PairVObjInt<K,V> { val p = list[idx++]; lastKey = p.first; hasLast = true; return p }
+                @Suppress("UNCHECKED_CAST")
+                override inline fun remove() { check(hasLast); collection.remove(lastKey as K); hasLast = false }
+            }
+        }
     }
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")

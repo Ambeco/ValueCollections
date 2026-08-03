@@ -147,23 +147,37 @@ context(a: ValueIntAdapter<T>, ka: ValueLongAdapter<K>) inline fun <T, K, C:Muta
 context(a: ValueIntAdapter<T>) inline fun <T, K, C:MutableMap<K,T>> CollectionVInt<T>.associateByGenericTo(destination: C, crossinline keySelector: (T) -> K): Map<K, T> = associateTo(destination, keySelector, {it})
  inline fun <T, C : MutableCollectionVInt<T>> CollectionVInt<T>.toCollection(destination: C): C = destination.also{ c -> c.addAll(this) }
 context(a: ValueIntAdapter<T>) inline fun <T, C : MutableCollection<T>> CollectionVInt<T>.toCollection(destination: C): C = destination.also{ c->forEach {c.add(it)}}
- inline fun <T> CollectionVInt<T>.toList(): ListVInt<T> = this as? ListVInt<T> ?: toMutableList()
+ inline fun <T> CollectionVInt<T>.toList(): ListVInt<T> = toMutableList()
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.toListGeneric(): List<T> = toMutableListGeneric()
- inline fun <T> CollectionVInt<T>.toMutableList(): ArrayListVInt<T> = this as? ArrayListVInt<T> ?: toCollection(ArrayListVInt<T>(size, NULL_VALUE))
+ inline fun <T> CollectionVInt<T>.toMutableList(): ArrayListVInt<T> = toCollection(ArrayListVInt<T>(size, NULL_VALUE))
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.toMutableListGeneric(): MutableList<T> = toCollection(ArrayList(size))
- inline fun <T> CollectionVInt<T>.toSet(): SetVInt<T> = this as? SetVInt<T> ?: toMutableSet()
- inline fun <T> CollectionVInt<T>.toMutableSet(): MutableSetVInt<T> = this as? MutableSetVInt<T> ?: toCollection(ArraySetVInt<T>(size))
+ inline fun <T> CollectionVInt<T>.toSet(): SetVInt<T> = toMutableSet()
+ inline fun <T> CollectionVInt<T>.toMutableSet(): MutableSetVInt<T> = toCollection(ArraySetVInt<T>(size))
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.toSetGeneric(): Set<T> = toHashSet()
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.toHashSet(): HashSet<T> = toCollection(HashSet(size + size/4))
- inline fun <T> CollectionVInt<T>.toIntArray(): IntArray = (this as? ArrayVInt<T>)?.collection ?: IntArray(size).also { c->forEachIndexedBits{ i, e-> c[i]=e}}
- inline fun <T> CollectionVInt<T>.toVIntArray(): ArrayVInt<T> = this as? ArrayVInt<T> ?: ArrayVInt(this)
- inline fun <T> CollectionVInt<T>.toArrayGenericBits(): Array<IntBits> = (this as? ArrayVInt<T>)?.collection?.toTypedArray() ?: Array(size,{NULL_VALUE}).also { c->forEachIndexedBits{ i, e-> c[i]=e}}
+ inline fun <T> CollectionVInt<T>.toIntArray(): IntArray = IntArray(size).also { c->forEachIndexedBits{ i, e-> c[i]=e}}
+ inline fun <T> CollectionVInt<T>.toVIntArray(): ArrayVInt<T> = ArrayVInt(this)
+ inline fun <T> CollectionVInt<T>.toArrayGenericBits(): Array<IntBits> = Array(size,{NULL_VALUE}).also { c->forEachIndexedBits{ i, e-> c[i]=e}}
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.asSequence(): Sequence<T> = asIterable().asSequence()
- inline fun <T> CollectionVInt<T>.asList(): ListVInt<T> = this as? ListVInt<T> ?: toMutableList()
-context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.asListGeneric(): List<T> = toMutableListGeneric()
+context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.asList(): ListVInt<T> {
+    if (this is ListVInt<T>) return this
+    val ic = this as? IndexedCollectionVInt<T>
+    if (ic != null) return object : ListVInt<T> {
+        override val NULL_VALUE: IntBits get() = ic.NULL_VALUE
+        override val size: Int get() = ic.size
+        override fun anyBits(predicate: (IntBits) -> Boolean): IntBits = ic.anyBits(predicate)
+        override fun containsBits(bits: IntBits): Boolean = ic.containsBits(bits)
+        override fun bitsAtIndex(index: Int): IntBits = ic.bitsAtIndex(index)
+        override fun indexOfBits(bits: IntBits): Int = ic.indexOfBits(bits)
+        context(a: ValueIntAdapter<T>) override fun asIterable(): Iterable<T> = ic.asIterable()
+        override fun toString(): String = (ic as Any).toString()
+    }
+    return toMutableList()
+}
+context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.asListGeneric(): List<T> = (this as? IndexedCollectionVInt<T>)?.asListGeneric() ?: toMutableListGeneric()
  inline fun <T> CollectionVInt<T>.contentEquals(other: CollectionVInt<T>?): Boolean = other != null && size == other.size && allBits { other.containsBits(it) }
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.contentEquals(other: Collection<T>?): Boolean = other != null && size == other.size && all { other.contains(it) }
-inline fun <T> CollectionVInt<T>.contentHashCode(): Int { var h = 1; forEachBits { h = 31 * h + it }; return h }
+inline fun <T> CollectionVInt<T>.contentHashCode(): Int = foldBits(1) { acc, bits -> 31 * acc + bits }
 context(a: ValueIntAdapter<T>) inline fun <T, R> CollectionVInt<T>.flatMap(crossinline transform: (T) ->CollectionVInt<R>): ArrayListVInt<R> = flatMapTo(ArrayListVInt(size*2), transform)
 context(a: ValueIntAdapter<T>) inline fun <T, R> CollectionVInt<T>.flatMap(crossinline transform: (T) ->CollectionVLong<R>): ArrayListVLong<R> = flatMapTo(ArrayListVLong(size*2), transform)
 context(a: ValueIntAdapter<T>) inline fun <T, R, C : MutableCollectionVInt<R>> CollectionVInt<T>.flatMapTo(destination: C, crossinline transform: (T) ->CollectionVInt<R>): C = destination.also{forEach { destination.addAll(transform(it)) }}

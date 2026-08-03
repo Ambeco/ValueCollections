@@ -143,9 +143,12 @@ class HashMapVIntLong<K,V>(val collection: MutableIntLongMap=MutableIntLongMap()
     override val size: Int get() = collection.size
     override inline fun getBits(k: IntKeyBits): LongValueBits = collection.getOrDefault(k, NULL_VALUE_BITS)
     override inline fun anyBits(predicate: (IntKeyBits, LongValueBits) -> Boolean): IntKeyBits {
-        var result: IntKeyBits = NULL_KEY_BITS
-        collection.forEach { k, v -> if (result == NULL_KEY_BITS && predicate(k, v)) result = k }
-        return result
+        val finder = object : (IntKeyBits, LongValueBits) -> Unit {
+            var result: IntKeyBits = NULL_KEY_BITS
+            override inline fun invoke(k: IntKeyBits, v: LongValueBits) { if (result == NULL_KEY_BITS && predicate(k, v)) result = k }
+        }
+        collection.forEach(finder)
+        return finder.result
     }
     override inline fun trim() { collection.trim() }
     override inline fun clear() = collection.clear()
@@ -200,7 +203,16 @@ class HashMapVIntLong<K,V>(val collection: MutableIntLongMap=MutableIntLongMap()
     context(ka: ValueIntAdapter<K>, va: ValueLongAdapter<V>) override inline fun asIterable(): MutableIterable<PairVIntLong<K,V>> {
         val list = ArrayList<PairVIntLong<K,V>>(size)
         collection.forEach { k, v -> list.add(PairVIntLong(k, v)) }
-        return list
+        return object : MutableIterable<PairVIntLong<K,V>> {
+            override inline fun iterator(): MutableIterator<PairVIntLong<K,V>> = object : MutableIterator<PairVIntLong<K,V>> {
+                var idx = 0
+                var lastKeyBits: IntKeyBits = NULL_KEY_BITS
+                var hasLast = false
+                override inline fun hasNext(): Boolean = idx < list.size
+                override inline fun next(): PairVIntLong<K,V> { val p = list[idx++]; lastKeyBits = p.firstBits; hasLast = true; return p }
+                override inline fun remove() { check(hasLast); collection.remove(lastKeyBits); hasLast = false }
+            }
+        }
     }
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")

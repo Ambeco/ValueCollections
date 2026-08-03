@@ -146,9 +146,12 @@ class HashMapVLongFloat<K>(val collection: MutableLongFloatMap=MutableLongFloatM
     override val size: Int get() = collection.size
     override inline fun getBits(k: LongKeyBits): Float = collection.getOrDefault(k, NULL_VALUE)
     override inline fun anyBits(predicate: (LongKeyBits, Float) -> Boolean): LongKeyBits {
-        var result: LongKeyBits = NULL_KEY_BITS
-        collection.forEach { k, v -> if (result == NULL_KEY_BITS && predicate(k, v)) result = k }
-        return result
+        val finder = object : (LongKeyBits, Float) -> Unit {
+            var result: LongKeyBits = NULL_KEY_BITS
+            override inline fun invoke(k: LongKeyBits, v: Float) { if (result == NULL_KEY_BITS && predicate(k, v)) result = k }
+        }
+        collection.forEach(finder)
+        return finder.result
     }
     override inline fun trim() { collection.trim() }
     override inline fun clear() = collection.clear()
@@ -203,7 +206,16 @@ class HashMapVLongFloat<K>(val collection: MutableLongFloatMap=MutableLongFloatM
     context(ka: ValueLongAdapter<K>) override inline fun asIterable(): MutableIterable<PairVLongObj<K,Float>> {
         val list = ArrayList<PairVLongObj<K,Float>>(size)
         collection.forEach { k, v -> list.add(PairVLongObj(k, v)) }
-        return list
+        return object : MutableIterable<PairVLongObj<K,Float>> {
+            override inline fun iterator(): MutableIterator<PairVLongObj<K,Float>> = object : MutableIterator<PairVLongObj<K,Float>> {
+                var idx = 0
+                var lastKeyBits: LongKeyBits = NULL_KEY_BITS
+                var hasLast = false
+                override inline fun hasNext(): Boolean = idx < list.size
+                override inline fun next(): PairVLongObj<K,Float> { val p = list[idx++]; lastKeyBits = p.firstBits; hasLast = true; return p }
+                override inline fun remove() { check(hasLast); collection.remove(lastKeyBits); hasLast = false }
+            }
+        }
     }
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")

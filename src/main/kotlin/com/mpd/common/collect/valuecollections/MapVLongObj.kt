@@ -144,9 +144,12 @@ class HashMapVLongObj<K,V>(val collection: MutableLongObjectMap<V> =MutableLongO
     override val size: Int get() = collection.size
     override inline fun getBits(k: LongKeyBits): V? = collection.get(k)
     override inline fun anyBits(predicate: (LongKeyBits, V) -> Boolean): LongKeyBits {
-        var result: LongKeyBits = NULL_KEY_BITS
-        collection.forEach { k, v -> if (result == NULL_KEY_BITS && predicate(k, v)) result = k }
-        return result
+        val finder = object : (LongKeyBits, V) -> Unit {
+            var result: LongKeyBits = NULL_KEY_BITS
+            override inline fun invoke(k: LongKeyBits, v: V) { if (result == NULL_KEY_BITS && predicate(k, v)) result = k }
+        }
+        collection.forEach(finder)
+        return finder.result
     }
     override inline fun trim() { collection.trim() }
     override inline fun clear() = collection.clear()
@@ -199,7 +202,16 @@ class HashMapVLongObj<K,V>(val collection: MutableLongObjectMap<V> =MutableLongO
     context(ka: ValueLongAdapter<K>) override inline fun asIterable(): MutableIterable<PairVLongObj<K,V>> {
         val list = ArrayList<PairVLongObj<K,V>>(size)
         collection.forEach { k, v -> list.add(PairVLongObj(k, v)) }
-        return list
+        return object : MutableIterable<PairVLongObj<K,V>> {
+            override inline fun iterator(): MutableIterator<PairVLongObj<K,V>> = object : MutableIterator<PairVLongObj<K,V>> {
+                var idx = 0
+                var lastKeyBits: LongKeyBits = NULL_KEY_BITS
+                var hasLast = false
+                override inline fun hasNext(): Boolean = idx < list.size
+                override inline fun next(): PairVLongObj<K,V> { val p = list[idx++]; lastKeyBits = p.firstBits; hasLast = true; return p }
+                override inline fun remove() { check(hasLast); collection.remove(lastKeyBits); hasLast = false }
+            }
+        }
     }
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")

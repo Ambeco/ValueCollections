@@ -142,10 +142,13 @@ class HashMapVObjLong<K,V>(val collection: MutableObjectLongMap<K> =MutableObjec
     override val size: Int get() = collection.size
     override inline fun getBits(k: K): LongValueBits = collection.getOrDefault(k, NULL_VALUE_BITS)
     override inline fun anyBits(predicate: (K, LongValueBits) -> Boolean): K? {
-        var result: K? = null
-        var found = false
-        collection.forEach { k, v -> if (!found && predicate(k, v)) { result = k; found = true } }
-        return result
+        val finder = object : (K, LongValueBits) -> Unit {
+            var result: K? = null
+            var found = false
+            override inline fun invoke(k: K, v: LongValueBits) { if (!found && predicate(k, v)) { result = k; found = true } }
+        }
+        collection.forEach(finder)
+        return finder.result
     }
     override inline fun trim() { collection.trim() }
     override inline fun clear() = collection.clear()
@@ -201,7 +204,17 @@ class HashMapVObjLong<K,V>(val collection: MutableObjectLongMap<K> =MutableObjec
     context(va: ValueLongAdapter<V>) override inline fun asIterable(): MutableIterable<PairVObjLong<K,V>> {
         val list = ArrayList<PairVObjLong<K,V>>(size)
         collection.forEach { k, v -> list.add(PairVObjLong(k, v)) }
-        return list
+        return object : MutableIterable<PairVObjLong<K,V>> {
+            override inline fun iterator(): MutableIterator<PairVObjLong<K,V>> = object : MutableIterator<PairVObjLong<K,V>> {
+                var idx = 0
+                var lastKey: K? = null
+                var hasLast = false
+                override inline fun hasNext(): Boolean = idx < list.size
+                override inline fun next(): PairVObjLong<K,V> { val p = list[idx++]; lastKey = p.first; hasLast = true; return p }
+                @Suppress("UNCHECKED_CAST")
+                override inline fun remove() { check(hasLast); collection.remove(lastKey as K); hasLast = false }
+            }
+        }
     }
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
