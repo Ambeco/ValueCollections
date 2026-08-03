@@ -28,8 +28,8 @@ interface CollectionVInt<T> {
     fun anyBits(predicate: (bits:IntBits) -> Boolean): IntBits
     fun containsBits(bits: IntBits): Boolean
     
-    context(a: ValueIntAdapter<T>) fun asIterable(): Iterable<T>
-    
+    context(a: ValueIntAdapter<T>) fun toIterable(): Iterable<T>
+
     @JvmName("toStringV") @Suppress("INAPPLICABLE_JVM_NAME")
     context(a: ValueIntAdapter<T>) fun toString(): String = toStringV()
 
@@ -41,7 +41,7 @@ context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.asCollectionGene
     override val size: Int get() = this@asCollectionGeneric.size
     override inline fun isEmpty(): Boolean = this@asCollectionGeneric.size == 0
     override inline fun contains(element: T): Boolean = this@asCollectionGeneric.contains(element)
-    override inline fun iterator(): Iterator<T> = this@asCollectionGeneric.asIterable().iterator()
+    override inline fun iterator(): Iterator<T> = this@asCollectionGeneric.toIterable().iterator()
     override inline fun containsAll(elements: Collection<T>): Boolean = this@asCollectionGeneric.containsAll(elements)
 }
 
@@ -158,7 +158,7 @@ context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.toHashSet(): Has
  inline fun <T> CollectionVInt<T>.toIntArray(): IntArray = IntArray(size).also { c->forEachIndexedBits{ i, e-> c[i]=e}}
  inline fun <T> CollectionVInt<T>.toVIntArray(): ArrayVInt<T> = ArrayVInt(this)
  inline fun <T> CollectionVInt<T>.toArrayGenericBits(): Array<IntBits> = Array(size,{NULL_VALUE}).also { c->forEachIndexedBits{ i, e-> c[i]=e}}
-context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.asSequence(): Sequence<T> = asIterable().asSequence()
+context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.asSequence(): Sequence<T> = toIterable().asSequence()
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.asList(): ListVInt<T> {
     if (this is ListVInt<T>) return this
     val ic = this as? IndexedCollectionVInt<T>

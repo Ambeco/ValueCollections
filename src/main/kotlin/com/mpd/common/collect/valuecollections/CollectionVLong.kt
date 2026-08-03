@@ -22,7 +22,7 @@ interface CollectionVLong<T> {
     fun anyBits(predicate: (bits:LongBits) -> Boolean): LongBits
     fun containsBits(bits: LongBits): Boolean
 
-    context(a: ValueLongAdapter<T>) fun asIterable(): Iterable<T>
+    context(a: ValueLongAdapter<T>) fun toIterable(): Iterable<T>
 
     @JvmName("toStringV") @Suppress("INAPPLICABLE_JVM_NAME")
     context(a: ValueLongAdapter<T>) fun toString(): String = toStringV()
@@ -35,7 +35,7 @@ context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.asCollectionGe
     override val size: Int get() = this@asCollectionGeneric.size
     override inline fun isEmpty(): Boolean = this@asCollectionGeneric.size == 0
     override inline fun contains(element: T): Boolean = this@asCollectionGeneric.contains(element)
-    override inline fun iterator(): Iterator<T> = this@asCollectionGeneric.asIterable().iterator()
+    override inline fun iterator(): Iterator<T> = this@asCollectionGeneric.toIterable().iterator()
     override inline fun containsAll(elements: Collection<T>): Boolean = this@asCollectionGeneric.containsAll(elements)
 }
 
@@ -152,7 +152,7 @@ context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.toHashSet(): H
  inline fun <T> CollectionVLong<T>.toLongArray(): LongArray = LongArray(size).also { c->forEachIndexedBits{ i, e-> c[i]=e}}
  inline fun <T> CollectionVLong<T>.toVLongArray(): ArrayVLong<T> = ArrayVLong(this)
  inline fun <T> CollectionVLong<T>.toArrayGenericBits(): Array<LongBits> = Array(size,{NULL_VALUE}).also { c->forEachIndexedBits{ i, e-> c[i]=e}}
-context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.asSequence(): Sequence<T> = asIterable().asSequence()
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.asSequence(): Sequence<T> = toIterable().asSequence()
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.asList(): ListVLong<T> {
     if (this is ListVLong<T>) return this
     val ic = this as? IndexedCollectionVLong<T>

@@ -9,9 +9,9 @@ package com.mpd.common.collect.valuecollections
 import kotlin.collections.all
 
 
-interface ModifiableCollectionVInt<T>: CollectionVInt<T> {
-    context(a: ValueIntAdapter<T>) fun asModifiableIterable(): MutableIterable<T>
-}
+// Marker interface: no longer requires a live mutable iterator (see CollectionVInt.toIterable()/
+// IndexedCollectionVInt.asIterable() - only genuinely indexed collections can offer that live).
+interface ModifiableCollectionVInt<T>: CollectionVInt<T>
 
 interface MutableCollectionVInt<T>: ModifiableCollectionVInt<T> {
     fun ensureCapacity(newCapacity: Int): Boolean = false
@@ -20,14 +20,17 @@ interface MutableCollectionVInt<T>: ModifiableCollectionVInt<T> {
     fun removeBits(bits: IntBits): Boolean
     fun removeAllBits(predicate: (IntBits) -> Boolean): Boolean
     fun clear()
-    context(a: ValueIntAdapter<T>) override fun asModifiableIterable(): MutableIterable<T> = asIterable()
-    context(a: ValueIntAdapter<T>) override fun asIterable(): MutableIterable<T>
 }
 context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.asCollectionGeneric(): MutableCollection<T> = object : MutableCollection<T> {
     override val size: Int inline get() = this@asCollectionGeneric.size
     override inline fun isEmpty(): Boolean = this@asCollectionGeneric.size == 0
     override inline fun contains(element: T): Boolean = this@asCollectionGeneric.contains(element)
-    override inline fun iterator(): MutableIterator<T> = this@asCollectionGeneric.asIterable().iterator()
+    override inline fun iterator(): MutableIterator<T> = object : MutableIterator<T> {
+        val delegate = this@asCollectionGeneric.toIterable().iterator()
+        override inline fun hasNext(): Boolean = delegate.hasNext()
+        override inline fun next(): T = delegate.next()
+        override inline fun remove(): Unit = throw UnsupportedOperationException("iterator remove is not supported; use MutableCollectionVInt.remove(element) instead")
+    }
     override inline fun add(element: T): Boolean = this@asCollectionGeneric.add(element)
     override inline fun remove(element: T): Boolean = this@asCollectionGeneric.remove(element)
     override inline fun addAll(elements: Collection<T>): Boolean = this@asCollectionGeneric.addAll(elements)

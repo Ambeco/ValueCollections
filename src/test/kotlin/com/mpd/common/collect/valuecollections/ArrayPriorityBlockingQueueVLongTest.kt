@@ -169,15 +169,10 @@ class ArrayPriorityBlockingQueueVLongTest {
     }
 
     @Test
-    fun asIterableVisitsAllElements() = with (QVLongTestClass) {
+    fun toIterableVisitsAllElements() = with (QVLongTestClass) {
         val q = simpleQueue()
-        val visited = q.asIterable().toList()
+        val visited = q.toIterable().toList()
         assertEquals(setOf(QVLongTestClass(100), QVLongTestClass(200), QVLongTestClass(300)), visited.toSet())
-
-        val modIter = q.asModifiableIterable().iterator()
-        modIter.next()
-        modIter.remove()
-        assertEquals(2, q.size)
     }
 
     @Test

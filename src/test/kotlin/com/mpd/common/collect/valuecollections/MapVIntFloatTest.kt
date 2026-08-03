@@ -282,7 +282,6 @@ class MapVIntFloatTest {
     fun rawWrapperMethods() {
         val map = simpleMap()
         assertEquals(true, map.capacity() >= 3)
-        assertEquals(true, map.anyBits())
         assertEquals(false, map.none())
         assertEquals(true, map.isNotEmptyBits())
         assertEquals(200f, map.getOrDefault(2, -1f))

@@ -14,16 +14,14 @@ typealias LongKeyBits = Long
 typealias LongValueBits = Long
 
 
-interface MapVIntInt<K,V> {
+interface MapVIntInt<K,V>: MapVIntKey<K>, MapVIntValue<V> {
     // Many operations require a NULL_VALUE in order to return an "Optional" result without a heap allocation.
-    val NULL_KEY_BITS: IntKeyBits
-    val NULL_VALUE_BITS: IntValueBits
 
-    val size: Int
+    override val size: Int
     fun getBits(k: IntKeyBits): IntValueBits
     fun anyBits(predicate: (IntKeyBits, IntValueBits) -> Boolean): IntKeyBits
 
-    context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) fun asIterable(): Iterable<PairVIntInt<K,V>>
+    context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) fun toIterable(): Iterable<PairVIntInt<K,V>>
 
     @JvmName("toStringV") @Suppress("INAPPLICABLE_JVM_NAME")
     context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) fun toString(): String = toStringV()
@@ -42,12 +40,6 @@ context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>)  inline fun <K,V> MapVIn
     override inline fun containsValue(value: V): Boolean = this@asMapGeneric.containsValue(value)
     override inline fun get(key: K): V? = this@asMapGeneric.getOrNull(key)
 }
-context(ka: ValueIntAdapter<K>) inline fun <K,V> MapVIntInt<K,V>.keyFromInt(bits: IntKeyBits): K = if (bits==NULL_KEY_BITS) throw NoSuchElementException() else ka.fromInt(bits)
-context(ka: ValueIntAdapter<K>) inline fun <K,V> MapVIntInt<K,V>.keyFromIntOr(bits: IntKeyBits, provider: ()->K): K = if (bits==NULL_KEY_BITS) provider() else ka.fromInt(bits)
-context(ka: ValueIntAdapter<K>) inline fun <K,V> MapVIntInt<K,V>.keyFromIntOrNull(bits: IntKeyBits): K? = if (bits==NULL_KEY_BITS) null else ka.fromInt(bits)
-context(va: ValueIntAdapter<V>) inline fun <K,V> MapVIntInt<K,V>.valueFromInt(bits: IntValueBits): V = if (bits==NULL_VALUE_BITS) throw NoSuchElementException() else va.fromInt(bits)
-context(va: ValueIntAdapter<V>) inline fun <K,V> MapVIntInt<K,V>.valueFromIntOr(bits: IntValueBits, provider: ()->V): V = if (bits==NULL_VALUE_BITS) provider() else va.fromInt(bits)
-context(va: ValueIntAdapter<V>) inline fun <K,V> MapVIntInt<K,V>.valueFromIntOrNull(bits: IntValueBits): V? = if (bits==NULL_VALUE_BITS) null else va.fromInt(bits)
 context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) inline operator fun <K,V> MapVIntInt<K,V>.get(key: K): V = valueFromInt(getBits(ka.toInt(key)))
 context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVIntInt<K,V>.getOr(key: K, defaultResult:()->V): V = valueFromIntOr(getBits(ka.toInt(key)), defaultResult)
 context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVIntInt<K,V>.getOrNull(key: K): V? = valueFromIntOrNull(getBits(ka.toInt(key)))
@@ -74,8 +66,6 @@ context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVInt
 }
 inline val <K,V> MapVIntInt<K,V>.isEmpty get() = size == 0
 inline fun <K,V> MapVIntInt<K,V>.isNotEmpty() = size > 0
-context(ka: ValueIntAdapter<K>) inline fun <K,V> MapVIntInt<K,V>.containsKey(k: K) = getBits(ka.toInt(k)) != NULL_VALUE_BITS
-context(va: ValueIntAdapter<V>) inline fun <K,V> MapVIntInt<K,V>.containsValue(findV: V) = anyBits { _, v-> v==va.toInt(findV)} != NULL_KEY_BITS
 context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V, A : Appendable> MapVIntInt<K,V>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): A {
     val appender = object: (Int,K,V)-> Boolean {
         var count=0
@@ -112,7 +102,7 @@ interface MutableMapVIntInt<K,V>: MapVIntInt<K,V> {
     fun removeBits(k: IntKeyBits)
     fun removeBits(k: IntKeyBits, v: IntValueBits):Boolean
     fun removeIfBits(predicate:(IntKeyBits,IntValueBits)->Boolean)
-    context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) override fun asIterable(): MutableIterable<PairVIntInt<K,V>>
+    context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) override fun toIterable(): Iterable<PairVIntInt<K,V>>
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toStringV()"))
@@ -163,9 +153,12 @@ class HashMapVIntInt<K,V>(val collection: MutableIntIntMap=MutableIntIntMap(), o
     override inline fun removeBits(k: IntKeyBits, v:IntValueBits): Boolean = collection.remove(k,v)
     override inline fun removeIfBits(predicate: (IntKeyBits, IntValueBits) -> Boolean) = collection.removeIf(predicate)
 
+    override inline fun anyKeyBits(predicate: (IntKeyBits) -> Boolean): IntKeyBits = anyBits { k, _ -> predicate(k) }
+    override inline fun removeKeyBits(bits: IntKeyBits): Boolean { val had = collection.containsKey(bits); removeBits(bits); return had }
+    override inline fun forEachValueBits(action: (valueBits: IntValueBits) -> Unit) = collection.forEachValue(action)
+
     // Thin wrappers for every public method of MutableIntIntMap.
     inline fun capacity(): Int = collection.capacity
-    inline fun anyBits(): Boolean = collection.any()
     inline fun none(): Boolean = collection.none()
     inline fun isEmpty(): Boolean = collection.isEmpty()
     inline fun isNotEmptyBits(): Boolean = collection.isNotEmpty()
@@ -178,8 +171,8 @@ class HashMapVIntInt<K,V>(val collection: MutableIntIntMap=MutableIntIntMap(), o
     inline fun count(): Int = collection.count()
     inline fun count(predicate: (IntKeyBits, IntValueBits) -> Boolean): Int = collection.count(predicate)
     inline operator fun contains(key: IntKeyBits): Boolean = collection.contains(key)
-    inline fun containsKeyBits(key: IntKeyBits): Boolean = collection.containsKey(key)
-    inline fun containsValueBits(value: IntValueBits): Boolean = collection.containsValue(value)
+    override inline fun containsKeyBits(bits: IntKeyBits): Boolean = collection.containsKey(bits)
+    override inline fun containsValueBits(bits: IntValueBits): Boolean = collection.containsValue(bits)
     inline fun joinToStringBits(
         separator: CharSequence = ", ",
         prefix: CharSequence = "",
@@ -205,17 +198,14 @@ class HashMapVIntInt<K,V>(val collection: MutableIntIntMap=MutableIntIntMap(), o
     inline fun minusAssignBits(keys: IntSet) = collection.minusAssign(keys)
     inline fun minusAssignBits(keys: IntList) = collection.minusAssign(keys)
 
-    context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) override inline fun asIterable(): MutableIterable<PairVIntInt<K,V>> {
+    context(ka: ValueIntAdapter<K>, va: ValueIntAdapter<V>) override inline fun toIterable(): Iterable<PairVIntInt<K,V>> {
         val list = ArrayList<PairVIntInt<K,V>>(size)
         collection.forEach { k, v -> list.add(PairVIntInt(k, v)) }
-        return object : MutableIterable<PairVIntInt<K,V>> {
-            override inline fun iterator(): MutableIterator<PairVIntInt<K,V>> = object : MutableIterator<PairVIntInt<K,V>> {
+        return object : Iterable<PairVIntInt<K,V>> {
+            override inline fun iterator(): Iterator<PairVIntInt<K,V>> = object : Iterator<PairVIntInt<K,V>> {
                 var idx = 0
-                var lastKeyBits: IntKeyBits = NULL_KEY_BITS
-                var hasLast = false
                 override inline fun hasNext(): Boolean = idx < list.size
-                override inline fun next(): PairVIntInt<K,V> { val p = list[idx++]; lastKeyBits = (p.bits shr 32).toInt(); hasLast = true; return p }
-                override inline fun remove() { check(hasLast); collection.remove(lastKeyBits); hasLast = false }
+                override inline fun next(): PairVIntInt<K,V> { val p = list[idx++]; return p }
             }
         }
     }

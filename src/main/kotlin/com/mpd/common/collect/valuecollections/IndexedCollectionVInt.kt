@@ -14,6 +14,21 @@ interface IndexedCollectionVInt<T> : CollectionVInt<T> {
     fun indexOfFirstIndexedBits(startIndex:Int=0, predicate: (index:Int, bits:IntBits) -> Boolean): Int = indexOfFirstIndexedBitsDefault(startIndex, predicate)
     fun indexOfLastIndexedBits(endIndex:Int=-1, predicate: (index:Int, bits:IntBits) -> Boolean): Int = indexOfLastIndexedBitsDefault(endIndex, predicate)
 
+    // Truly live, lazy iterator: genuinely indexed backing stores can read a fresh element on each
+    // next() with no upfront snapshot copy. Only types that are declared IndexedCollectionVInt<T>
+    // get to offer this - see CollectionVInt.toIterable() for the honest snapshot-based alternative.
+    context(a: ValueIntAdapter<T>) fun asIterable(): Iterable<T> {
+        val self = this
+        return object : Iterable<T> {
+            override fun iterator(): Iterator<T> = object : Iterator<T> {
+                var idx = 0
+                override fun hasNext(): Boolean = idx < self.size
+                override fun next(): T = a.fromInt(self.bitsAtIndex(idx++))
+            }
+        }
+    }
+    context(a: ValueIntAdapter<T>) override fun toIterable(): Iterable<T> = toMutableList().asIterable()
+
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toStringV()"))
     override fun toString(): String // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!

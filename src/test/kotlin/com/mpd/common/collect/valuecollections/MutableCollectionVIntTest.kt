@@ -188,15 +188,13 @@ class MutableCollectionVIntTest {
     }
 
     @Test
-    fun asIterableAndAsModifiableIterableOnIndexedBacking() = with (MutColTestClass) {
-        // ArrayListVInt is also a MutableCollectionVInt (via MutableIndexedCollectionVInt), and unlike
-        // ArraySetVInt it does implement asIterable(), so it's used here to cover that member.
+    fun toIterableOnIndexedBacking() = with (MutColTestClass) {
+        // ArrayListVInt is also a MutableCollectionVInt (via MutableIndexedCollectionVInt); at the
+        // MutableCollectionVInt<T> static type, only toIterable() (a snapshot) is available - the live,
+        // removal-supporting asIterable() is only exposed via the more specific
+        // MutableIndexedCollectionVInt<T>/ArrayListVInt<T> types.
         val list: MutableCollectionVInt<MutColTestClass> = ArrayListVInt<MutColTestClass>().also { it += MutColTestClass(1); it += MutColTestClass(2) }
-        val values = list.asIterable().toList()
+        val values = list.toIterable().toList()
         assertEquals(listOf(MutColTestClass(1), MutColTestClass(2)), values)
-        val modifiableIter = list.asModifiableIterable().iterator()
-        modifiableIter.next()
-        modifiableIter.remove()
-        assertEquals(1, list.size)
     }
 }

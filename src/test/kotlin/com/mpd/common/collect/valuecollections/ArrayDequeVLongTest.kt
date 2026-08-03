@@ -250,21 +250,10 @@ class ArrayDequeVLongTest {
     }
 
     @Test
-    fun asIterableVisitsAllElementsInOrder() = with (DVLongTestClass) {
+    fun toIterableVisitsAllElementsInOrder() = with (DVLongTestClass) {
         val q = simpleDeque()
-        val visited = q.asIterable().toList()
+        val visited = q.toIterable().toList()
         assertEquals(listOf(DVLongTestClass(100), DVLongTestClass(200), DVLongTestClass(300)), visited)
-    }
-
-    @Test
-    fun asModifiableIterableRemoveRemovesCorrectElementAndPreservesOrder() = with (DVLongTestClass) {
-        val q = simpleDeque()
-        val iter = q.asModifiableIterable().iterator()
-        assertEquals(DVLongTestClass(100), iter.next())
-        assertEquals(DVLongTestClass(200), iter.next())
-        iter.remove()
-        assertEquals(2, q.size)
-        assertEquals(listOf(DVLongTestClass(100), DVLongTestClass(300)), q.asIterable().toList())
     }
 
     @Test

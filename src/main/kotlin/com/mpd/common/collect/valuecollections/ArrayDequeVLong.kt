@@ -31,7 +31,10 @@ class ArrayDequeVLong<T>(
         return false
     }
 
-    context(a: ValueLongAdapter<T>) override fun asIterable(): MutableIterable<T> = MutableIteratorVLongGeneric(DequeIterator(), a)
+    context(a: ValueLongAdapter<T>) override fun toIterable(): Iterable<T> {
+        val bits = LongArray(deque.size()) { deque[it] }
+        return IteratorVLongKotlin(bits.iterator(), a)
+    }
 
     override inline fun ensureCapacity(newCapacity: Int): Boolean = false
     override inline fun trim(minCapacity: Int) { /* not supported: CircularLongArray does not expose a way to shrink its backing array */ }
@@ -84,25 +87,4 @@ class ArrayDequeVLong<T>(
         return sb.append(']').toString()
     }
 
-    private inner class DequeIterator : MutableIterator<Long> {
-        private var index = -1
-        override inline fun hasNext(): Boolean = index + 1 < deque.size()
-        override inline fun next(): Long {
-            if (!hasNext()) throw NoSuchElementException()
-            ++index
-            return deque[index]
-        }
-        override inline fun remove() {
-            if (index < 0) throw IllegalStateException("Cannot remove element before calling next().")
-            removeAtIndex(index)
-            --index
-        }
-    }
-    private inline fun removeAtIndex(index: Int) {
-        val n = deque.size()
-        for (i in 0 until n) {
-            val v = deque.popFirst()
-            if (i != index) deque.addLast(v)
-        }
-    }
 }

@@ -16,8 +16,7 @@ class ArrayVLong<T>(val collection:LongArray, override val NULL_VALUE: LongBits=
     override inline fun anyBits(predicate: (LongBits) -> Boolean): LongBits = getBits(collection.indexOfFirst { predicate(it) })
     override inline fun containsBits(bits: LongBits): Boolean = collection.contains(bits)
     
-    context(a: ValueLongAdapter<T>) override inline fun asModifiableIterable(): MutableIterable<T> = MutableIteratorVLongKotlin(collection.iterator(), a)
-    context(a: ValueLongAdapter<T>) override inline fun asIterable(): Iterable<T> = IteratorVLongKotlin(collection.iterator(), a)
+    context(a: ValueLongAdapter<T>) override inline fun asIterable(): MutableIterable<T> = MutableIteratorVLongKotlin(collection.iterator(), a)
 
     context(a: ValueLongAdapter<T>) inline operator fun get(index: Int): T = a.fromLong(collection.get(index))
     context(a: ValueLongAdapter<T>) inline operator fun set(index: Int, value: T) = collection.set(index, a.toLong(value))

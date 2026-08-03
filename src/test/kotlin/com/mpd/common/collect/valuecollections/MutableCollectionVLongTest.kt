@@ -193,15 +193,13 @@ class MutableCollectionVLongTest {
     }
 
     @Test
-    fun asIterableAndAsModifiableIterableOnIndexedBacking() = with (MutColLongTestClass) {
-        // ArrayListVLong is also a MutableCollectionVLong (via MutableIndexedCollectionVLong), and unlike
-        // ArraySetVLong it does implement asIterable(), so it's used here to cover that member.
+    fun toIterableOnIndexedBacking() = with (MutColLongTestClass) {
+        // ArrayListVLong is also a MutableCollectionVLong (via MutableIndexedCollectionVLong); at the
+        // MutableCollectionVLong<T> static type, only toIterable() (a snapshot) is available - the live,
+        // removal-supporting asIterable() is only exposed via the more specific
+        // MutableIndexedCollectionVLong<T>/ArrayListVLong<T> types.
         val list: MutableCollectionVLong<MutColLongTestClass> = ArrayListVLong<MutColLongTestClass>().also { it plusAssign MutColLongTestClass(1); it plusAssign MutColLongTestClass(2) }
-        val values = list.asIterable().toList()
+        val values = list.toIterable().toList()
         assertEquals(listOf(MutColLongTestClass(1), MutColLongTestClass(2)), values)
-        val modifiableIter = list.asModifiableIterable().iterator()
-        modifiableIter.next()
-        modifiableIter.remove()
-        assertEquals(1, list.size)
     }
 }

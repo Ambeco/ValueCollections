@@ -9,12 +9,26 @@ import kotlin.random.Random
 // can modify elements, but not add or remove
 interface ModifiableIndexedCollectionVInt<T>: IndexedCollectionVInt<T>, ModifiableCollectionVInt<T> {
     fun setBits(index: Int, bits: IntBits)
+
+    // Covariant override: index-based live iteration supports set()-based mutation, but since
+    // Modifiable collections cannot resize, remove() is unsupported.
+    context(a: ValueIntAdapter<T>) override fun asIterable(): MutableIterable<T> {
+        val self = this
+        return object : MutableIterable<T> {
+            override fun iterator(): MutableIterator<T> = object : MutableIterator<T> {
+                var idx = 0
+                override fun hasNext(): Boolean = idx < self.size
+                override fun next(): T = a.fromInt(self.bitsAtIndex(idx++))
+                override fun remove(): Unit = throw UnsupportedOperationException("Collection elements are modifiable, but the collection itself is not mutable")
+            }
+        }
+    }
 }
 context(a: ValueIntAdapter<T>) inline fun <T> ModifiableIndexedCollectionVInt<T>.asListGeneric() = object: MutableList<T> {
     override val size: Int get() = this@asListGeneric.size
     override inline fun isEmpty(): Boolean = this@asListGeneric.size==0
     override inline fun contains(element: T): Boolean = this@asListGeneric.contains(element)
-    override inline fun iterator(): MutableIterator<T> = this@asListGeneric.asModifiableIterable().iterator()
+    override inline fun iterator(): MutableIterator<T> = this@asListGeneric.asIterable().iterator()
     override inline fun containsAll(elements: Collection<T>): Boolean = this@asListGeneric.containsAll(elements)
     override inline fun get(index: Int): T = this@asListGeneric.get(index)
     override inline fun indexOf(element: T): Int = this@asListGeneric.indexOf(element)

@@ -6,15 +6,14 @@ import androidx.collection.MutableObjectIntMap
 import androidx.collection.ObjectIntMap
 import androidx.collection.ScatterSet
 
-interface MapVObjInt<K,V> {
+interface MapVObjInt<K,V>: MapVObjectKey<K>, MapVIntValue<V> {
     // Many operations require a NULL_VALUE in order to return an "Optional" result without a heap allocation.
-    val NULL_VALUE_BITS: IntValueBits
 
-    val size: Int
+    override val size: Int
     fun getBits(k: K): IntValueBits
     fun anyBits(predicate: (K, IntValueBits) -> Boolean): K?
 
-    context(va: ValueIntAdapter<V>) fun asIterable(): Iterable<PairVObjInt<K,V>>
+    context(va: ValueIntAdapter<V>) fun toIterable(): Iterable<PairVObjInt<K,V>>
 
     @JvmName("toStringV") @Suppress("INAPPLICABLE_JVM_NAME")
     context(va: ValueIntAdapter<V>) fun toString(): String = toStringV()
@@ -33,9 +32,6 @@ context(va: ValueIntAdapter<V>)  inline fun <K,V> MapVObjInt<K,V>.asMapGeneric()
     override inline fun containsValue(value: V): Boolean = this@asMapGeneric.containsValue(value)
     override inline fun get(key: K): V? = this@asMapGeneric.getOrNull(key)
 }
-context(va: ValueIntAdapter<V>) inline fun <K,V> MapVObjInt<K,V>.valueFromInt(bits: IntValueBits): V = if (bits==NULL_VALUE_BITS) throw NoSuchElementException() else va.fromInt(bits)
-context(va: ValueIntAdapter<V>) inline fun <K,V> MapVObjInt<K,V>.valueFromIntOr(bits: IntValueBits, provider: ()->V): V = if (bits==NULL_VALUE_BITS) provider() else va.fromInt(bits)
-context(va: ValueIntAdapter<V>) inline fun <K,V> MapVObjInt<K,V>.valueFromIntOrNull(bits: IntValueBits): V? = if (bits==NULL_VALUE_BITS) null else va.fromInt(bits)
 context(va: ValueIntAdapter<V>) inline operator fun <K,V> MapVObjInt<K,V>.get(key: K): V = valueFromInt(getBits(key))
 context(va: ValueIntAdapter<V>) inline fun <K,V> MapVObjInt<K,V>.getOr(key: K, defaultResult:()->V): V = valueFromIntOr(getBits(key), defaultResult)
 context(va: ValueIntAdapter<V>) inline fun <K,V> MapVObjInt<K,V>.getOrNull(key: K): V? = valueFromIntOrNull(getBits(key))
@@ -71,8 +67,6 @@ context(va: ValueIntAdapter<V>) inline fun <K,V> MapVObjInt<K,V>.forEachIndexed(
 }
 inline val <K,V> MapVObjInt<K,V>.isEmpty get() = size == 0
 inline fun <K,V> MapVObjInt<K,V>.isNotEmpty() = size > 0
-inline fun <K,V> MapVObjInt<K,V>.containsKey(k: K) = getBits(k) != NULL_VALUE_BITS
-context(va: ValueIntAdapter<V>) inline fun <K,V> MapVObjInt<K,V>.containsValue(findV: V) = anyBits { _, v-> v==va.toInt(findV)} != null
 context(va: ValueIntAdapter<V>) inline fun <K,V, A : Appendable> MapVObjInt<K,V>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): A {
     val appender = object: (Int,K,V)-> Boolean {
         var count=0
@@ -109,7 +103,7 @@ interface MutableMapVObjInt<K,V>: MapVObjInt<K,V> {
     fun removeBits(k: K)
     fun removeBits(k: K, v: IntValueBits):Boolean
     fun removeIfBits(predicate:(K,IntValueBits)->Boolean)
-    context(va: ValueIntAdapter<V>) override fun asIterable(): MutableIterable<PairVObjInt<K,V>>
+    context(va: ValueIntAdapter<V>) override fun toIterable(): Iterable<PairVObjInt<K,V>>
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toStringV()"))
@@ -161,23 +155,27 @@ class HashMapVObjInt<K,V>(val collection: MutableObjectIntMap<K> =MutableObjectI
     override inline fun removeBits(k: K, v:IntValueBits): Boolean = collection.remove(k,v)
     override inline fun removeIfBits(predicate: (K, IntValueBits) -> Boolean) = collection.removeIf(predicate)
 
+    override inline fun anyKeyOrNull(predicate: (K) -> Boolean): K? = anyBits { k, _ -> predicate(k) }
+    override inline fun removeKey(key: K): Boolean { val had = collection.containsKey(key); removeBits(key); return had }
+    override inline fun forEachValueBits(action: (valueBits: IntValueBits) -> Unit) = collection.forEachValue(action)
+
     // Thin wrappers for every public method of MutableObjectIntMap.
     inline fun capacity(): Int = collection.capacity
-    inline fun anyBits(): Boolean = collection.any()
     inline fun none(): Boolean = collection.none()
     inline fun isEmpty(): Boolean = collection.isEmpty()
     inline fun isNotEmptyBits(): Boolean = collection.isNotEmpty()
     inline fun getOrDefault(key: K, defaultValue: IntValueBits): IntValueBits = collection.getOrDefault(key, defaultValue)
     inline fun getOrElse(key: K, defaultValue: () -> IntValueBits): IntValueBits = collection.getOrElse(key, defaultValue)
     inline fun forEachBits(block: (key: K, value: IntValueBits) -> Unit) = collection.forEach(block)
-    inline fun forEachKey(block: (key: K) -> Unit) = collection.forEachKey(block)
+    override inline fun forEachKey(block: (key: K) -> Unit) = collection.forEachKey(block)
     inline fun forEachValue(block: (value: IntValueBits) -> Unit) = collection.forEachValue(block)
     inline fun all(predicate: (K, IntValueBits) -> Boolean): Boolean = collection.all(predicate)
     inline fun count(): Int = collection.count()
     inline fun count(predicate: (K, IntValueBits) -> Boolean): Int = collection.count(predicate)
     inline operator fun contains(key: K): Boolean = collection.contains(key)
     inline fun containsKeyBits(key: K): Boolean = collection.containsKey(key)
-    inline fun containsValueBits(value: IntValueBits): Boolean = collection.containsValue(value)
+    override inline fun containsKey(key: K): Boolean = containsKeyBits(key)
+    override inline fun containsValueBits(bits: IntValueBits): Boolean = collection.containsValue(bits)
     inline fun joinToStringBits(
         separator: CharSequence = ", ",
         prefix: CharSequence = "",
@@ -204,18 +202,14 @@ class HashMapVObjInt<K,V>(val collection: MutableObjectIntMap<K> =MutableObjectI
     inline fun minusAssignBits(keys: Sequence<K>) = collection.minusAssign(keys)
     inline fun minusAssignBits(keys: ScatterSet<K>) = collection.minusAssign(keys)
 
-    context(va: ValueIntAdapter<V>) override inline fun asIterable(): MutableIterable<PairVObjInt<K,V>> {
+    context(va: ValueIntAdapter<V>) override inline fun toIterable(): Iterable<PairVObjInt<K,V>> {
         val list = ArrayList<PairVObjInt<K,V>>(size)
         collection.forEach { k, v -> list.add(PairVObjInt(k, v)) }
-        return object : MutableIterable<PairVObjInt<K,V>> {
-            override inline fun iterator(): MutableIterator<PairVObjInt<K,V>> = object : MutableIterator<PairVObjInt<K,V>> {
+        return object : Iterable<PairVObjInt<K,V>> {
+            override inline fun iterator(): Iterator<PairVObjInt<K,V>> = object : Iterator<PairVObjInt<K,V>> {
                 var idx = 0
-                var lastKey: K? = null
-                var hasLast = false
                 override inline fun hasNext(): Boolean = idx < list.size
-                override inline fun next(): PairVObjInt<K,V> { val p = list[idx++]; lastKey = p.first; hasLast = true; return p }
-                @Suppress("UNCHECKED_CAST")
-                override inline fun remove() { check(hasLast); collection.remove(lastKey as K); hasLast = false }
+                override inline fun next(): PairVObjInt<K,V> { val p = list[idx++]; return p }
             }
         }
     }

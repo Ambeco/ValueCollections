@@ -7,16 +7,14 @@ import androidx.collection.LongList
 import androidx.collection.LongSet
 import androidx.collection.MutableLongIntMap
 
-interface MapVLongInt<K,V> {
+interface MapVLongInt<K,V>: MapVLongKey<K>, MapVIntValue<V> {
     // Many operations require a NULL_VALUE in order to return an "Optional" result without a heap allocation.
-    val NULL_KEY_BITS: LongKeyBits
-    val NULL_VALUE_BITS: IntValueBits
 
-    val size: Int
+    override val size: Int
     fun getBits(k: LongKeyBits): IntValueBits
     fun anyBits(predicate: (LongKeyBits, IntValueBits) -> Boolean): LongKeyBits
 
-    context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) fun asIterable(): Iterable<PairVLongInt<K,V>>
+    context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) fun toIterable(): Iterable<PairVLongInt<K,V>>
 
     @JvmName("toStringV") @Suppress("INAPPLICABLE_JVM_NAME")
     context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) fun toString(): String = toStringV()
@@ -35,27 +33,21 @@ context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>)  inline fun <K,V> MapVL
     override inline fun containsValue(value: V): Boolean = this@asMapGeneric.containsValue(value)
     override inline fun get(key: K): V? = this@asMapGeneric.getOrNull(key)
 }
-context(ka: ValueLongAdapter<K>) inline fun <K,V> MapVLongInt<K,V>.keyFromLong(bits: LongKeyBits): K = if (bits==NULL_KEY_BITS) throw NoSuchElementException() else ka.fromLong(bits)
-context(ka: ValueLongAdapter<K>) inline fun <K,V> MapVLongInt<K,V>.keyFromLongOr(bits: LongKeyBits, provider: ()->K): K = if (bits==NULL_KEY_BITS) provider() else ka.fromLong(bits)
-context(ka: ValueLongAdapter<K>) inline fun <K,V> MapVLongInt<K,V>.keyFromLongOrNull(bits: LongKeyBits): K? = if (bits==NULL_KEY_BITS) null else ka.fromLong(bits)
-context(va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.valueFromInt(bits: IntValueBits): V = if (bits==NULL_VALUE_BITS) throw NoSuchElementException() else va.fromInt(bits)
-context(va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.valueFromIntOr(bits: IntValueBits, provider: ()->V): V = if (bits==NULL_VALUE_BITS) provider() else va.fromInt(bits)
-context(va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.valueFromIntOrNull(bits: IntValueBits): V? = if (bits==NULL_VALUE_BITS) null else va.fromInt(bits)
 context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline operator fun <K,V> MapVLongInt<K,V>.get(key: K): V = valueFromInt(getBits(ka.toLong(key)))
 context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.getOr(key: K, defaultResult:()->V): V = valueFromIntOr(getBits(ka.toLong(key)), defaultResult)
 context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.getOrNull(key: K): V? = valueFromIntOrNull(getBits(ka.toLong(key)))
-context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.any(crossinline predicate:(K, V)->Boolean):K = keyFromLong(anyBits{ k, v-> predicate(ka.fromLong(k), va.fromInt(v))})
-context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.anyOr(crossinline predicate:(K, V)->Boolean, defaultResult:()->K):K = keyFromLongOr(anyBits{ k, v-> predicate(ka.fromLong(k), va.fromInt(v))}, defaultResult)
-context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.anyOrNull(crossinline predicate:(K, V)->Boolean):K? = keyFromLongOrNull(anyBits{ k, v-> predicate(ka.fromLong(k), va.fromInt(v))})
+context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.any(crossinline predicate:(K, V)->Boolean):K = keyFromInt(anyBits{ k, v-> predicate(ka.fromLong(k), va.fromInt(v))})
+context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.anyOr(crossinline predicate:(K, V)->Boolean, defaultResult:()->K):K = keyFromIntOr(anyBits{ k, v-> predicate(ka.fromLong(k), va.fromInt(v))}, defaultResult)
+context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.anyOrNull(crossinline predicate:(K, V)->Boolean):K? = keyFromIntOrNull(anyBits{ k, v-> predicate(ka.fromLong(k), va.fromInt(v))})
 inline fun <K,V> MapVLongInt<K,V>.anyIndexedBits(crossinline predicate:(index:Int, LongKeyBits, IntValueBits)->Boolean):LongKeyBits {
     return anyBits(object: (LongKeyBits,IntValueBits) -> Boolean {
         var index = 0
         override inline fun invoke(k: LongKeyBits, v:IntValueBits) = predicate(index++, k,v)
     } )
 }
-context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.anyIndexed(crossinline action:(index:Int, K, V)->Boolean):K = keyFromLong(anyIndexedBits{ index, k, v-> action(index, ka.fromLong(k), va.fromInt(v))})
-context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.anyIndexedOr(crossinline action:(index:Int, K, V)->Boolean, defaultResult:()->K):K = keyFromLongOr(anyIndexedBits{ index, k, v-> action(index, ka.fromLong(k), va.fromInt(v))}, defaultResult)
-context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.anyIndexedOrNull(crossinline action:(index:Int, K, V)->Boolean):K? = keyFromLongOrNull(anyIndexedBits{ index, k, v-> action(index, ka.fromLong(k), va.fromInt(v))})
+context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.anyIndexed(crossinline action:(index:Int, K, V)->Boolean):K = keyFromInt(anyIndexedBits{ index, k, v-> action(index, ka.fromLong(k), va.fromInt(v))})
+context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.anyIndexedOr(crossinline action:(index:Int, K, V)->Boolean, defaultResult:()->K):K = keyFromIntOr(anyIndexedBits{ index, k, v-> action(index, ka.fromLong(k), va.fromInt(v))}, defaultResult)
+context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.anyIndexedOrNull(crossinline action:(index:Int, K, V)->Boolean):K? = keyFromIntOrNull(anyIndexedBits{ index, k, v-> action(index, ka.fromLong(k), va.fromInt(v))})
 inline fun <K,V> MapVLongInt<K,V>.forEachBits(crossinline action:(LongKeyBits, IntValueBits)->Unit) {anyBits { k, v-> action(k,v); false} }
 context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.forEach(crossinline action:(K, V)->Unit) = forEachBits { k, v-> action(ka.fromLong(k), va.fromInt(v)) }
 context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.forEachPair(crossinline action:(PairVLongInt<K,V>)->Unit)  {
@@ -72,8 +64,6 @@ context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V> MapVLo
 }
 inline val <K,V> MapVLongInt<K,V>.isEmpty get() = size == 0
 inline fun <K,V> MapVLongInt<K,V>.isNotEmpty() = size > 0
-context(ka: ValueLongAdapter<K>) inline fun <K,V> MapVLongInt<K,V>.containsKey(k: K) = getBits(ka.toLong(k)) != NULL_VALUE_BITS
-context(va: ValueIntAdapter<V>) inline fun <K,V> MapVLongInt<K,V>.containsValue(findV: V) = anyBits { _, v-> v==va.toInt(findV)} != NULL_KEY_BITS
 context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) inline fun <K,V, A : Appendable> MapVLongInt<K,V>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: ((K, V) -> CharSequence) = { k, v-> "($k:$v)" }): A {
     val appender = object: (Int,K,V)-> Boolean {
         var count=0
@@ -110,7 +100,7 @@ interface MutableMapVLongInt<K,V>: MapVLongInt<K,V> {
     fun removeBits(k: LongKeyBits)
     fun removeBits(k: LongKeyBits, v: IntValueBits):Boolean
     fun removeIfBits(predicate:(LongKeyBits,IntValueBits)->Boolean)
-    context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) override fun asIterable(): MutableIterable<PairVLongInt<K,V>>
+    context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) override fun toIterable(): Iterable<PairVLongInt<K,V>>
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print K.toString", ReplaceWith("toStringV()"))
@@ -161,9 +151,12 @@ class HashMapVLongInt<K,V>(val collection: MutableLongIntMap=MutableLongIntMap()
     override inline fun removeBits(k: LongKeyBits, v:IntValueBits): Boolean = collection.remove(k,v)
     override inline fun removeIfBits(predicate: (LongKeyBits, IntValueBits) -> Boolean) = collection.removeIf(predicate)
 
+    override inline fun anyKeyBits(predicate: (LongKeyBits) -> Boolean): LongKeyBits = anyBits { k, _ -> predicate(k) }
+    override inline fun removeKeyBits(bits: LongKeyBits): Boolean { val had = collection.containsKey(bits); removeBits(bits); return had }
+    override inline fun forEachValueBits(action: (valueBits: IntValueBits) -> Unit) = collection.forEachValue(action)
+
     // Thin wrappers for every public method of MutableLongIntMap.
     inline fun capacity(): Int = collection.capacity
-    inline fun anyBits(): Boolean = collection.any()
     inline fun none(): Boolean = collection.none()
     inline fun isEmpty(): Boolean = collection.isEmpty()
     inline fun isNotEmptyBits(): Boolean = collection.isNotEmpty()
@@ -176,8 +169,8 @@ class HashMapVLongInt<K,V>(val collection: MutableLongIntMap=MutableLongIntMap()
     inline fun count(): Int = collection.count()
     inline fun count(predicate: (LongKeyBits, IntValueBits) -> Boolean): Int = collection.count(predicate)
     inline operator fun contains(key: LongKeyBits): Boolean = collection.contains(key)
-    inline fun containsKeyBits(key: LongKeyBits): Boolean = collection.containsKey(key)
-    inline fun containsValueBits(value: IntValueBits): Boolean = collection.containsValue(value)
+    override inline fun containsKeyBits(bits: LongKeyBits): Boolean = collection.containsKey(bits)
+    override inline fun containsValueBits(bits: IntValueBits): Boolean = collection.containsValue(bits)
     inline fun joinToStringBits(
         separator: CharSequence = ", ",
         prefix: CharSequence = "",
@@ -203,17 +196,14 @@ class HashMapVLongInt<K,V>(val collection: MutableLongIntMap=MutableLongIntMap()
     inline fun minusAssignBits(keys: LongSet) = collection.minusAssign(keys)
     inline fun minusAssignBits(keys: LongList) = collection.minusAssign(keys)
 
-    context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) override inline fun asIterable(): MutableIterable<PairVLongInt<K,V>> {
+    context(ka: ValueLongAdapter<K>, va: ValueIntAdapter<V>) override inline fun toIterable(): Iterable<PairVLongInt<K,V>> {
         val list = ArrayList<PairVLongInt<K,V>>(size)
         collection.forEach { k, v -> list.add(PairVLongInt(k, v)) }
-        return object : MutableIterable<PairVLongInt<K,V>> {
-            override inline fun iterator(): MutableIterator<PairVLongInt<K,V>> = object : MutableIterator<PairVLongInt<K,V>> {
+        return object : Iterable<PairVLongInt<K,V>> {
+            override inline fun iterator(): Iterator<PairVLongInt<K,V>> = object : Iterator<PairVLongInt<K,V>> {
                 var idx = 0
-                var lastKeyBits: LongKeyBits = NULL_KEY_BITS
-                var hasLast = false
                 override inline fun hasNext(): Boolean = idx < list.size
-                override inline fun next(): PairVLongInt<K,V> { val p = list[idx++]; lastKeyBits = p.firstBits; hasLast = true; return p }
-                override inline fun remove() { check(hasLast); collection.remove(lastKeyBits); hasLast = false }
+                override inline fun next(): PairVLongInt<K,V> { val p = list[idx++]; return p }
             }
         }
     }

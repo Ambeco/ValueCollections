@@ -7,15 +7,14 @@ import androidx.collection.FloatList
 import androidx.collection.FloatSet
 import androidx.collection.MutableFloatIntMap
 
-interface MapVFloatInt<V> {
+interface MapVFloatInt<V>: MapVFloatKey, MapVIntValue<V> {
     // Many operations require a NULL_VALUE in order to return an "Optional" result without a heap allocation.
-    val NULL_VALUE_BITS: IntValueBits
 
-    val size: Int
+    override val size: Int
     fun getBits(k: Float): IntValueBits
     fun anyBits(predicate: (Float, IntValueBits) -> Boolean): Float?
 
-    context(va: ValueIntAdapter<V>) fun asIterable(): Iterable<PairVObjInt<Float,V>>
+    context(va: ValueIntAdapter<V>) fun toIterable(): Iterable<PairVObjInt<Float,V>>
 
     @JvmName("toStringV") @Suppress("INAPPLICABLE_JVM_NAME")
     context(va: ValueIntAdapter<V>) fun toString(): String = toStringV()
@@ -34,9 +33,6 @@ context(va: ValueIntAdapter<V>)  inline fun <V> MapVFloatInt<V>.asMapGeneric(): 
     override inline fun containsValue(value: V): Boolean = this@asMapGeneric.containsValue(value)
     override inline fun get(key: Float): V? = this@asMapGeneric.getOrNull(key)
 }
-context(va: ValueIntAdapter<V>) inline fun <V> MapVFloatInt<V>.valueFromInt(bits: IntValueBits): V = if (bits==NULL_VALUE_BITS) throw NoSuchElementException() else va.fromInt(bits)
-context(va: ValueIntAdapter<V>) inline fun <V> MapVFloatInt<V>.valueFromIntOr(bits: IntValueBits, provider: ()->V): V = if (bits==NULL_VALUE_BITS) provider() else va.fromInt(bits)
-context(va: ValueIntAdapter<V>) inline fun <V> MapVFloatInt<V>.valueFromIntOrNull(bits: IntValueBits): V? = if (bits==NULL_VALUE_BITS) null else va.fromInt(bits)
 context(va: ValueIntAdapter<V>) inline operator fun <V> MapVFloatInt<V>.get(key: Float): V = valueFromInt(getBits(key))
 context(va: ValueIntAdapter<V>) inline fun <V> MapVFloatInt<V>.getOr(key: Float, defaultResult:()->V): V = valueFromIntOr(getBits(key), defaultResult)
 context(va: ValueIntAdapter<V>) inline fun <V> MapVFloatInt<V>.getOrNull(key: Float): V? = valueFromIntOrNull(getBits(key))
@@ -72,8 +68,6 @@ context(va: ValueIntAdapter<V>) inline fun <V> MapVFloatInt<V>.forEachIndexed(cr
 }
 inline val <V> MapVFloatInt<V>.isEmpty get() = size == 0
 inline fun <V> MapVFloatInt<V>.isNotEmpty() = size > 0
-inline fun <V> MapVFloatInt<V>.containsKey(k: Float) = getBits(k) != NULL_VALUE_BITS
-context(va: ValueIntAdapter<V>) inline fun <V> MapVFloatInt<V>.containsValue(findV: V) = anyBits { _, v-> v==va.toInt(findV)} != null
 context(va: ValueIntAdapter<V>) inline fun <V, A : Appendable> MapVFloatInt<V>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: ((Float, V) -> CharSequence) = { k, v-> "($k:$v)" }): A {
     val appender = object: (Int,Float,V)-> Boolean {
         var count=0
@@ -110,7 +104,7 @@ interface MutableMapVFloatInt<V>: MapVFloatInt<V> {
     fun removeBits(k: Float)
     fun removeBits(k: Float, v: IntValueBits):Boolean
     fun removeIfBits(predicate:(Float,IntValueBits)->Boolean)
-    context(va: ValueIntAdapter<V>) override fun asIterable(): MutableIterable<PairVObjInt<Float,V>>
+    context(va: ValueIntAdapter<V>) override fun toIterable(): Iterable<PairVObjInt<Float,V>>
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toString(ValueIntAdapter) to print V.toString", ReplaceWith("toStringV()"))
@@ -159,23 +153,27 @@ class HashMapVFloatInt<V>(val collection: MutableFloatIntMap =MutableFloatIntMap
     override inline fun removeBits(k: Float, v:IntValueBits): Boolean = collection.remove(k,v)
     override inline fun removeIfBits(predicate: (Float, IntValueBits) -> Boolean) = collection.removeIf(predicate)
 
+    override inline fun anyKeyOrNull(predicate: (Float) -> Boolean): Float? = anyBits { k, _ -> predicate(k) }
+    override inline fun removeKey(key: Float): Boolean { val had = collection.containsKey(key); removeBits(key); return had }
+    override inline fun forEachValueBits(action: (valueBits: IntValueBits) -> Unit) = collection.forEachValue(action)
+
     // Thin wrappers for every public method of MutableFloatIntMap.
     inline fun capacity(): Int = collection.capacity
-    inline fun anyBits(): Boolean = collection.any()
     inline fun none(): Boolean = collection.none()
     inline fun isEmpty(): Boolean = collection.isEmpty()
     inline fun isNotEmptyBits(): Boolean = collection.isNotEmpty()
     inline fun getOrDefault(key: Float, defaultValue: IntValueBits): IntValueBits = collection.getOrDefault(key, defaultValue)
     inline fun getOrElse(key: Float, defaultValue: () -> IntValueBits): IntValueBits = collection.getOrElse(key, defaultValue)
     inline fun forEachBits(block: (key: Float, value: IntValueBits) -> Unit) = collection.forEach(block)
-    inline fun forEachKey(block: (key: Float) -> Unit) = collection.forEachKey(block)
+    override inline fun forEachKey(block: (key: Float) -> Unit) = collection.forEachKey(block)
     inline fun forEachValue(block: (value: IntValueBits) -> Unit) = collection.forEachValue(block)
     inline fun all(predicate: (Float, IntValueBits) -> Boolean): Boolean = collection.all(predicate)
     inline fun count(): Int = collection.count()
     inline fun count(predicate: (Float, IntValueBits) -> Boolean): Int = collection.count(predicate)
     inline operator fun contains(key: Float): Boolean = collection.contains(key)
     inline fun containsKeyBits(key: Float): Boolean = collection.containsKey(key)
-    inline fun containsValueBits(value: IntValueBits): Boolean = collection.containsValue(value)
+    override inline fun containsKey(key: Float): Boolean = containsKeyBits(key)
+    override inline fun containsValueBits(bits: IntValueBits): Boolean = collection.containsValue(bits)
     inline fun joinToStringBits(
         separator: CharSequence = ", ",
         prefix: CharSequence = "",
@@ -201,17 +199,14 @@ class HashMapVFloatInt<V>(val collection: MutableFloatIntMap =MutableFloatIntMap
     inline fun minusAssignBits(keys: FloatSet) = collection.minusAssign(keys)
     inline fun minusAssignBits(keys: FloatList) = collection.minusAssign(keys)
 
-    context(va: ValueIntAdapter<V>) override inline fun asIterable(): MutableIterable<PairVObjInt<Float,V>> {
+    context(va: ValueIntAdapter<V>) override inline fun toIterable(): Iterable<PairVObjInt<Float,V>> {
         val list = ArrayList<PairVObjInt<Float,V>>(size)
         collection.forEach { k, v -> list.add(PairVObjInt(k, v)) }
-        return object : MutableIterable<PairVObjInt<Float,V>> {
-            override inline fun iterator(): MutableIterator<PairVObjInt<Float,V>> = object : MutableIterator<PairVObjInt<Float,V>> {
+        return object : Iterable<PairVObjInt<Float,V>> {
+            override inline fun iterator(): Iterator<PairVObjInt<Float,V>> = object : Iterator<PairVObjInt<Float,V>> {
                 var idx = 0
-                var lastKey: Float = 0f
-                var hasLast = false
                 override inline fun hasNext(): Boolean = idx < list.size
-                override inline fun next(): PairVObjInt<Float,V> { val p = list[idx++]; lastKey = p.first; hasLast = true; return p }
-                override inline fun remove() { check(hasLast); collection.remove(lastKey); hasLast = false }
+                override inline fun next(): PairVObjInt<Float,V> { val p = list[idx++]; return p }
             }
         }
     }

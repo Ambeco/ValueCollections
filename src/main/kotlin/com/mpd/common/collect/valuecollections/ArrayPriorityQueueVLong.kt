@@ -30,7 +30,7 @@ class ArrayPriorityQueueVLong<T>(
     }
     override inline fun containsBits(bits: LongBits): Boolean = queue.contains(bits)
 
-    context(a: ValueLongAdapter<T>) override inline fun asIterable(): MutableIterable<T> = MutableIteratorVLongGeneric(queue.iterator(), a)
+    context(a: ValueLongAdapter<T>) override inline fun toIterable(): Iterable<T> = IteratorVLongGeneric(queue.iterator(), a)
 
     override inline fun ensureCapacity(newCapacity: Int): Boolean = false
     override inline fun trim(minCapacity: Int) { /* not supported: the wrapped queue does not expose a way to shrink its backing array */ }

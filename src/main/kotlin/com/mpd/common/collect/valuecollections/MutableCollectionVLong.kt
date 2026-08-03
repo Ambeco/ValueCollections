@@ -9,9 +9,7 @@ package com.mpd.common.collect.valuecollections
 import kotlin.collections.all
 import kotlin.collections.fold
 
-interface ModifiableCollectionVLong<T>: CollectionVLong<T> {
-    context(a: ValueLongAdapter<T>) fun asModifiableIterable(): MutableIterable<T>
-}
+interface ModifiableCollectionVLong<T>: CollectionVLong<T>
 
 interface MutableCollectionVLong<T>: ModifiableCollectionVLong<T> {
     fun ensureCapacity(newCapacity: Int): Boolean = false
@@ -20,14 +18,17 @@ interface MutableCollectionVLong<T>: ModifiableCollectionVLong<T> {
     fun removeBits(bits: LongBits): Boolean
     fun removeAllBits(predicate: (LongBits) -> Boolean): Boolean
     fun clear()
-    context(a: ValueLongAdapter<T>) override fun asModifiableIterable(): MutableIterable<T> = asIterable()
-    context(a: ValueLongAdapter<T>) override fun asIterable(): MutableIterable<T>
 }
 context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.asCollectionGeneric(): MutableCollection<T> = object : MutableCollection<T> {
     override val size: Int inline get() = this@asCollectionGeneric.size
     override inline fun isEmpty(): Boolean = this@asCollectionGeneric.size == 0
     override inline fun contains(element: T): Boolean = this@asCollectionGeneric.contains(element)
-    override inline fun iterator(): MutableIterator<T> = this@asCollectionGeneric.asIterable().iterator()
+    override inline fun iterator(): MutableIterator<T> = object : MutableIterator<T> {
+        val delegate = this@asCollectionGeneric.toIterable().iterator()
+        override inline fun hasNext(): Boolean = delegate.hasNext()
+        override inline fun next(): T = delegate.next()
+        override inline fun remove(): Unit = throw UnsupportedOperationException("iterator remove is not supported; use MutableCollectionVLong.remove(element) instead")
+    }
     override inline fun add(element: T): Boolean = this@asCollectionGeneric.add(element)
     override inline fun remove(element: T): Boolean = this@asCollectionGeneric.remove(element)
     override inline fun addAll(elements: Collection<T>): Boolean = this@asCollectionGeneric.addAll(elements)

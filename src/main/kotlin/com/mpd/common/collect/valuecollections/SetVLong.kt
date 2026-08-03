@@ -24,20 +24,17 @@ class ArraySetVLong<T>(val collection: MutableLongSet, override val NULL_VALUE: 
         return finder.found
     }
     override inline fun containsBits(bits: LongBits): Boolean = collection.contains(bits)
-    context(a: ValueLongAdapter<T>) override inline fun asIterable(): MutableIterable<T> {
+    context(a: ValueLongAdapter<T>) override inline fun toIterable(): Iterable<T> {
         val bits = LongArray(size)
         val filler = object : (LongBits) -> Unit {
             var i = 0
             override inline fun invoke(v: LongBits) { bits[i++] = v }
         }
         collection.forEach(filler)
-        return MutableIteratorVLongGeneric(object : MutableIterator<Long> {
+        return IteratorVLongGeneric(object : Iterator<Long> {
             var idx = 0
-            var lastBits = NULL_VALUE
-            var hasLast = false
             override inline fun hasNext(): Boolean = idx < bits.size
-            override inline fun next(): Long { val v = bits[idx++]; lastBits = v; hasLast = true; return v }
-            override inline fun remove() { check(hasLast); collection.remove(lastBits); hasLast = false }
+            override inline fun next(): Long = bits[idx++]
         }, a)
     }
 

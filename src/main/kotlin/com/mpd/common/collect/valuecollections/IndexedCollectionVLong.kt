@@ -6,12 +6,25 @@ package com.mpd.common.collect.valuecollections
 
 import java.util.BitSet
 
+// TODO, replace `object`s with indies with for loops.
 interface IndexedCollectionVLong<T> : CollectionVLong<T> {
     fun bitsAtIndex(index: Int): LongBits
 
     fun indexOfBits(bits: LongBits): Int
     fun indexOfFirstIndexedBits(startIndex:Int=0, predicate: (index:Int, bits:LongBits) -> Boolean): Int = indexOfFirstIndexedBitsDefault(startIndex, predicate)
     fun indexOfLastIndexedBits(endIndex:Int=-1, predicate: (index:Int, bits:LongBits) -> Boolean): Int = indexOfLastIndexedBitsDefault(endIndex, predicate)
+
+    context(a: ValueLongAdapter<T>) fun asIterable(): Iterable<T> {
+        val self = this
+        return object : Iterable<T> {
+            override fun iterator(): Iterator<T> = object : Iterator<T> {
+                var idx = 0
+                override fun hasNext(): Boolean = idx < self.size
+                override fun next(): T = a.fromLong(self.bitsAtIndex(idx++))
+            }
+        }
+    }
+    context(a: ValueLongAdapter<T>) override fun toIterable(): Iterable<T> = toMutableList().asIterable()
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toString(ValueLongAdapter) to print K.toString", ReplaceWith("toStringV()"))

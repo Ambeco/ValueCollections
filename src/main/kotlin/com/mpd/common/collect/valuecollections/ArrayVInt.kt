@@ -16,8 +16,7 @@ class ArrayVInt<T>(val collection:IntArray, override val NULL_VALUE: IntBits=Int
     override inline fun anyBits(predicate: (IntBits) -> Boolean): IntBits = getBits(collection.indexOfFirst { predicate(it) })
     override inline fun containsBits(bits: IntBits): Boolean = collection.contains(bits)
 
-    context(a: ValueIntAdapter<T>) override inline fun asModifiableIterable(): MutableIterable<T> = MutableIteratorVIntKotlin(collection.iterator(), a)
-    context(a: ValueIntAdapter<T>) override inline fun asIterable(): Iterable<T> = IteratorVIntKotlin(collection.iterator(),a)
+    context(a: ValueIntAdapter<T>) override inline fun asIterable(): MutableIterable<T> = MutableIteratorVIntKotlin(collection.iterator(), a)
 
     context(a: ValueIntAdapter<T>) inline operator fun get(index: Int): T = a.fromInt(collection.get(index))
     context(a: ValueIntAdapter<T>) inline operator fun set(index: Int, value: T) = collection.set(index, a.toInt(value))

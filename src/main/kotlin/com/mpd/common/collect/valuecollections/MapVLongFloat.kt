@@ -7,16 +7,15 @@ import androidx.collection.LongList
 import androidx.collection.LongSet
 import androidx.collection.MutableLongFloatMap
 
-interface MapVLongFloat<K> {
+interface MapVLongFloat<K>: MapVLongKey<K>, MapVFloatValue {
     // Many operations require a NULL_VALUE in order to return an "Optional" result without a heap allocation.
-    val NULL_KEY_BITS: LongKeyBits
     val NULL_VALUE: Float
 
-    val size: Int
+    override val size: Int
     fun getBits(k: LongKeyBits): Float
     fun anyBits(predicate: (LongKeyBits, Float) -> Boolean): LongKeyBits
 
-    context(ka: ValueLongAdapter<K>) fun asIterable(): Iterable<PairVLongObj<K,Float>>
+    context(ka: ValueLongAdapter<K>) fun toIterable(): Iterable<PairVLongObj<K,Float>>
 
     @JvmName("toStringV") @Suppress("INAPPLICABLE_JVM_NAME")
     context(ka: ValueLongAdapter<K>) fun toString(): String = toStringV()
@@ -35,9 +34,6 @@ context(ka: ValueLongAdapter<K>)  inline fun <K> MapVLongFloat<K>.asMapGeneric()
     override inline fun containsValue(value: Float): Boolean = this@asMapGeneric.containsValue(value)
     override inline fun get(key: K): Float? = this@asMapGeneric.getOrNull(key)
 }
-context(ka: ValueLongAdapter<K>) inline fun <K> MapVLongFloat<K>.keyFromInt(bits: LongKeyBits): K = if (bits==NULL_KEY_BITS) throw NoSuchElementException() else ka.fromLong(bits)
-context(ka: ValueLongAdapter<K>) inline fun <K> MapVLongFloat<K>.keyFromIntOr(bits: LongKeyBits, provider: ()->K): K = if (bits==NULL_KEY_BITS) provider() else ka.fromLong(bits)
-context(ka: ValueLongAdapter<K>) inline fun <K> MapVLongFloat<K>.keyFromIntOrNull(bits: LongKeyBits): K? = if (bits==NULL_KEY_BITS) null else ka.fromLong(bits)
 inline fun <K> MapVLongFloat<K>.valueFromFloat(v: Float): Float = if (v==NULL_VALUE) throw NoSuchElementException() else v
 inline fun <K> MapVLongFloat<K>.valueFromFloatOr(v: Float, provider: ()->Float): Float = if (v==NULL_VALUE) provider() else v
 inline fun <K> MapVLongFloat<K>.valueFromFloatOrNull(v: Float): Float? = if (v==NULL_VALUE) null else v
@@ -78,8 +74,6 @@ context(ka: ValueLongAdapter<K>) inline fun <K> MapVLongFloat<K>.forEachIndexed(
 }
 inline val <K> MapVLongFloat<K>.isEmpty get() = size == 0
 inline fun <K> MapVLongFloat<K>.isNotEmpty() = size > 0
-context(ka: ValueLongAdapter<K>) inline fun <K> MapVLongFloat<K>.containsKey(k: K) = getBits(ka.toLong(k)) != NULL_VALUE
-inline fun <K> MapVLongFloat<K>.containsValue(findV: Float) = anyBits { _, v-> v==findV} != NULL_KEY_BITS
 context(ka: ValueLongAdapter<K>) inline fun <K, A : Appendable> MapVLongFloat<K>.joinTo(buffer: A, separator: CharSequence = ", ", prefix: CharSequence = "", postfix: CharSequence = "", limit: Int = size, truncated: CharSequence = "...", crossinline transform: ((K, Float) -> CharSequence) = { k, v-> "($k:$v)" }): A {
     val appender = object: (Int,K,Float)-> Boolean {
         var count=0
@@ -115,7 +109,7 @@ interface MutableMapVLongFloat<K>: MapVLongFloat<K> {
     fun removeBits(k: LongKeyBits)
     fun removeBits(k: LongKeyBits, v: Float):Boolean
     fun removeIfBits(predicate:(LongKeyBits,Float)->Boolean)
-    context(ka: ValueLongAdapter<K>) override fun asIterable(): MutableIterable<PairVLongObj<K,Float>>
+    context(ka: ValueLongAdapter<K>) override fun toIterable(): Iterable<PairVLongObj<K,Float>>
 
     @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
     @Deprecated("toString() prints Integers. Use toString(ValueLongAdapter) to print K.toString", ReplaceWith("toStringV()"))
@@ -161,9 +155,10 @@ class HashMapVLongFloat<K>(val collection: MutableLongFloatMap=MutableLongFloatM
     override inline fun removeBits(k: LongKeyBits, v:Float): Boolean = collection.remove(k,v)
     override inline fun removeIfBits(predicate: (LongKeyBits, Float) -> Boolean) = collection.removeIf(predicate)
 
+    override inline fun anyKeyBits(predicate: (LongKeyBits) -> Boolean): LongKeyBits = anyBits { k, _ -> predicate(k) }
+    override inline fun removeKeyBits(bits: LongKeyBits): Boolean { val had = collection.containsKey(bits); removeBits(bits); return had }
     // Thin wrappers for every public method of MutableLongFloatMap.
     inline fun capacity(): Int = collection.capacity
-    inline fun anyBits(): Boolean = collection.any()
     inline fun none(): Boolean = collection.none()
     inline fun isEmpty(): Boolean = collection.isEmpty()
     inline fun isNotEmptyBits(): Boolean = collection.isNotEmpty()
@@ -171,13 +166,14 @@ class HashMapVLongFloat<K>(val collection: MutableLongFloatMap=MutableLongFloatM
     inline fun getOrElse(key: LongKeyBits, defaultValue: () -> Float): Float = collection.getOrElse(key, defaultValue)
     inline fun forEachBits(block: (key: LongKeyBits, value: Float) -> Unit) = collection.forEach(block)
     inline fun forEachKey(block: (key: LongKeyBits) -> Unit) = collection.forEachKey(block)
-    inline fun forEachValue(block: (value: Float) -> Unit) = collection.forEachValue(block)
+    override inline fun forEachValue(block: (value: Float) -> Unit) = collection.forEachValue(block)
     inline fun all(predicate: (LongKeyBits, Float) -> Boolean): Boolean = collection.all(predicate)
     inline fun count(): Int = collection.count()
     inline fun count(predicate: (LongKeyBits, Float) -> Boolean): Int = collection.count(predicate)
     inline operator fun contains(key: LongKeyBits): Boolean = collection.contains(key)
-    inline fun containsKeyBits(key: LongKeyBits): Boolean = collection.containsKey(key)
+    override inline fun containsKeyBits(bits: LongKeyBits): Boolean = collection.containsKey(bits)
     inline fun containsValueBits(value: Float): Boolean = collection.containsValue(value)
+    override inline fun containsValue(value: Float): Boolean = containsValueBits(value)
     inline fun joinToStringBits(
         separator: CharSequence = ", ",
         prefix: CharSequence = "",
@@ -203,17 +199,14 @@ class HashMapVLongFloat<K>(val collection: MutableLongFloatMap=MutableLongFloatM
     inline fun minusAssignBits(keys: LongSet) = collection.minusAssign(keys)
     inline fun minusAssignBits(keys: LongList) = collection.minusAssign(keys)
 
-    context(ka: ValueLongAdapter<K>) override inline fun asIterable(): MutableIterable<PairVLongObj<K,Float>> {
+    context(ka: ValueLongAdapter<K>) override inline fun toIterable(): Iterable<PairVLongObj<K,Float>> {
         val list = ArrayList<PairVLongObj<K,Float>>(size)
         collection.forEach { k, v -> list.add(PairVLongObj(k, v)) }
-        return object : MutableIterable<PairVLongObj<K,Float>> {
-            override inline fun iterator(): MutableIterator<PairVLongObj<K,Float>> = object : MutableIterator<PairVLongObj<K,Float>> {
+        return object : Iterable<PairVLongObj<K,Float>> {
+            override inline fun iterator(): Iterator<PairVLongObj<K,Float>> = object : Iterator<PairVLongObj<K,Float>> {
                 var idx = 0
-                var lastKeyBits: LongKeyBits = NULL_KEY_BITS
-                var hasLast = false
                 override inline fun hasNext(): Boolean = idx < list.size
-                override inline fun next(): PairVLongObj<K,Float> { val p = list[idx++]; lastKeyBits = p.firstBits; hasLast = true; return p }
-                override inline fun remove() { check(hasLast); collection.remove(lastKeyBits); hasLast = false }
+                override inline fun next(): PairVLongObj<K,Float> { val p = list[idx++]; return p }
             }
         }
     }

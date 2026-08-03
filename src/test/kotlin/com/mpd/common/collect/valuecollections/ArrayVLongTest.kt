@@ -106,8 +106,6 @@ class ArrayVLongTest {
         val array = simpleArray()
         val values = array.asIterable().toList()
         assertEquals((1..10).map { ArrVLongTestClass(100L * it) }, values)
-        val modifiableValues = array.asModifiableIterable().toList()
-        assertEquals(values, modifiableValues)
     }
 
     @Test
