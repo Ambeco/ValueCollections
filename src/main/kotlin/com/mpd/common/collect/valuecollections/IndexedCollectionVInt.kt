@@ -50,18 +50,40 @@ context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.asListGen
         return result
     }
 }
-context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.anyIndexed(crossinline action: (index:Int, T) -> Boolean) = any(
-    object: (T) -> Boolean {
-        var index = 0
-        override inline fun invoke(v: T) = action(index++, v)
-    }
-)
-context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.allIndexed(crossinline action: (index:Int, T) -> Boolean) = all(
-    object: (T) -> Boolean {
-        var index = 0
-        override inline fun invoke(v: T) = action(index++, v)
-    }
-)
+// Overrides of the CollectionVInt<T> versions of the same name: those wrap the caller's lambda in a
+// stateful object to fake an index while scanning via anyBits/allBits/forEachBits (the only option for
+// non-indexed collections). Here we have real O(1) random access via bitsAtIndex, so a plain for-loop
+// is simpler and needs no wrapper object at all.
+inline fun <T> IndexedCollectionVInt<T>.anyIndexedBits(crossinline action: (index:Int, IntBits) -> Boolean): IntBits {
+    for (i in 0 ..< size) { val b = bitsAtIndex(i); if (action(i, b)) return b }
+    return NULL_VALUE
+}
+inline fun <T> IndexedCollectionVInt<T>.allIndexedBits(crossinline action: (index:Int, IntBits) -> Boolean): Boolean {
+    for (i in 0 ..< size) if (!action(i, bitsAtIndex(i))) return false
+    return true
+}
+inline fun <T> IndexedCollectionVInt<T>.forEachIndexedBits(crossinline action: (index:Int, bits:IntBits) -> Unit) {
+    for (i in 0 ..< size) action(i, bitsAtIndex(i))
+}
+inline fun <T> IndexedCollectionVInt<T>.findIndexedBits(crossinline predicate: (index:Int, bits:IntBits) -> Boolean): IntBits {
+    for (i in 0 ..< size) { val b = bitsAtIndex(i); if (predicate(i, b)) return b }
+    return NULL_VALUE
+}
+context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.anyIndexed(crossinline action: (index:Int, T) -> Boolean): Boolean {
+    for (i in 0 ..< size) if (action(i, elementAtIndex(i))) return true
+    return false
+}
+context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.allIndexed(crossinline action: (index:Int, T) -> Boolean): Boolean {
+    for (i in 0 ..< size) if (!action(i, elementAtIndex(i))) return false
+    return true
+}
+context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.forEachIndexed(crossinline action: (index:Int, T) -> Unit) {
+    for (i in 0 ..< size) action(i, elementAtIndex(i))
+}
+context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.findIndexed(crossinline predicate: (index:Int, T) -> Boolean): IntBits {
+    for (i in 0 ..< size) { val e = elementAtIndex(i); if (predicate(i, e)) return bitsAtIndex(i) }
+    return NULL_VALUE
+}
 inline fun <T> IndexedCollectionVInt<T>.contentEquals(other: IndexedCollectionVInt<T>?): Boolean = other != null && size == other.size && allIndexedBits { i, b-> other.bitsAtIndex(i)==b }
 
 context(a: ValueIntAdapter<T>) inline operator fun <T> IndexedCollectionVInt<T>.component1(): T = elementAtIndex(0)
