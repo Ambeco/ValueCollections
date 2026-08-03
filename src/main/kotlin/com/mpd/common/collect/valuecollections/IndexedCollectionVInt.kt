@@ -69,21 +69,17 @@ inline fun <T> IndexedCollectionVInt<T>.findIndexedBits(crossinline predicate: (
     for (i in 0 ..< size) { val b = bitsAtIndex(i); if (predicate(i, b)) return b }
     return NULL_VALUE
 }
-context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.anyIndexed(crossinline action: (index:Int, T) -> Boolean): Boolean {
-    for (i in 0 ..< size) if (action(i, elementAtIndex(i))) return true
-    return false
+context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.anyIndexed(crossinline action: (index:Int, T) -> Boolean): Boolean = anyIndexedBits { i, bits -> action(i, a.fromInt(bits)) } != NULL_VALUE
+context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.allIndexed(crossinline action: (index:Int, T) -> Boolean): Boolean = allIndexedBits { i, bits -> action(i, a.fromInt(bits)) }
+context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.forEachIndexed(crossinline action: (index:Int, T) -> Unit) = forEachIndexedBits { i, bits -> action(i, a.fromInt(bits)) }
+context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.findIndexed(crossinline predicate: (index:Int, T) -> Boolean): IntBits = findIndexedBits { i, bits -> predicate(i, a.fromInt(bits)) }
+inline fun <T, R> IndexedCollectionVInt<T>.foldIndexedBits(initial: R, crossinline operation: (index: Int, acc: R, IntBits) -> R): R {
+    var acc = initial
+    for (i in 0 ..< size) acc = operation(i, acc, bitsAtIndex(i))
+    return acc
 }
-context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.allIndexed(crossinline action: (index:Int, T) -> Boolean): Boolean {
-    for (i in 0 ..< size) if (!action(i, elementAtIndex(i))) return false
-    return true
-}
-context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.forEachIndexed(crossinline action: (index:Int, T) -> Unit) {
-    for (i in 0 ..< size) action(i, elementAtIndex(i))
-}
-context(a: ValueIntAdapter<T>) inline fun <T> IndexedCollectionVInt<T>.findIndexed(crossinline predicate: (index:Int, T) -> Boolean): IntBits {
-    for (i in 0 ..< size) { val e = elementAtIndex(i); if (predicate(i, e)) return bitsAtIndex(i) }
-    return NULL_VALUE
-}
+context(a: ValueIntAdapter<T>) inline fun <T, R> IndexedCollectionVInt<T>.foldIndexed(initial: R, crossinline operation: (index: Int, acc: R, T) -> R): R =
+    foldIndexedBits(initial) { i, acc, bits -> operation(i, acc, a.fromInt(bits)) }
 inline fun <T> IndexedCollectionVInt<T>.contentEquals(other: IndexedCollectionVInt<T>?): Boolean = other != null && size == other.size && allIndexedBits { i, b-> other.bitsAtIndex(i)==b }
 
 context(a: ValueIntAdapter<T>) inline operator fun <T> IndexedCollectionVInt<T>.component1(): T = elementAtIndex(0)

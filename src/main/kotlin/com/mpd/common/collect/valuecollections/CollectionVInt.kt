@@ -91,6 +91,8 @@ context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.forEach(crossinl
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.single(crossinline predicate: (T) -> Boolean): T = fromInt(singleBits {predicate(a.fromInt(it))})
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.contains(element: T) = containsBits(a.toInt(element))
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.forEachIndexed(crossinline action: (index:Int, T) -> Unit) = forEachIndexedBits { i, e-> action(i,a.fromInt(e)) }
+context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.anyIndexed(crossinline predicate: (index:Int, T) -> Boolean): Boolean = anyIndexedBits { i, e-> predicate(i,a.fromInt(e)) } != NULL_VALUE
+context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.allIndexed(crossinline predicate: (index:Int, T) -> Boolean): Boolean = allIndexedBits { i, e-> predicate(i,a.fromInt(e)) }
 
  inline fun <T> CollectionVInt<T>.isEmpty() = size == 0
  inline fun <T> CollectionVInt<T>.isNotEmpty() = size > 0
@@ -229,15 +231,7 @@ context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.any(): Boolean =
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.count(): Int = size
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.count(crossinline predicate: (T) -> Boolean): Int = fold(0,{ acc, e->if(predicate(e)) acc+1 else acc})
 context(a: ValueIntAdapter<T>) inline fun <T, R> CollectionVInt<T>.fold(initial: R, crossinline operation: (acc: R, T) -> R): R = foldIndexed(initial,{ _, acc, e->operation(acc,e)})
-context(a: ValueIntAdapter<T>) inline fun <T, R> CollectionVInt<T>.foldIndexed(initial: R, crossinline operation: (index: Int, acc: R, T) -> R): R {
-    val accumulator = object: (Int,T)->Unit {
-        var index=0
-        var acc = initial
-        override inline fun invoke(i:Int, e: T) { acc = operation(i, acc, e) }
-    }
-    forEachIndexed(accumulator)
-    return accumulator.acc
-}
+context(a: ValueIntAdapter<T>) inline fun <T, R> CollectionVInt<T>.foldIndexed(initial: R, crossinline operation: (index: Int, acc: R, T) -> R): R = foldIndexedBits(initial) { i, acc, e -> operation(i, acc, a.fromInt(e)) }
 inline fun <T, R> CollectionVInt<T>.foldBits(initial: R, crossinline operation: (acc: R, IntBits) -> R): R = foldIndexedBits(initial,{ _, acc, e->operation(acc,e)})
 inline fun <T, R> CollectionVInt<T>.foldIndexedBits(initial: R, crossinline operation: (index: Int, acc: R, IntBits) -> R): R {
     val accumulator = object: (Int,IntBits)->Unit {
