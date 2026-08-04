@@ -74,8 +74,8 @@ import com.mpd.common.collect.valuecollections.fromLong
 import com.mpd.common.collect.valuecollections.fromLongOr
 import com.mpd.common.collect.valuecollections.fromLongOrNull
 import com.mpd.common.collect.valuecollections.get
-import com.mpd.common.collect.valuecollections.groupBy
-import com.mpd.common.collect.valuecollections.groupByTo
+import com.mpd.common.collect.valuecollections.groupByGeneric
+import com.mpd.common.collect.valuecollections.groupByGenericTo
 import com.mpd.common.collect.valuecollections.intersect
 import com.mpd.common.collect.valuecollections.isEmpty
 import com.mpd.common.collect.valuecollections.isNotEmpty
@@ -88,7 +88,7 @@ import com.mpd.common.collect.valuecollections.mapIndexedVInt
 import com.mpd.common.collect.valuecollections.mapIndexedVIntNotNull
 import com.mpd.common.collect.valuecollections.mapIndexedVLong
 import com.mpd.common.collect.valuecollections.mapIndexedVLongNotNull
-import com.mpd.common.collect.valuecollections.mapNotNull
+import com.mpd.common.collect.valuecollections.mapNotNullGeneric
 import com.mpd.common.collect.valuecollections.mapNotNullTo
 import com.mpd.common.collect.valuecollections.mapReduce
 import com.mpd.common.collect.valuecollections.mapReduceIndexed
@@ -476,7 +476,7 @@ class CollectionVLongTest {
     @Test
     fun groupBy() = with (VLongTestClass) {
         val array = simpleList()
-        val groups = array.groupBy { it.value % 200 }
+        val groups = array.groupByGeneric { it.value % 200 }
         assertEquals(2, groups.size)
         assertEquals(5, groups[0]!!.size)
     }
@@ -642,7 +642,7 @@ class CollectionVLongTest {
     @Test
     fun withIndex() = with (VLongTestClass) {
         val array = simpleList()
-        val indexed: Collection<IndexedVLong<VLongTestClass>> = array.withIndex()
+        val indexed: Collection<IndexedVLong<VLongTestClass>> = array.withIndexGeneric()
         val first = indexed.first()
         assertEquals(0, first.index)
         assertEquals(VLongTestClass(100), first.second)
@@ -689,7 +689,7 @@ class CollectionVLongTest {
     fun groupByTo() = with (VLongTestClass) {
         val array = simpleList()
         val destination = HashMap<Long, MutableListVLong<VLongTestClass>>()
-        array.groupByTo(destination) { it.value % 2 }
+        array.groupByGenericTo(destination) { it.value % 2 }
         assertEquals(1, destination.size)
     }
 
@@ -705,7 +705,7 @@ class CollectionVLongTest {
             assertEquals(vLongListOf(VLongTestClass(2)), array.mapIndexedVLongNotNull { i, e -> if (i == 1) e else null })
             assertEquals(vIntListOf(MyIntTestClass(2)), array.mapIndexedVIntNotNull { i, e -> if (i == 1) MyIntTestClass(e.value.toInt()) else null })
             assertEquals(listOf(2L), array.mapIndexedGenericNotNull { i, e -> if (i == 1) e.value else null })
-            assertEquals(listOf(2L), array.mapNotNull { if (it.value == 2L) it.value else null })
+            assertEquals(listOf(2L), array.mapNotNullGeneric { if (it.value == 2L) it.value else null })
             val mapNotNullDest = mutableListOf<Long>()
             array.mapNotNullTo(mapNotNullDest) { if (it.value == 2L) it.value else null }
             assertEquals(listOf(2L), mapNotNullDest)
@@ -797,9 +797,9 @@ class CollectionVLongTest {
     @Test
     fun zipVariants() = with (VLongTestClass) {
         val array = vLongListOf(VLongTestClass(1), VLongTestClass(2))
-        val zippedArray = array.zip(arrayOf("a", "b"))
+        val zippedArray = array.zipGeneric(arrayOf("a", "b"))
         assertEquals(listOf(VLongTestClass(1) to "a", VLongTestClass(2) to "b"), zippedArray)
-        val zippedTransform = array.zip(arrayOf(10, 20)) { a, b -> a.value + b }
+        val zippedTransform = array.zipGeneric(arrayOf(10, 20)) { a, b -> a.value + b }
         assertEquals(listOf(11L, 22L), zippedTransform)
         val other = vLongListOf(VLongTestClass(10), VLongTestClass(20))
         val zippedPair = array.zipPairVLongLong(other) { a, b -> VLongTestClass(a.value + b.value) }

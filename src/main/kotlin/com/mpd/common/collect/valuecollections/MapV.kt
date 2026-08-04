@@ -106,14 +106,14 @@ interface MapVObjectKey<K> {
     fun containsKey(key: K): Boolean = anyKeyOrNull { it == key } != null
     fun forEachKey(action: (K) -> Unit) { anyKeyOrNull { action(it); false } }
 }
-fun <K> MapVObjectKey<K>.keySet(): Set<K> = object : Set<K> {
-    override val size: Int get() = this@keySet.size
+fun <K> MapVObjectKey<K>.keySetGeneric(): Set<K> = object : Set<K> {
+    override val size: Int get() = this@keySetGeneric.size
     override fun isEmpty(): Boolean = size == 0
-    override fun contains(element: K): Boolean = this@keySet.anyKeyOrNull { it == element } != null
+    override fun contains(element: K): Boolean = this@keySetGeneric.anyKeyOrNull { it == element } != null
     override fun containsAll(elements: Collection<K>): Boolean = elements.all { contains(it) }
     override fun iterator(): Iterator<K> {
         val arr = ArrayList<K>(size)
-        this@keySet.anyKeyOrNull { arr.add(it); false }
+        this@keySetGeneric.anyKeyOrNull { arr.add(it); false }
         return object : Iterator<K>, PrimitiveIterator<K, Consumer<in K>> {
             var idx = 0
             override fun hasNext(): Boolean = idx < arr.size
@@ -226,14 +226,14 @@ interface MapVObjectValue<V> {
     fun forEachValue(action: (value: V) -> Unit)
     fun containsValue(value: V): Boolean { var found = false; forEachValue { if (!found && it == value) found = true }; return found }
 }
-fun <V> MapVObjectValue<V>.values(): Collection<V> = object : Collection<V> {
-    override val size: Int get() = this@values.size
+fun <V> MapVObjectValue<V>.valuesGeneric(): Collection<V> = object : Collection<V> {
+    override val size: Int get() = this@valuesGeneric.size
     override fun isEmpty(): Boolean = size == 0
-    override fun contains(element: V): Boolean { var found = false; this@values.forEachValue { v -> if (!found && v == element) found = true }; return found }
+    override fun contains(element: V): Boolean { var found = false; this@valuesGeneric.forEachValue { v -> if (!found && v == element) found = true }; return found }
     override fun containsAll(elements: Collection<V>): Boolean = elements.all { contains(it) }
     override fun iterator(): Iterator<V> {
         val vals = ArrayList<V>(size)
-        this@values.forEachValue { v -> vals.add(v) }
+        this@valuesGeneric.forEachValue { v -> vals.add(v) }
         return object : Iterator<V>, PrimitiveIterator<V, Consumer<in V>> {
             var idx = 0
             override fun hasNext(): Boolean = idx < vals.size

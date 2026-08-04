@@ -31,22 +31,47 @@ interface IndexedCollectionVLong<T> : CollectionVLong<T> {
     @Deprecated("toString() prints Integers. Use toString(ValueLongAdapter) to print K.toString", ReplaceWith("toStringV()"))
     override fun toString(): String // WARNING: THIS PRINTS THE INTEGERS, NOT K.toString()!
 }
-context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.asListGeneric() = object: List<T> {
-    override val size: Int get() = this@asListGeneric.size
-    override inline fun isEmpty(): Boolean = this@asListGeneric.size==0
-    override inline fun contains(element: T): Boolean = this@asListGeneric.contains(element)
-    override inline fun iterator(): Iterator<T> = this@asListGeneric.asIterable().iterator()
-    override inline fun containsAll(elements: Collection<T>): Boolean = this@asListGeneric.containsAll(elements)
-    override inline fun get(index: Int): T = this@asListGeneric[index]
-    override inline fun indexOf(element: T): Int = this@asListGeneric.indexOf(element)
-    override inline fun lastIndexOf(element: T): Int = this@asListGeneric.lastIndexOf(element)
-    override inline fun listIterator(): ListIterator<T> = ListIteratorVLong(this)
-    override inline fun listIterator(index: Int): ListIterator<T> = ListIteratorVLong(this, index)
-    override inline fun subList(fromIndex: Int, toIndex: Int): List<T> {
-        val result = ArrayList<T>(toIndex-fromIndex)
-        for (i in fromIndex ..< toIndex) result.add(this@asListGeneric[i])
-        return result
+context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.asListGeneric(): List<T> = AsListGenericVLong(this, a)
+// Named (not anonymous) so asListGeneric() can be inline: an anonymous object here would have made
+// asListGeneric() call itself through its own inlined body (subList() -> asListGeneric()), which Kotlin
+// disallows as a self-referential inline cycle. A named class's methods are compiled once, separately,
+// so the call to asListGeneric() inside subList() below is just an ordinary (non-cyclic) inline usage.
+class AsListGenericVLong<T>(private val source: IndexedCollectionVLong<T>, private val a: ValueLongAdapter<T>) : List<T> {
+    override val size: Int get() = source.size
+    override fun isEmpty(): Boolean = source.size==0
+    override fun contains(element: T): Boolean = with(a) { source.contains(element) }
+    override fun iterator(): Iterator<T> = with(a) { source.asIterable().iterator() }
+    override fun containsAll(elements: Collection<T>): Boolean = with(a) { source.containsAll(elements) }
+    override fun get(index: Int): T = with(a) { source[index] }
+    override fun indexOf(element: T): Int = with(a) { source.indexOf(element) }
+    override fun lastIndexOf(element: T): Int = with(a) { source.lastIndexOf(element) }
+    override fun listIterator(): ListIterator<T> = ListIteratorVLong(this)
+    override fun listIterator(index: Int): ListIterator<T> = ListIteratorVLong(this, index)
+    override fun subList(fromIndex: Int, toIndex: Int): List<T> = with(a) { source.subList(fromIndex, toIndex).asListGeneric() }
+}
+// A live view, not a snapshot: reads go straight through to the source's bitsAtIndex, so mutations to
+// the source are visible through the sublist (and vice versa, for Modifiable/MutableIndexedCollectionVLong).
+inline fun <T> IndexedCollectionVLong<T>.subList(fromIndex: Int, toIndex: Int): ListVLong<T> = SubListVLong(this, fromIndex, toIndex)
+// Named so the class isn't duplicated at every inline call site of subList().
+class SubListVLong<T>(private val source: IndexedCollectionVLong<T>, private val fromIndex: Int, private val toIndex: Int) : ListVLong<T> {
+    override val NULL_VALUE: LongBits get() = source.NULL_VALUE
+    override val size: Int get() = toIndex - fromIndex
+    override fun anyBits(predicate: (LongBits) -> Boolean): LongBits {
+        for (i in fromIndex ..< toIndex) { val b = source.bitsAtIndex(i); if (predicate(b)) return b }
+        return NULL_VALUE
     }
+    override fun containsBits(bits: LongBits): Boolean = anyBits { it == bits } != NULL_VALUE
+    override fun bitsAtIndex(index: Int): LongBits {
+        if (index !in 0..<size) throw IndexOutOfBoundsException("$index not in 0..$size")
+        return source.bitsAtIndex(fromIndex + index)
+    }
+    override fun indexOfBits(bits: LongBits): Int {
+        for (i in 0..<size) if (bitsAtIndex(i) == bits) return i
+        return -1
+    }
+    @Suppress("POTENTIALLY_NON_REPORTED_ANNOTATION")
+    @Deprecated("toString() prints Integers. Use toStringV() to print K.toString", ReplaceWith("toStringV()"))
+    override fun toString(): String = "subList"
 }
 // Overrides of the CollectionVLong<T> versions of the same name: those wrap the caller's lambda in a
 // stateful object to fake an index while scanning via anyBits/allBits/forEachBits (the only option for
@@ -170,8 +195,8 @@ context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.takeWhi
 inline fun <T, C: MutableIndexedCollectionVLong<T>> IndexedCollectionVLong<T>.copyInto(destination: C, destinationOffset: Int = 0, startIndex: Int = 0, endIndex: Int = size): C = destination.also{forEachIndexedBits{ i, e-> if(i in startIndex..endIndex) destination.addBits(i-startIndex+destinationOffset, e)}}
 context(a: ValueLongAdapter<T>) inline fun <T, C: MutableList<T>> IndexedCollectionVLong<T>.copyInto(destination: C, destinationOffset: Int = 0, startIndex: Int = 0, endIndex: Int = size): C = destination.also{forEachIndexed{ i, e-> if(i in startIndex..endIndex) destination.add(i-startIndex+destinationOffset, e)}}
 inline fun <T> IndexedCollectionVLong<T>.reversed(): ArrayListVLong<T> = ArrayListVLong<T>(size).also { dest -> for (i in size-1 downTo 0) dest.addBits(bitsAtIndex(i)) }
-context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.zipWithNext(): List<Pair<T, T>> = zipWithNext { l, r -> l to r}
-context(a: ValueLongAdapter<T>) inline fun <T, R> IndexedCollectionVLong<T>.zipWithNext(crossinline transform: (a: T, b: T) -> R): List<R> {
+context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.zipWithNextGeneric(): List<Pair<T, T>> = zipWithNextGeneric { l, r -> l to r}
+context(a: ValueLongAdapter<T>) inline fun <T, R> IndexedCollectionVLong<T>.zipWithNextGeneric(crossinline transform: (a: T, b: T) -> R): List<R> {
     if (size<=1) return emptyList()
     val result = ArrayList<R>(size-1)
     for (i in 0 ..< size-1) result.add(transform(elementAtIndex(i), elementAtIndex(i+1)))
@@ -186,7 +211,7 @@ context(a: ValueLongAdapter<T>) inline fun <S, T : S> IndexedCollectionVLong<T>.
 }
 context(a: ValueLongAdapter<T>) inline fun <S, T : S> IndexedCollectionVLong<T>.reduceRightIndexedOrNull(crossinline operation: (index: Int, T, acc: T) -> T): T? = if (size<2) null else reduceRightIndexed(operation)
 context(a: ValueLongAdapter<T>) inline fun <S, T : S> IndexedCollectionVLong<T>.reduceRightOrNull(crossinline operation: (T, acc: T) -> T): T? = if (size<2) null else reduceRight(operation)
-context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.windowed(windowSize: Int, step: Int = 1, partialWindows: Boolean = false): MutableList<MutableList<T>> {
+context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.windowedGeneric(windowSize: Int, step: Int = 1, partialWindows: Boolean = false): MutableList<MutableList<T>> {
     val list = MutableList<MutableList<T>>(size-windowSize) { mutableListOf() }
     for (i in 0 ..< size-windowSize) {
         for (j in 0..<windowSize)
@@ -194,7 +219,7 @@ context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.windowe
     }
     return list
 }
-context(a: ValueLongAdapter<T>) inline fun <T, R> IndexedCollectionVLong<T>.windowed(windowSize: Int, step: Int = 1, partialWindows: Boolean = false, crossinline transform: (List<T>) -> R): List<R> {
+context(a: ValueLongAdapter<T>) inline fun <T, R> IndexedCollectionVLong<T>.windowedGeneric(windowSize: Int, step: Int = 1, partialWindows: Boolean = false, crossinline transform: (List<T>) -> R): List<R> {
     require(windowSize > 0) { "windowSize must be greater than zero, was $windowSize" }
     require(step > 0) { "step must be greater than zero, was $step" }
     val result = ArrayList<R>()

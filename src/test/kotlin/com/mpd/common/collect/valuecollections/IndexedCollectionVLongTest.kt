@@ -64,7 +64,7 @@ import com.mpd.common.collect.valuecollections.takeWhileIndexed
 import com.mpd.common.collect.valuecollections.toListGeneric
 import com.mpd.common.collect.valuecollections.toMutableList
 import com.mpd.common.collect.valuecollections.vLongListOf
-import com.mpd.common.collect.valuecollections.windowed
+import com.mpd.common.collect.valuecollections.windowedGeneric
 import org.junit.jupiter.api.Assertions.assertThrows
 import kotlin.random.Random
 import kotlin.test.Test
@@ -455,7 +455,7 @@ class IndexedCollectionVLongTest {
             IdxLongTestClass(4),
             IdxLongTestClass(5)
         )
-        val windows = array.windowed(3)
+        val windows = array.windowedGeneric(3)
         // Note: current implementation iterates i in 0..<(size-windowSize), yielding one fewer
         // window than the textbook sliding-window definition (which would also include [3,4,5]).
         assertEquals(2, windows.size)
