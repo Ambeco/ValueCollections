@@ -64,6 +64,7 @@ context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.removeA
 context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.removeAll(elements:Collection<T>): Boolean = elements.all { remove(it)}
 inline fun <T> MutableCollectionVLong<T>.removeAll(elements: CollectionVLong<T>): Boolean = elements.allBits { removeBits(it) }
 context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.removeAll(crossinline predicate: (T) -> Boolean): Boolean = removeAllBits { predicate(a.fromLong(it)) }
+context(a: ValueLongAdapter<T>) inline fun <T> MutableCollectionVLong<T>.removeIf(crossinline predicate: (T) -> Boolean): Boolean = removeAll(predicate)
 context(a: ValueLongAdapter<T>) inline infix operator fun <T> MutableCollectionVLong<T>.minusAssign(elements: ListVLong<T>): Unit = check(removeAll(elements))
 context(a: ValueLongAdapter<T>) inline infix operator fun <T> MutableCollectionVLong<T>.minusAssign(elements: Array<T>): Unit = check(removeAll(elements))
 context(a: ValueLongAdapter<T>) inline infix operator fun <T> MutableCollectionVLong<T>.minusAssign(elements: Collection<T>): Unit = check(removeAll(elements))

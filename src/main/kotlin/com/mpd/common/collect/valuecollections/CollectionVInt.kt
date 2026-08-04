@@ -96,6 +96,7 @@ context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.allIndexed(cross
 
  inline fun <T> CollectionVInt<T>.isEmpty() = size == 0
  inline fun <T> CollectionVInt<T>.isNotEmpty() = size > 0
+inline fun <T, C : CollectionVInt<T>> C.ifEmpty(defaultValue: () -> C): C = if (isEmpty()) defaultValue() else this
  inline fun <T> CollectionVInt<T>.containsAll(bits: IntList): Boolean = bits.first { !containsBits(it) } == NULL_VALUE
  inline fun <T> CollectionVInt<T>.containsAll(bits: IntSet): Boolean = bits.first { !containsBits(it) } == NULL_VALUE
  inline fun <T> CollectionVInt<T>.containsAll(bits: CollectionVInt<T>): Boolean = bits.anyBits({ !containsBits(it) }) == NULL_VALUE
@@ -194,6 +195,12 @@ context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.toHashSet(): Has
  inline fun <T> CollectionVInt<T>.toIntArray(): IntArray = IntArray(size).also { c->forEachIndexedBits{ i, e-> c[i]=e}}
  inline fun <T> CollectionVInt<T>.toVIntArray(): ArrayVInt<T> = ArrayVInt(this)
  inline fun <T> CollectionVInt<T>.toArrayGenericBits(): Array<IntBits> = Array(size,{NULL_VALUE}).also { c->forEachIndexedBits{ i, e-> c[i]=e}}
+context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.toTypedArrayGeneric(): Array<T> {
+    val result = arrayOfNulls<Any?>(size)
+    forEachIndexedBits { i, e -> result[i] = a.fromInt(e) }
+    @Suppress("UNCHECKED_CAST")
+    return result as Array<T>
+}
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.asSequence(): Sequence<T> = toIterable().asSequence()
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.asList(): ListVInt<T> {
     if (this is ListVInt<T>) return this
@@ -346,6 +353,9 @@ context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.sumOf(crossinlin
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.sumOf(crossinline selector: (T) -> Long): Long = mapReduce(selector) { acc, e->acc+e}
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.sumOfUInt(crossinline selector: (T) -> UInt): UInt = mapReduce(selector) { acc, e->acc+e}
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.sumOfULong(crossinline selector: (T) -> ULong): ULong = mapReduce(selector) { acc, e->acc+e}
+@JvmName("averageOfInt") context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.averageOf(crossinline selector: (T) -> Int): Double = sumOf(selector).toDouble() / size
+@JvmName("averageOfLong") context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.averageOf(crossinline selector: (T) -> Long): Double = sumOf(selector).toDouble() / size
+@JvmName("averageOfDouble") context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.averageOf(crossinline selector: (T) -> Double): Double = sumOf(selector) / size
 context(a: ValueIntAdapter<T>) inline fun <T> CollectionVInt<T>.chunked(size: Int): List<ArrayListVInt<T>>{
     val results = List<ArrayListVInt<T>>((this.size + size - 1)/size) {ArrayListVInt(size)}
     val acc = object: (Int,T)->Unit {

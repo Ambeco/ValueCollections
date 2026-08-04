@@ -90,6 +90,7 @@ context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.allIndexed(cro
 
  inline fun <T> CollectionVLong<T>.isEmpty() = size == 0
  inline fun <T> CollectionVLong<T>.isNotEmpty() = size > 0
+inline fun <T, C : CollectionVLong<T>> C.ifEmpty(defaultValue: () -> C): C = if (isEmpty()) defaultValue() else this
  inline fun <T> CollectionVLong<T>.containsAll(bits: LongList): Boolean = bits.first { !containsBits(it) } == NULL_VALUE
  inline fun <T> CollectionVLong<T>.containsAll(bits: LongSet): Boolean = bits.first { !containsBits(it) } == NULL_VALUE
  inline fun <T> CollectionVLong<T>.containsAll(bits: CollectionVLong<T>): Boolean = bits.anyBits({ !containsBits(it) }) == NULL_VALUE
@@ -188,6 +189,12 @@ context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.toHashSet(): H
  inline fun <T> CollectionVLong<T>.toLongArray(): LongArray = LongArray(size).also { c->forEachIndexedBits{ i, e-> c[i]=e}}
  inline fun <T> CollectionVLong<T>.toVLongArray(): ArrayVLong<T> = ArrayVLong(this)
  inline fun <T> CollectionVLong<T>.toArrayGenericBits(): Array<LongBits> = Array(size,{NULL_VALUE}).also { c->forEachIndexedBits{ i, e-> c[i]=e}}
+context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.toTypedArrayGeneric(): Array<T> {
+    val result = arrayOfNulls<Any?>(size)
+    forEachIndexedBits { i, e -> result[i] = a.fromLong(e) }
+    @Suppress("UNCHECKED_CAST")
+    return result as Array<T>
+}
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.asSequence(): Sequence<T> = toIterable().asSequence()
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.asList(): ListVLong<T> {
     if (this is ListVLong<T>) return this
@@ -340,6 +347,9 @@ context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.sumOf(crossinl
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.sumOf(crossinline selector: (T) -> Long): Long = mapReduce(selector) { acc, e->acc+e}
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.sumOfUInt(crossinline selector: (T) -> UInt): UInt = mapReduce(selector) { acc, e->acc+e}
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.sumOfULong(crossinline selector: (T) -> ULong): ULong = mapReduce(selector) { acc, e->acc+e}
+@JvmName("averageOfInt") context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.averageOf(crossinline selector: (T) -> Int): Double = sumOf(selector).toDouble() / size
+@JvmName("averageOfLong") context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.averageOf(crossinline selector: (T) -> Long): Double = sumOf(selector).toDouble() / size
+@JvmName("averageOfDouble") context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.averageOf(crossinline selector: (T) -> Double): Double = sumOf(selector) / size
 context(a: ValueLongAdapter<T>) inline fun <T> CollectionVLong<T>.chunked(size: Int): List<ArrayListVLong<T>>{
     val results = List<ArrayListVLong<T>>((this.size + size - 1)/size) {ArrayListVLong(size)}
     val acc = object: (Int,T)->Unit {

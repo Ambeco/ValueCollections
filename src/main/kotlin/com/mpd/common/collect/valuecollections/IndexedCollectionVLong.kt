@@ -5,6 +5,7 @@
 package com.mpd.common.collect.valuecollections
 
 import java.util.BitSet
+import kotlin.random.Random
 
 // TODO, replace `object`s with indies with for loops.
 interface IndexedCollectionVLong<T> : CollectionVLong<T> {
@@ -78,6 +79,32 @@ inline fun <T, R> IndexedCollectionVLong<T>.foldIndexedBits(initial: R, crossinl
 context(a: ValueLongAdapter<T>) inline fun <T, R> IndexedCollectionVLong<T>.foldIndexed(initial: R, crossinline operation: (index: Int, acc: R, T) -> R): R =
     foldIndexedBits(initial) { i, acc, bits -> operation(i, acc, a.fromLong(bits)) }
 inline fun <T> IndexedCollectionVLong<T>.contentEquals(other: IndexedCollectionVLong<T>?): Boolean = other != null && size == other.size && allIndexedBits { i, b-> other.bitsAtIndex(i)==b }
+context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.shuffled(): ArrayListVLong<T> = toMutableList().also { it.shuffle() }
+context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.shuffled(random: Random): ArrayListVLong<T> = toMutableList().also { it.shuffle(random) }
+context(a: ValueLongAdapter<T>) inline fun <T : Comparable<T>> IndexedCollectionVLong<T>.binarySearch(element: T, fromIndex: Int = 0, toIndex: Int = size): Int {
+    var low = fromIndex
+    var high = toIndex - 1
+    while (low <= high) {
+        val mid = (low + high) ushr 1
+        val cmp = elementAtIndex(mid).compareTo(element)
+        if (cmp < 0) low = mid + 1
+        else if (cmp > 0) high = mid - 1
+        else return mid
+    }
+    return -(low + 1)
+}
+context(a: ValueLongAdapter<T>) inline fun <T> IndexedCollectionVLong<T>.binarySearch(fromIndex: Int = 0, toIndex: Int = size, crossinline comparison: (T) -> Int): Int {
+    var low = fromIndex
+    var high = toIndex - 1
+    while (low <= high) {
+        val mid = (low + high) ushr 1
+        val cmp = comparison(elementAtIndex(mid))
+        if (cmp < 0) low = mid + 1
+        else if (cmp > 0) high = mid - 1
+        else return mid
+    }
+    return -(low + 1)
+}
 
 context(a: ValueLongAdapter<T>) inline operator fun <T> IndexedCollectionVLong<T>.component1(): T = elementAtIndex(0)
 context(a: ValueLongAdapter<T>) inline operator fun <T> IndexedCollectionVLong<T>.component2(): T = elementAtIndex(1)

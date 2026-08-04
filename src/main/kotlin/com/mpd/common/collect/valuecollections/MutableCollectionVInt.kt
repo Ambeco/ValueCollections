@@ -66,6 +66,7 @@ context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.removeAll
 context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.removeAll(elements:Collection<T>): Boolean = elements.all { remove(it)}
 inline fun <T> MutableCollectionVInt<T>.removeAll(elements: CollectionVInt<T>): Boolean = elements.allBits { removeBits(it) }
 context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.removeAll(crossinline predicate: (T) -> Boolean): Boolean = removeAllBits { predicate(a.fromInt(it)) }
+context(a: ValueIntAdapter<T>) inline fun <T> MutableCollectionVInt<T>.removeIf(crossinline predicate: (T) -> Boolean): Boolean = removeAll(predicate)
 context(a: ValueIntAdapter<T>) inline infix operator fun <T> MutableCollectionVInt<T>.minusAssign(elements: ListVInt<T>): Unit = check(removeAll(elements))
 context(a: ValueIntAdapter<T>) inline infix operator fun <T> MutableCollectionVInt<T>.minusAssign(elements: Array<T>): Unit = check(removeAll(elements))
 context(a: ValueIntAdapter<T>) inline infix operator fun <T> MutableCollectionVInt<T>.minusAssign(elements: Collection<T>): Unit = check(removeAll(elements))
