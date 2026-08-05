@@ -59,7 +59,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # Requires these repo secrets to be configured under Settings -> Secrets and variables -> Actions:
-      #   MAVEN_CENTRAL_USERNAME / MAVEN_CENTRAL_PASSWORD - a Sonatype Central Portal user token
+      #   MAVEN_USERNAME / MAVEN_PASSWORD - a Sonatype Central Portal user token
       #     (Central Portal -> your account -> Generate User Token), NOT your account login password.
       #   GPG_SIGNING_KEY - the ASCII-armored private key block, e.g. from:
       #     gpg --export-secret-keys --armor <KEY_ID>
@@ -67,5 +67,5 @@ jobs:
       - name: Publish to Maven Central
         run: ./gradlew publishAndReleaseToMavenCentral -PlibVersion=${{ steps.version.outputs.version }} --no-configuration-cache
         env:
-          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_PASSWORD }}
