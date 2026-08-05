@@ -1,3 +1,4 @@
+import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -51,7 +52,9 @@ mavenPublishing {
     // Publishes to the Sonatype Central Portal (the only option for namespaces registered since
     // mid-2024). Requires ORG_GRADLE_PROJECT_mavenCentralUsername/Password (a Central Portal user
     // token, not your account password) to be set - see the publish.yml workflow for details.
-    publishToMavenCentral(automaticRelease = true)
+    // Host must be explicit: this namespace has no legacy OSSRH staging profile, so without it the
+    // plugin's default host lookup calls the old Nexus staging API and fails with a 402.
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL, automaticRelease = true)
     // Requires ORG_GRADLE_PROJECT_signingInMemoryKey (ASCII-armored GPG private key) and
     // ORG_GRADLE_PROJECT_signingInMemoryKeyPassword to be set.
     signAllPublications()
