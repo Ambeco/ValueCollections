@@ -50,6 +50,15 @@ jobs:
       - name: Run tests
         run: ./gradlew test -PlibVersion=${{ steps.version.outputs.version }}
 
+      # TEMPORARY debug step - remove once signing is confirmed working.
+      # Only prints packet metadata (algo/S2K info), never the actual secret key material.
+      - name: Debug - inspect received signing key
+        run: |
+          printf '%s' "$ORG_GRADLE_PROJECT_signingInMemoryKey" > /tmp/received-key.asc
+          echo "byte length: $(wc -c < /tmp/received-key.asc)"
+          echo "sha256: $(sha256sum /tmp/received-key.asc)"
+          gpg --list-packets /tmp/received-key.asc || true
+
       # Uses the built-in GITHUB_TOKEN - no extra secrets needed. See build.gradle.kts's
       # `publishing { repositories { maven("GitHubPackages") { ... } } }` block.
       - name: Publish to GitHub Packages
