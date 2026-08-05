@@ -53,7 +53,7 @@ jobs:
       # Uses the built-in GITHUB_TOKEN - no extra secrets needed. See build.gradle.kts's
       # `publishing { repositories { maven("GitHubPackages") { ... } } }` block.
       - name: Publish to GitHub Packages
-        run: ./gradlew publishAllPublicationsToGitHubPackagesRepository -PlibVersion=${{ steps.version.outputs.version }}
+        run: ./gradlew publishAllPublicationsToGitHubPackagesRepository -PlibVersion=${{ steps.version.outputs.version }} --no-configuration-cache
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
