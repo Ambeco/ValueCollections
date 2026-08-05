@@ -1,0 +1,68 @@
+name: Publish
+
+# Triggered by publishing a GitHub Release (tag name is used as the library version, e.g. release "v1.2.3"
+# publishes version "1.2.3"), or manually via the Actions tab for ad-hoc/testing publishes.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (e.g. 1.2.3)"
+        required: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="${{ inputs.version }}"
+          fi
+          echo "Publishing version: $VERSION"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Run tests
+        run: ./gradlew test -PlibVersion=${{ steps.version.outputs.version }}
+
+      # Uses the built-in GITHUB_TOKEN - no extra secrets needed. See build.gradle.kts's
+      # `publishing { repositories { maven("GitHubPackages") { ... } } }` block.
+      - name: Publish to GitHub Packages
+        run: ./gradlew publishAllPublicationsToGitHubPackagesRepository -PlibVersion=${{ steps.version.outputs.version }}
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Requires these repo secrets to be configured under Settings -> Secrets and variables -> Actions:
+      #   MAVEN_CENTRAL_USERNAME / MAVEN_CENTRAL_PASSWORD - a Sonatype Central Portal user token
+      #     (Central Portal -> your account -> Generate User Token), NOT your account login password.
+      #   GPG_SIGNING_KEY - the ASCII-armored private key block, e.g. from:
+      #     gpg --export-secret-keys --armor <KEY_ID>
+      #   GPG_SIGNING_PASSPHRASE - the passphrase for that key.
+      - name: Publish to Maven Central
+        run: ./gradlew publishAndReleaseToMavenCentral -PlibVersion=${{ steps.version.outputs.version }} --no-configuration-cache
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_SIGNING_PASSPHRASE }}
